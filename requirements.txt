@@ -1,0 +1,16 @@
+pandas
+numpy
+scikit-learn
+xgboost
+fastapi
+uvicorn
+streamlit
+shap
+matplotlib
+seaborn
+joblib
+pydantic>=2.0
+requests
+pytest
+httpx
+# Optional: pip install lightgbm  (see --model lightgbm)
