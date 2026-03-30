@@ -183,15 +183,17 @@ Evaluate model behavior across subgroups when sensitive attributes are available
 
 ### Screenshots
 
-**Streamlit — Overview** (risk summary and session trend)
+The following PNGs live in **[`screenshots/`](screenshots/)** in the repository so they render on GitHub/GitLab when you view this README. Replace them with your own captures after you run the dashboard (`streamlit run dashboard/app.py`) and API (`uvicorn api.main:app`, then open `/docs`).
+
+| File | What it shows |
+|------|----------------|
+| [`screenshots/overview.png`](screenshots/overview.png) | Streamlit **Overview** tab — risk summary and session trend |
+| [`screenshots/patient-timeline.png`](screenshots/patient-timeline.png) | Streamlit **Patient timeline** tab — demo multi-visit series from sidebar values |
+| [`screenshots/api-documentation.png`](screenshots/api-documentation.png) | FastAPI **Swagger UI** at `http://127.0.0.1:8000/docs` |
 
 ![Streamlit overview tab](screenshots/overview.png)
 
-**Streamlit — Patient timeline** (illustrative multi-visit series from sidebar inputs)
-
 ![Streamlit patient timeline tab](screenshots/patient-timeline.png)
-
-**FastAPI — OpenAPI docs** (`/docs` when the API is running)
 
 ![FastAPI interactive documentation](screenshots/api-documentation.png)
 
@@ -332,7 +334,7 @@ ehr-chronic-disease-risk-prediction/
 ├── notebooks/
 │   ├── 01_eda.ipynb
 │   └── 02_feature_engineering.ipynb
-├── screenshots/             # UI + API images (see Demo UI → Screenshots)
+├── screenshots/             # PNGs for README (overview, timeline, API docs)
 ├── docs/
 │   ├── data_sources_and_schema.md
 │   ├── external_validation.md
