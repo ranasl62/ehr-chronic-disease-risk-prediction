@@ -18,3 +18,4 @@ data/processed/*
 !data/processed/.gitkeep
 reports/*.png
 .vscode/
+.cursor/
