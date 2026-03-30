@@ -1,0 +1,12 @@
+---
+description: Minimize context — read narrow, edit small, verify with pytest
+alwaysApply: true
+---
+
+# Repository efficiency
+
+1. **Before broad search:** open `README.md` → matching `.cursor/rules/*.mdc` for the task → `.cursor/skills/ehr-chronic-risk/SKILL.md` file map. Skip unrelated rules.
+2. **Edits:** touch only files for the stated task; no drive-by refactors.
+3. **Verify:** `PYTHONPATH=. pytest tests/ -q` after API, train, preprocessing, or schema changes.
+4. **Data safety:** never suggest committing PHI; demo data only in `data/raw/`.
+5. **Output:** prefer code citations + short rationale; avoid repeating README tables.

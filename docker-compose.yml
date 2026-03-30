@@ -1,0 +1,81 @@
+# One command (train-if-needed → API → Streamlit):
+#   docker compose up --build
+#
+# See README "Run entirely in Docker" for separate commands.
+services:
+  # Runs before api/dashboard: trains only if model.pkl is missing/empty (or FORCE_TRAIN=1).
+  prepare:
+    build:
+      context: .
+      dockerfile: deployment/Dockerfile
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    environment:
+      PYTHONPATH: /workspace
+      FORCE_TRAIN: ${FORCE_TRAIN:-0}
+    command: ["/bin/sh", "scripts/docker_prepare.sh"]
+
+  api:
+    build:
+      context: .
+      dockerfile: deployment/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./model.pkl:/app/model.pkl:ro
+      - ./reports:/app/reports:ro
+    environment:
+      - PYTHONPATH=/app
+      # - API_KEY=change-me
+    depends_on:
+      prepare:
+        condition: service_completed_successfully
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: deployment/Dockerfile
+    command: >
+      streamlit run dashboard/app.py
+      --server.port=8501
+      --server.address=0.0.0.0
+      --server.headless=true
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./model.pkl:/app/model.pkl:ro
+      - ./reports:/app/reports:ro
+      - ./data:/app/data:ro
+    environment:
+      - PYTHONPATH=/app
+      - PREDICT_API_URL=http://api:8000
+      # If API_KEY is set on api service, set the same value here:
+      # - PREDICT_API_KEY=change-me
+    depends_on:
+      - api
+
+  # Always train (ignore existing model.pkl). Separate use only.
+  #   docker compose --profile train run --rm train
+  train:
+    profiles:
+      - train
+    build:
+      context: .
+      dockerfile: deployment/Dockerfile
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    environment:
+      PYTHONPATH: /workspace
+    command:
+      - python
+      - -m
+      - training.train
+      - --format
+      - longitudinal
+      - --data
+      - data/raw/ehr_data.csv
+      - --model
+      - logreg
+      - --split-by-patient

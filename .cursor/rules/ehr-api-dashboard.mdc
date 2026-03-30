@@ -1,0 +1,18 @@
+---
+description: FastAPI and Streamlit conventions for this repo
+globs:
+  - api/**/*.py
+  - dashboard/**/*.py
+  - inference/**/*.py
+alwaysApply: false
+---
+
+# API & dashboard
+
+- **JSON contract:** `POST /v1/predict` body `{ "features": { ... }, "include_explanation": true }` must match `feature_columns` from the artifact. `POST /explain` returns explanation only.
+- **Public meta:** `GET /v1/meta` — version, disclaimer text, doc pointers (no auth). All JSON responses get `X-Clinical-Disclaimer` header via middleware.
+- **Ops:** `GET /health` (file exists, fast); `GET /v1/ready` (artifact loads). Schema may include `input_stats` (training medians / quantiles for form defaults).
+- **Limits:** `MAX_BODY_BYTES`, `RATE_LIMIT_PER_MINUTE` (>0 enables in-memory per-IP limit), `AUDIT_LOG_JSONL` (POST predict/explain metadata only).
+- **Predictions:** Use `inference/predict.py` for shared logic; keep risk bands as **demo** thresholds unless configured.
+- **Streamlit:** Inputs are schema-driven from `model.pkl`. Do not hardcode feature lists for longitudinal models.
+- **Errors:** Return 400 for schema mismatch, 503 if `model.pkl` missing with a clear train command.

@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: |
+          pip install -r requirements.txt
+          pip install -e .
+      - name: Import check
+        run: PYTHONPATH=. python -c "import api.main; import training.train; import explainability.explanation"
+      - name: Train demo model (patient-level split)
+        run: PYTHONPATH=. python -m training.train --format longitudinal --data data/raw/ehr_data.csv --model logreg --split-by-patient
+      - name: Leakage audit on artifact
+        run: PYTHONPATH=. python scripts/leakage_audit.py --artifact model.pkl
+      - name: Pytest
+        run: PYTHONPATH=. pytest tests/ -q --tb=short
+      - name: Temporal train + leakage audit + group CV
+        run: |
+          PYTHONPATH=. python -m training.train --format longitudinal --data data/raw/ehr_data.csv --model logreg --temporal-split --out model_temporal.pkl
+          PYTHONPATH=. python scripts/leakage_audit.py --artifact model_temporal.pkl --temporal-split
+          PYTHONPATH=. python scripts/group_cv_report.py --format longitudinal --data data/raw/ehr_data.csv --model logreg -o /tmp/ci_cv_group_metrics.json
+      - name: Docker smoke (API image)
+        run: |
+          docker build -f deployment/Dockerfile -t ehr-ci .
+          CID=$(docker run -d -p 8765:8000 -v "$PWD/model.pkl:/app/model.pkl:ro" ehr-ci)
+          sleep 3
+          curl -sf http://127.0.0.1:8765/health
+          curl -sf http://127.0.0.1:8765/v1/ready
+          curl -sf http://127.0.0.1:8765/v1/model/metrics | python -c "import json,sys; d=json.load(sys.stdin); assert 'metrics' in d"
+          docker rm -f "$CID"
+      - name: Unit smoke (longitudinal merge)
+        run: |
+          PYTHONPATH=. python -c "import pandas as pd; from feature_engineering.multi_window import merge_multi_window_features; df=pd.read_csv('data/raw/ehr_data.csv'); df['timestamp']=pd.to_datetime(df['timestamp']); m=merge_multi_window_features(df, (7,30)); assert 'w7d_glucose' in m.columns"

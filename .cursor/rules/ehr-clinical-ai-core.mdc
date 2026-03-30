@@ -1,0 +1,20 @@
+---
+description: Core context for EHR chronic disease risk — stack, safety, authorship
+alwaysApply: true
+---
+
+# EHR Clinical Intelligence — project core
+
+## Stack
+Python 3.10+, pandas/sklearn, XGBoost (optional LightGBM), FastAPI, Streamlit, SHAP. Training: `python -m training.train`. API: `uvicorn api.main:app`. Dashboard: `streamlit run dashboard/app.py`.
+
+## Clinical / research rules
+- **Temporal integrity:** Features must use only data **before or at** the defined prediction **index time**. Multi-window columns use prefixes `w7d_`, `w30d_`, `w180d_`. Never merge future labels into past feature rows.
+- **Demo vs MIMIC:** `data/raw/*.csv` is for smoke tests. Real MIMIC-IV requires PhysioNet credentialing — never commit restricted data.
+- **Disclaimers:** This is research / CDS prototyping, not a regulated medical device.
+
+## Authorship
+Maintainer and attribution: see `AUTHORS.md`.
+
+## Artifacts
+After training: `model.pkl`, `reports/evaluation_report.json`, `reports/feature_importance.json`. API schema: `GET /v1/model/schema`.

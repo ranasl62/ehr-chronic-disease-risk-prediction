@@ -1,0 +1,18 @@
+---
+description: ML training, features, calibration, reports for this repo
+globs:
+  - training/**/*.py
+  - models/**/*.py
+  - feature_engineering/**/*.py
+  - preprocessing/**/*.py
+  - explainability/**/*.py
+alwaysApply: false
+---
+
+# ML & EHR feature pipeline
+
+- **Longitudinal default:** Multi-window `(7, 30, 180)` via `feature_engineering/multi_window.py` unless `--windows ""` for single `--window-days`.
+- **Calibration:** `--calibrate` wraps base estimator in `CalibratedClassifierCV` (`models/calibration.py`). SHAP unwraps calibrated trees in `explainability/shap_explainer.py`.
+- **New models:** Add to `make_estimator` / `fit_model` in `training/train.py`; extend `training/reporting.py` `feature_importance_from_model` if needed.
+- **Lazy imports:** Keep XGBoost/LightGBM imports inside branches so `logreg` works without those packages.
+- **Exports:** Always write `evaluation_report.json` and `feature_importance.json` on successful train; include `shap_background` sample in artifact for linear SHAP.
