@@ -1,0 +1,14 @@
+{
+  "data_path": "/media/ranasl62/Study4/ai/ehr-chronic-disease-risk-prediction/data/raw/ehr_data.csv",
+  "format": "longitudinal",
+  "model_kind": "logreg",
+  "n_splits_effective": 5,
+  "roc_auc_mean": 1.0,
+  "roc_auc_std": 0.0,
+  "roc_auc_folds": [
+    1.0,
+    1.0
+  ],
+  "brier_mean": 0.03938728609691422,
+  "brier_std": 0.04707780216112992
+}

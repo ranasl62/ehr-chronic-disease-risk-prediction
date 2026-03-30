@@ -1,0 +1,44 @@
+{
+  "generated_at_utc": "2026-03-29T22:33:41.052876+00:00",
+  "threshold": 0.5,
+  "metrics": {
+    "roc_auc": NaN,
+    "pr_auc": NaN,
+    "brier": 0.20762754191886204,
+    "ece": 0.4415743302983367,
+    "ece_bins": 10,
+    "accuracy": 0.5,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0
+  },
+  "classification_report_text": "              precision    recall  f1-score   support\n\n           0       1.00      0.50      0.67         2\n           1       0.00      0.00      0.00         0\n\n    accuracy                           0.50         2\n   macro avg       0.50      0.25      0.33         2\nweighted avg       1.00      0.50      0.67         2\n",
+  "meta": {
+    "model_path": "/media/ranasl62/Study4/ai/ehr-chronic-disease-risk-prediction/model.pkl",
+    "model_kind": "logreg",
+    "calibrated": false,
+    "feature_engineering": {
+      "format": "longitudinal",
+      "window_days": null,
+      "windows_days": [
+        7,
+        30,
+        180
+      ],
+      "data_path": "/media/ranasl62/Study4/ai/ehr-chronic-disease-risk-prediction/data/raw/ehr_data.csv",
+      "random_state": 42,
+      "test_size": 0.2,
+      "split_method": "patient_group"
+    },
+    "training_manifest_path": "/media/ranasl62/Study4/ai/ehr-chronic-disease-risk-prediction/reports/training_manifest.json",
+    "training_manifest": {
+      "generated_at_utc": "2026-03-29T22:33:41.033194+00:00",
+      "data_sha256": "d7be825a5f58fb9aea610ded521799e510c2777754be68629a64b88db87688ae",
+      "git_revision": "unknown",
+      "split_method": "patient_group",
+      "model_kind": "logreg",
+      "calibrated": false
+    },
+    "psi_train_vs_test_predicted_prob": 10.361589631740209
+  }
+}

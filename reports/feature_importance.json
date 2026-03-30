@@ -1,0 +1,29 @@
+{
+  "generated_at_utc": "2026-03-29T22:33:41.052876+00:00",
+  "importance": {
+    "w7d_visit_count": 0.0,
+    "w7d_glucose": 0.21706703448944623,
+    "w7d_blood_pressure": 0.21877494879238568,
+    "w7d_cholesterol": 0.22090398527117056,
+    "w7d_age": 0.2095764513032621,
+    "w7d_lab_value_mean": 0.22771335244922364,
+    "w7d_vital_signs_mean": 0.18292185490140203,
+    "w7d_icd_unique_count": 0.0,
+    "w30d_visit_count": 0.0,
+    "w30d_glucose": 0.21706703448944623,
+    "w30d_blood_pressure": 0.21877494879238568,
+    "w30d_cholesterol": 0.22090398527117056,
+    "w30d_age": 0.2095764513032621,
+    "w30d_lab_value_mean": 0.22771335244922364,
+    "w30d_vital_signs_mean": 0.18292185490140203,
+    "w30d_icd_unique_count": 0.0,
+    "w180d_visit_count": 0.1999990978875741,
+    "w180d_glucose": 0.21505891407806774,
+    "w180d_blood_pressure": 0.21598367915907563,
+    "w180d_cholesterol": 0.22067477114083472,
+    "w180d_age": 0.2095764513032621,
+    "w180d_lab_value_mean": 0.21362611149092103,
+    "w180d_vital_signs_mean": 0.1747057160470167,
+    "w180d_icd_unique_count": 0.08042366116311893
+  }
+}
