@@ -1,0 +1,19 @@
+<div class="shell">
+  <header class="top">
+    <a routerLink="/" class="brand">EHR Risk Workbench</a>
+    <nav>
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+      <a routerLink="/datasets" routerLinkActive="active">Datasets</a>
+      <a routerLink="/train" routerLinkActive="active">Train</a>
+      <a routerLink="/results" routerLinkActive="active">Results</a>
+      <a routerLink="/analytics" routerLinkActive="active">Analytics</a>
+      <a routerLink="/config" routerLinkActive="active">Config</a>
+      <a routerLink="/predict" routerLinkActive="active">Predict</a>
+      <a routerLink="/docs" routerLinkActive="active">Docs</a>
+    </nav>
+  </header>
+  <p class="banner">For research and education only. Outputs are not clinical recommendations and are not intended for patient care.</p>
+  <main>
+    <router-outlet />
+  </main>
+</div>

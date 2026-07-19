@@ -1,0 +1,219 @@
+import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { ApiService } from './api.service';
+
+describe('ApiService (UI → backend contract)', () => {
+  let api: ApiService;
+  let http: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    api = TestBed.inject(ApiService);
+    http = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => http.verify());
+
+  it('GET /health', () => {
+    api.health().subscribe((r) => expect(r).toEqual({ status: 'ok' }));
+    const req = http.expectOne('/health');
+    expect(req.request.method).toBe('GET');
+    req.flush({ status: 'ok' });
+  });
+
+  it('GET /v1/workspace/status', () => {
+    api.workspaceStatus().subscribe((r) => expect(r.api_ok).toBeTrue());
+    const req = http.expectOne('/v1/workspace/status');
+    req.flush({
+      api_ok: true,
+      model_ready: true,
+      evaluation_present: false,
+      leakage_audit_present: false,
+      shap_present: false,
+      calibration_present: false,
+      demo_datasets_available: true,
+      checklist: {},
+      recent_jobs: [],
+    });
+  });
+
+  it('GET /v1/datasets', () => {
+    api.datasets().subscribe((r) => expect(r.datasets.length).toBe(1));
+    http.expectOne('/v1/datasets').flush({
+      datasets: [{ id: 'ehr_data', label: 'Demo', path: 'data/raw/ehr_data.csv', format: 'longitudinal', exists: true }],
+    });
+  });
+
+  it('POST /v1/datasets/upload', () => {
+    const file = new File(['a,b\n1,2\n'], 'demo.csv', { type: 'text/csv' });
+    api.uploadDataset(file).subscribe((r) => expect(r).toEqual({ path: 'data/uploads/demo.csv' }));
+    const req = http.expectOne('/v1/datasets/upload');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body instanceof FormData).toBeTrue();
+    req.flush({ path: 'data/uploads/demo.csv' });
+  });
+
+  it('POST /v1/datasets/from-form', () => {
+    api.importForm([{ patient_id: 1 }], 'x.csv').subscribe();
+    const req = http.expectOne('/v1/datasets/from-form');
+    expect(req.request.body).toEqual({ name: 'x.csv', rows: [{ patient_id: 1 }] });
+    req.flush({ path: 'data/uploads/x.csv' });
+  });
+
+  it('POST /v1/datasets/from-sql', () => {
+    api.importSql('select 1', 'sqlite://', 's.csv').subscribe();
+    const req = http.expectOne('/v1/datasets/from-sql');
+    expect(req.request.body).toEqual({
+      sql: 'select 1',
+      connection_url: 'sqlite://',
+      name: 's.csv',
+    });
+    req.flush({ path: 'data/uploads/s.csv' });
+  });
+
+  it('GET /v1/datasets/profile?path=', () => {
+    api.datasetProfile('data/raw/ehr_data.csv', { age_band: '50_59' }).subscribe((p) => expect(p.n_rows).toBe(20));
+    const req = http.expectOne((r) => r.url === '/v1/datasets/profile');
+    expect(req.request.params.get('path')).toBe('data/raw/ehr_data.csv');
+    expect(req.request.params.get('age_band')).toBe('50_59');
+    req.flush({
+      path: 'data/raw/ehr_data.csv',
+      n_rows: 20,
+      n_columns: 10,
+      columns: ['patient_id', 'age'],
+      cohort_rows: [],
+    });
+  });
+
+  it('GET /v1/datasets/health?path=', () => {
+    api.datasetHealth('data/raw/ehr_data.csv').subscribe((h) => expect(h.health.ready_for_training).toBeTrue());
+    const req = http.expectOne((r) => r.url === '/v1/datasets/health');
+    expect(req.request.params.get('path')).toBe('data/raw/ehr_data.csv');
+    req.flush({
+      path: 'data/raw/ehr_data.csv',
+      n_rows: 20,
+      n_columns: 10,
+      health: { ready_for_training: true, blockers: [], warnings: [] },
+    });
+  });
+
+  it('POST /v1/jobs/train', () => {
+    api
+      .train({
+        data_path: 'data/raw/ehr_data.csv',
+        data_format: 'longitudinal',
+        model_kind: 'logreg',
+        calibrate: false,
+        split_by_patient: true,
+        temporal_split: false,
+        windows_days: [7, 30, 180],
+        window_days: 180,
+        horizon_days: null,
+        index_strategy: 'last_event',
+        index_time_col: null,
+        feature_inclusive: true,
+      })
+      .subscribe((j) => expect(j.id).toBe('job-1'));
+    const req = http.expectOne('/v1/jobs/train');
+    expect(req.request.method).toBe('POST');
+    req.flush({ id: 'job-1', kind: 'train', status: 'queued', message: '', result: {}, log_tail: [] });
+  });
+
+  it('POST /v1/jobs/compare', () => {
+    api
+      .compare({
+        data_path: 'data/raw/ehr_data.csv',
+        data_format: 'longitudinal',
+        calibrate: false,
+        split_by_patient: true,
+        temporal_split: false,
+        windows_days: [7, 30, 180],
+        window_days: 180,
+        horizon_days: null,
+        index_strategy: 'last_event',
+        index_time_col: null,
+        feature_inclusive: true,
+        promote_best: true,
+      })
+      .subscribe((j) => expect(j.kind).toBe('compare'));
+    http.expectOne('/v1/jobs/compare').flush({
+      id: 'c1',
+      kind: 'compare',
+      status: 'queued',
+      message: '',
+      result: {},
+      log_tail: [],
+    });
+  });
+
+  it('GET /v1/tasks', () => {
+    api.tasks().subscribe((r) => expect(r.tasks.length).toBe(1));
+    http.expectOne('/v1/tasks').flush({ tasks: [{ id: 'diabetes', name: 'Diabetes' }] });
+  });
+
+  it('POST /v1/jobs/leakage-audit and /v1/jobs/shap', () => {
+    api.leakageAudit().subscribe((j) => expect(j.kind).toBe('leakage_audit'));
+    http.expectOne('/v1/jobs/leakage-audit').flush({
+      id: 'l1',
+      kind: 'leakage_audit',
+      status: 'queued',
+      message: '',
+      result: {},
+      log_tail: [],
+    });
+
+    api.shap().subscribe((j) => expect(j.kind).toBe('shap'));
+    http.expectOne('/v1/jobs/shap').flush({
+      id: 's1',
+      kind: 'shap',
+      status: 'queued',
+      message: '',
+      result: {},
+      log_tail: [],
+    });
+  });
+
+  it('GET /v1/jobs/:id', () => {
+    api.job('abc').subscribe((j) => expect(j.status).toBe('succeeded'));
+    http.expectOne('/v1/jobs/abc').flush({
+      id: 'abc',
+      kind: 'train',
+      status: 'succeeded',
+      message: 'ok',
+      result: {},
+      log_tail: [],
+    });
+  });
+
+  it('GET /v1/reports/summary and URL helpers', () => {
+    api.reportsSummary().subscribe((r) => expect(r.files.length).toBe(1));
+    http.expectOne('/v1/reports/summary').flush({
+      files: [{ name: 'evaluation_report.json', bytes: 10, url: '/v1/reports/file/evaluation_report.json' }],
+    });
+    expect(api.reportFileUrl('x.png')).toBe('/v1/reports/file/x.png');
+    expect(api.resultsZipUrl()).toBe('/v1/reports/download.zip');
+  });
+
+  it('GET schema/metrics/meta and POST predict', () => {
+    api.schema().subscribe((s) => expect(s.feature_columns).toEqual(['a']));
+    http.expectOne('/v1/model/schema').flush({
+      feature_columns: ['a'],
+      model_kind: 'logreg',
+      calibrated: false,
+    });
+
+    api.metrics().subscribe();
+    http.expectOne('/v1/model/metrics').flush({ roc_auc: 0.8 });
+
+    api.meta().subscribe();
+    http.expectOne('/v1/meta').flush({ clinical_use: 'research' });
+
+    api.predict({ a: 1 }, true).subscribe((p) => expect(p.risk_level).toBe('medium'));
+    const req = http.expectOne('/v1/predict');
+    expect(req.request.body).toEqual({ features: { a: 1 }, include_explanation: true });
+    req.flush({ risk_probability: 0.5, risk_level: 'medium' });
+  });
+});

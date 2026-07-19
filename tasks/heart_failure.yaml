@@ -1,0 +1,33 @@
+# Example second clinical task preset (same demo schema; swap data for real HF cohorts).
+task:
+  id: heart_failure
+  name: Heart Failure Risk Prediction
+  description: >
+    Example task YAML for HF-style outcomes. Demo path uses paper synthetic
+    labels — replace suggested_path with your credentialed cohort for research.
+
+target:
+  column: label
+
+prediction:
+  horizon_days: 365
+  index_strategy: column
+  index_time_col: index_time
+  feature_inclusive: true
+
+features:
+  windows_days: [7, 30, 90, 180]
+  window_days: 180
+
+data:
+  format: longitudinal
+  suggested_path: data/raw/paper_synthetic_cohort.csv
+
+training:
+  model_kind: xgboost
+  calibrate: true
+  split_by_patient: true
+  temporal_split: false
+
+evaluation:
+  metrics: [roc_auc, pr_auc, brier, ece]

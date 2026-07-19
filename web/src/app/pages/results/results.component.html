@@ -1,0 +1,109 @@
+<section class="panel">
+  <h1>Results</h1>
+  <p class="lede">Interactive metrics, leakage audit, comparison charts, feature importance, and filterable figures.</p>
+
+  <div class="actions">
+    <button type="button" class="btn" (click)="reload()">Refresh</button>
+    <button type="button" class="btn primary" [disabled]="busy()" (click)="runShap()">Generate SHAP</button>
+    <a class="btn" [href]="zipUrl()" download="ehr_risk_results_pack.zip">Download results ZIP</a>
+    <label class="chk inline">
+      <input type="checkbox" [ngModel]="showCharts" name="showCharts" (ngModelChange)="onShowCharts($event)" />
+      Charts
+    </label>
+  </div>
+
+  @if (error()) { <p class="err">{{ error() }}</p> }
+  @if (job(); as j) {
+    <p class="muted">SHAP job {{ j.id }}: {{ j.status }} — {{ j.message }}</p>
+  }
+
+  @if (!summary()) {
+    <p class="muted">No reports yet. Train a model first, then refresh.</p>
+    <p><a routerLink="/train" class="btn primary">Go to Train</a></p>
+  }
+
+  @if (summary(); as s) {
+    @if (showCharts) {
+      @if (!chartsReady()) {
+        <p class="muted">Drawing charts…</p>
+      }
+      <div class="chart-grid">
+        <div class="card"><canvas #compareChart data-chart="compare"></canvas></div>
+        <div class="card"><canvas #metricChart data-chart="metric"></canvas></div>
+        <div class="card wide"><canvas #importanceChart data-chart="importance"></canvas></div>
+      </div>
+    }
+
+    @if (compareRows.length) {
+      <h2>Model comparison</h2>
+      <p class="muted">Selected: {{ s.model_comparison?.selected_model || '—' }}</p>
+      <app-data-table
+        [columns]="compareCols"
+        [rows]="compareRows"
+        [pageSize]="prefs.table_page_size"
+        exportName="model_comparison.csv"
+        (pageSizeChange)="onPageSize($event)"
+      />
+    }
+
+    @if (metricRows.length) {
+      <h2>Metrics</h2>
+      <label class="fig-filter">Filter metrics
+        <input type="search" [(ngModel)]="metricFilter" name="metricFilter" placeholder="e.g. roc, brier" />
+      </label>
+      <app-data-table
+        [columns]="metricCols"
+        [rows]="filteredMetrics()"
+        [pageSize]="prefs.table_page_size"
+        exportName="metrics.csv"
+        (pageSizeChange)="onPageSize($event)"
+      />
+    }
+
+    @if (importanceRows.length) {
+      <h2>Feature importance</h2>
+      <app-data-table
+        [columns]="importanceCols"
+        [rows]="importanceRows"
+        [pageSize]="prefs.table_page_size"
+        exportName="importance.csv"
+        (pageSizeChange)="onPageSize($event)"
+      />
+    }
+
+    @if (leakageRows.length) {
+      <h2>Leakage audit</h2>
+      <app-data-table
+        [columns]="leakageCols"
+        [rows]="leakageRows"
+        [pageSize]="prefs.table_page_size"
+        exportName="leakage_audit.csv"
+        (pageSizeChange)="onPageSize($event)"
+      />
+    }
+
+    <h2>Report files</h2>
+    <app-data-table
+      [columns]="fileCols"
+      [rows]="fileRows"
+      [pageSize]="prefs.table_page_size"
+      exportName="report_files.csv"
+      (pageSizeChange)="onPageSize($event)"
+    />
+
+    <h2>Figures</h2>
+    <label class="fig-filter">Filter figures
+      <input type="search" [(ngModel)]="figFilter" name="figFilter" placeholder="e.g. shap, calibration" />
+    </label>
+    <div class="figs">
+      @for (f of filteredFigs(); track f.name) {
+        <figure>
+          <figcaption>{{ f.name }}</figcaption>
+          <img [src]="fileUrl(f.name)" [alt]="f.name" />
+        </figure>
+      } @empty {
+        <p class="muted">No PNG figures match the filter.</p>
+      }
+    </div>
+  }
+</section>

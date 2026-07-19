@@ -1,0 +1,5 @@
+.lede { color: var(--muted); }
+.muted { color: var(--muted); font-size: 0.95rem; line-height: 1.5; }
+.links { line-height: 1.75; padding-left: 1.25rem; }
+.links code { font-size: 0.9em; }
+h2 { margin-top: 1.25rem; }

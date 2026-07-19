@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Analytics — EHR Risk Framework</title>
+  <meta name="description" content="Cohort charts, filters, model tables" />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/site.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="index.html">EHR Risk <span>Framework</span></a>
+      <nav class="nav" aria-label="Primary"></nav>
+    </div>
+  </header>
+  <main id="main" data-ui-page="ui-analytics">
+    <p class="muted crumb"><a href="workbench.html">Workbench hub</a> · UI route <code>/analytics</code></p>
+    <h1 style="font-family:var(--display);font-size:2rem;margin:0 0 0.5rem">Analytics dashboard</h1>
+    <p class="lede muted" style="max-width:42rem;margin:0 0 1rem">Explore cohort distributions and model artifacts with charts, tables, or split view — plus age-band / label / patient filters.</p>
+    <p class="banner">Demo screenshots only — never capture PHI.</p>
+
+    <figure class="shot">
+      <img src="media/08_analytics_dashboard.png" alt="Analytics dashboard" width="1200" height="750" />
+      <figcaption>Analytics — cohort + model charts</figcaption>
+    </figure>
+    <section class="section">
+      <h2>View modes</h2>
+      <p>Charts · Tables · Split — persisted via Config UI preferences.</p>
+    </section>
+    <section class="section">
+      <h2>Charts</h2>
+      <ul>
+        <li>Label distribution</li>
+        <li>Age bands</li>
+        <li>Missingness</li>
+        <li>Numeric preview</li>
+        <li>Hold-out metrics</li>
+        <li>Feature importance</li>
+        <li>Model comparison</li>
+      </ul>
+      <p>Toggle individual cards from preferences; canvases stay mounted so redraws stay reliable.</p>
+    </section>
+    <section class="section">
+      <h2>Filters</h2>
+      <ul>
+        <li><code>age_band</code> · <code>label</code> · <code>patient_id</code> on profile + cohort table</li>
+        <li>API: <code>GET /v1/datasets/profile?path=&amp;age_band=&amp;label=&amp;patient_id=</code></li>
+      </ul>
+      <p class="muted"><a href="features.html#trust">Trust surfaces</a> · <a href="api.html">API</a></p>
+    </section>
+
+  </main>
+  <footer class="site-footer"><div class="inner"><p class="fine">Research / education only · Md Rana Hossain · <a href="mailto:support@larucare.com">support@larucare.com</a></p></div></footer>
+  <script src="assets/site.js"></script>
+</body>
+</html>

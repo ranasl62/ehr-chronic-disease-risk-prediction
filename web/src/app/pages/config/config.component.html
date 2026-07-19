@@ -1,0 +1,127 @@
+<section class="panel">
+  <h1>Config Center</h1>
+  <p class="lede">Train workspace settings + UI customization. Changes apply to the next train/compare and Analytics/Results views.</p>
+
+  @if (error()) { <p class="err">{{ error() }}</p> }
+  @if (message()) { <p class="ok">{{ message() }}</p> }
+
+  <form class="form" (ngSubmit)="save()">
+    <h2>Persona &amp; data</h2>
+    <div class="form-grid">
+      <label>Persona
+        <select [(ngModel)]="cfg['persona']" name="persona">
+          <option value="researcher">researcher</option>
+          <option value="clinical_research">clinical_research</option>
+        </select>
+      </label>
+      <label>Data mode
+        <select [(ngModel)]="cfg['data_mode']" name="data_mode">
+          <option value="synthetic">synthetic</option>
+          <option value="real">real</option>
+        </select>
+      </label>
+      <label>Active task id
+        <input [(ngModel)]="cfg['active_task_id']" name="active_task_id" placeholder="diabetes / heart_failure / …" />
+      </label>
+      <label class="chk span2">
+        <input type="checkbox" [(ngModel)]="cfg['disclaimer_ack']" name="disclaimer_ack" />
+        Disclaimer acknowledged (required for clinical_research worklist)
+      </label>
+      <label class="chk">
+        <input type="checkbox" [(ngModel)]="cfg['require_api_key']" name="require_api_key" />
+        Require API key (server must also set API_KEY env)
+      </label>
+      <label class="span2">Browser API key (X-API-Key)
+        <input type="password" [(ngModel)]="apiKey" name="apiKey" autocomplete="off" placeholder="stored in localStorage only" />
+      </label>
+      <div class="span2">
+        <button type="button" class="btn" (click)="saveApiKey()">Save API key in browser</button>
+      </div>
+    </div>
+
+    <h2>Training defaults</h2>
+    <div class="form-grid">
+      <label>Model kind
+        <select [(ngModel)]="cfg['model_kind']" name="model_kind">
+          @for (m of modelOpts; track m) {
+            <option [value]="m">{{ m }}</option>
+          }
+        </select>
+      </label>
+      <label>Horizon days
+        <input type="number" [(ngModel)]="cfg['horizon_days']" name="horizon_days" />
+      </label>
+      <label>Windows (days, comma-separated)
+        <input [(ngModel)]="windowsText" name="windows_days" placeholder="7, 30, 180" />
+      </label>
+      <label>Index strategy
+        <select [(ngModel)]="cfg['index_strategy']" name="index_strategy">
+          <option value="last_event">last_event</option>
+          <option value="before_last">before_last</option>
+          <option value="column">column</option>
+        </select>
+      </label>
+      <label>Index time column
+        <input [(ngModel)]="cfg['index_time_col']" name="index_time_col" />
+      </label>
+      <label class="chk"><input type="checkbox" [(ngModel)]="cfg['calibrate']" name="calibrate" /> Calibrate</label>
+      <label class="chk"><input type="checkbox" [(ngModel)]="cfg['split_by_patient']" name="split_by_patient" /> Patient split</label>
+      <label class="chk"><input type="checkbox" [(ngModel)]="cfg['temporal_split']" name="temporal_split" /> Temporal split</label>
+      <label class="chk"><input type="checkbox" [(ngModel)]="cfg['feature_inclusive']" name="feature_inclusive" /> Feature inclusive</label>
+    </div>
+
+    <h3>Compare models</h3>
+    <div class="compare-row">
+      @for (m of modelOpts; track m) {
+        <label class="chk"><input type="checkbox" [(ngModel)]="compareSelected[m]" [name]="'cm_' + m" /> {{ m }}</label>
+      }
+    </div>
+
+    <h2>UI preferences</h2>
+    <div class="form-grid">
+      <label>Theme
+        <select [ngModel]="prefs.theme" (ngModelChange)="ui.patch({ theme: $event })" name="theme">
+          <option value="forest">forest</option>
+          <option value="slate">slate</option>
+          <option value="sand">sand</option>
+        </select>
+      </label>
+      <label>Density
+        <select [ngModel]="prefs.density" (ngModelChange)="ui.patch({ density: $event })" name="density">
+          <option value="comfortable">comfortable</option>
+          <option value="compact">compact</option>
+        </select>
+      </label>
+      <label>Analytics default view
+        <select [ngModel]="prefs.analytics_view" (ngModelChange)="ui.patch({ analytics_view: $event })" name="aview">
+          <option value="charts">charts</option>
+          <option value="tables">tables</option>
+          <option value="split">split</option>
+        </select>
+      </label>
+      <label>Table page size
+        <input type="number" min="5" max="100" [ngModel]="prefs.table_page_size" (ngModelChange)="ui.patch({ table_page_size: +$event })" name="tps" />
+      </label>
+      <label>Top-N features (charts)
+        <input type="number" min="5" max="50" [ngModel]="prefs.top_n_features" (ngModelChange)="ui.patch({ top_n_features: +$event })" name="topn" />
+      </label>
+      <label class="chk"><input type="checkbox" [ngModel]="prefs.chart_animation" (ngModelChange)="ui.patch({ chart_animation: $event })" name="anim" /> Chart animation</label>
+    </div>
+    <div class="actions">
+      <button type="submit" class="btn primary">Save config</button>
+      <button type="button" class="btn" (click)="resetUi()">Reset UI defaults</button>
+    </div>
+  </form>
+
+  <h2>Effective train params</h2>
+  <pre>{{ effective | json }}</pre>
+
+  <h2>Recent events</h2>
+  <app-data-table
+    [columns]="eventCols"
+    [rows]="eventRows"
+    [pageSize]="prefs.table_page_size"
+    exportName="events.csv"
+    (pageSizeChange)="onPageSize($event)"
+  />
+</section>

@@ -1,0 +1,36 @@
+persona: researcher
+active_task_id: postgres
+windows_days:
+- 7
+- 30
+- 180
+horizon_days: null
+index_strategy: last_event
+index_time_col: null
+model_kind: logreg
+compare_models:
+- logreg
+- random_forest
+- xgboost
+calibrate: false
+split_by_patient: true
+temporal_split: false
+feature_inclusive: true
+require_api_key: false
+disclaimer_ack: false
+active_run_id: null
+data_mode: synthetic
+ui:
+  density: comfortable
+  theme: forest
+  analytics_view: split
+  chart_animation: true
+  table_page_size: 10
+  top_n_features: 15
+  show_label_chart: true
+  show_age_chart: true
+  show_missing_chart: true
+  show_numeric_chart: true
+  show_metric_chart: true
+  show_importance_chart: true
+  show_compare_chart: true

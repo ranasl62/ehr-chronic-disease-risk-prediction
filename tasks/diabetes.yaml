@@ -1,0 +1,33 @@
+# Horizon-safe diabetes-style risk task (works with paper synthetic cohort).
+task:
+  id: diabetes
+  name: Diabetes Risk Prediction
+  description: >
+    Incident-style chronic risk within a 365-day horizon after index_time.
+    Uses multi-window labs/vitals features. Research demo only.
+
+target:
+  column: label
+
+prediction:
+  horizon_days: 365
+  index_strategy: column
+  index_time_col: index_time
+  feature_inclusive: true
+
+features:
+  windows_days: [7, 30, 180]
+  window_days: 180
+
+data:
+  format: longitudinal
+  suggested_path: data/raw/paper_synthetic_cohort.csv
+
+training:
+  model_kind: xgboost
+  calibrate: true
+  split_by_patient: true
+  temporal_split: false
+
+evaluation:
+  metrics: [roc_auc, pr_auc, brier, ece, precision, recall, f1]

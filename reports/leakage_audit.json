@@ -1,0 +1,20 @@
+{
+  "artifact": "/media/ranasl62/Study4/ai/ehr-chronic-disease-risk-prediction/model.pkl",
+  "split_method": "patient_group",
+  "n_rows": 10,
+  "n_patients": 10,
+  "patient_disjoint_train_test": true,
+  "notes": [],
+  "horizon_days": null,
+  "index_strategy": "last_event",
+  "feature_inclusive": true,
+  "temporal_integrity": {
+    "feature_events_after_index": 0,
+    "feature_inclusive": true,
+    "horizon_days": null,
+    "n_patients": 10,
+    "passed": true,
+    "notes": [],
+    "label_col": "label"
+  }
+}

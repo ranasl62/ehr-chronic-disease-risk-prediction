@@ -1,0 +1,15 @@
+.lede { color: var(--muted); }
+.form-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 0.75rem 1rem; margin: 0.5rem 0 1rem;
+}
+.form label { display: flex; flex-direction: column; gap: 0.3rem; }
+.chk { flex-direction: row !important; align-items: center; gap: 0.5rem !important; }
+.span2 { grid-column: span 2; }
+input, select { padding: 0.4rem; border: 1px solid var(--line); border-radius: 4px; font: inherit; }
+pre { font-size: 0.75rem; background: #0f1419; color: #c8d0d8; padding: 0.75rem; border-radius: 4px; overflow: auto; }
+.compare-row { display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; margin-bottom: 1rem; }
+.actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0.75rem 0 1.25rem; }
+.err { color: var(--danger); }
+.ok { color: var(--ok); }
+h3 { font-size: 0.95rem; margin: 0.5rem 0; color: var(--muted); font-weight: 600; }

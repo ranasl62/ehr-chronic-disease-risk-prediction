@@ -1,0 +1,33 @@
+# Template — copy and edit for a new prediction task without changing core code.
+task:
+  id: custom
+  name: Custom Chronic Risk
+  description: >
+    Generic longitudinal chronic-disease label (max over history).
+    Point --data at your CSV; adjust horizon/index for leakage-safe labels.
+
+target:
+  column: chronic_disease
+
+prediction:
+  horizon_days: null
+  index_strategy: last_event
+  index_time_col: null
+  feature_inclusive: true
+
+features:
+  windows_days: [7, 30, 180]
+  window_days: 180
+
+data:
+  format: longitudinal
+  suggested_path: data/raw/ehr_data.csv
+
+training:
+  model_kind: logreg
+  calibrate: false
+  split_by_patient: true
+  temporal_split: false
+
+evaluation:
+  metrics: [roc_auc, pr_auc, brier, ece]

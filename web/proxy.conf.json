@@ -1,0 +1,7 @@
+{
+  "/v1": { "target": "http://127.0.0.1:8000", "secure": false },
+  "/health": { "target": "http://127.0.0.1:8000", "secure": false },
+  "/docs": { "target": "http://127.0.0.1:8000", "secure": false },
+  "/predict": { "target": "http://127.0.0.1:8000", "secure": false },
+  "/explain": { "target": "http://127.0.0.1:8000", "secure": false }
+}

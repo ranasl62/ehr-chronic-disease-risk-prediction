@@ -1,0 +1,48 @@
+<section class="panel">
+  <h1>Researcher workbench</h1>
+  <p class="lede">
+    Leakage-aware EHR chronic disease risk — train, audit, explain, predict.
+    <strong>For research and education</strong> — not FDA-cleared and not intended for patient care.
+  </p>
+
+  <div class="actions">
+    <button type="button" class="btn" (click)="refresh()">Refresh status</button>
+    <a routerLink="/datasets" class="btn primary">Start: import / pick data</a>
+    <a routerLink="/analytics" class="btn">Analytics</a>
+    <a class="btn" [href]="zipUrl" download="ehr_risk_results_pack.zip">Download results ZIP</a>
+  </div>
+
+  @if (loading()) {
+    <p class="muted">Checking workspace…</p>
+  }
+  @if (error()) {
+    <p class="err">{{ error() }}</p>
+  }
+
+  @if (status(); as s) {
+    <h2>Setup checklist</h2>
+    <ul class="check">
+      @for (step of steps; track step.key) {
+        <li [class.ok]="s.checklist[step.key]" [class.bad]="!s.checklist[step.key]">
+          <span class="mark">{{ s.checklist[step.key] ? '✓' : '○' }}</span>
+          {{ step.label }}
+          @if (!s.checklist[step.key] && step.fix) {
+            <a [routerLink]="step.fix" class="fix">Fix</a>
+          }
+        </li>
+      }
+    </ul>
+
+    @if (s.metrics) {
+      <h2>Latest hold-out metrics</h2>
+      <div class="metrics">
+        @for (kv of s.metrics | keyvalue; track kv.key) {
+          <div class="metric">
+            <span class="k">{{ kv.key }}</span>
+            <span class="v">{{ kv.value | number: '1.3-3' }}</span>
+          </div>
+        }
+      </div>
+    }
+  }
+</section>
