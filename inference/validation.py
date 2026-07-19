@@ -1,4 +1,4 @@
-"""Shared validation for prediction requests (API, dashboard, batch)."""
+"""Shared validation for prediction requests (API and batch)."""
 
 from __future__ import annotations
 

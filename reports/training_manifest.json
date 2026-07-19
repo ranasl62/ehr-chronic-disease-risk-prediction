@@ -1,9 +1,9 @@
 {
-  "generated_at_utc": "2026-03-29T22:33:41.033194+00:00",
-  "data_path": "/media/ranasl62/Study4/ai/ehr-chronic-disease-risk-prediction/data/raw/ehr_data.csv",
+  "generated_at_utc": "2026-07-19T22:21:03.641863+00:00",
+  "data_path": "/app/data/raw/ehr_data.csv",
   "data_sha256": "d7be825a5f58fb9aea610ded521799e510c2777754be68629a64b88db87688ae",
   "data_bytes": 1184,
-  "model_path": "/media/ranasl62/Study4/ai/ehr-chronic-disease-risk-prediction/model.pkl",
+  "model_path": "/app/reports/runs/20260719T222103Z_logreg/model.pkl",
   "model_kind": "logreg",
   "calibrated": false,
   "split_method": "patient_group",

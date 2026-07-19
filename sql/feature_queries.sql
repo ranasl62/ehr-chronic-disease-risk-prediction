@@ -3,7 +3,7 @@
 -- Run against a credentialed MIMIC-IV Postgres instance after PhysioNet approval.
 -- Table/column names follow MIMIC-IV v3+ conventions; verify against your release.
 --
--- Ops checklist: docs/mimic_week1_2_runbook.md
+-- Ops checklist: docs/mimic_extract_splits_runbook.md
 -- Post-export: preprocessing/canonical_schema.py, scripts/normalize_longitudinal_csv.py
 -- QA:       scripts/leakage_audit.py, scripts/validate_training_data.py
 -- =============================================================================
@@ -58,8 +58,15 @@
 -- FROM mimiciv_hosp.diagnoses_icd;
 
 -- -----------------------------------------------------------------------------
--- Derived cohort: anchor + prediction window (pseudo-SQL — implement in Python)
+-- Derived cohort: incident diabetes (align with docs/study_protocol_mimic_diabetes.md)
 -- -----------------------------------------------------------------------------
--- 1) Choose index_time per subject (e.g., discharge, last lab before outcome window).
--- 2) Restrict labs/vitals to [index_time - W, index_time).
--- 3) Define outcome from diagnoses after index_time + horizon H (no future leakage in features).
+-- 1) Choose index_time per subject (e.g., first qualifying discharge).
+-- 2) Exclude prevalent diabetes (ICD / labs) on or before index_time.
+-- 3) Restrict labs/vitals to [index_time - W, index_time] (or half-open upper bound).
+-- 4) Set label=1 iff first diabetes evidence in (index_time, index_time + H]; else 0.
+-- 5) Export event-level CSV with columns:
+--      patient_id, timestamp, index_time, glucose, blood_pressure, cholesterol,
+--      age, sex (optional), icd_code, label
+-- 6) Lock Results: bash scripts/lock_mimic_cohort.sh data/processed/mimic_diabetes_cohort.csv
+--
+-- Pseudo-SQL — implement joins in your MIMIC Postgres client; do not commit extracts.

@@ -4,7 +4,7 @@ scikit-learn
 xgboost
 fastapi
 uvicorn
-streamlit
+python-multipart>=0.0.9
 shap
 matplotlib
 seaborn
@@ -13,4 +13,6 @@ pydantic>=2.13.4
 requests
 pytest
 httpx
-# Optional: pip install lightgbm  (see --model lightgbm)
+openpyxl>=3.1.0
+PyYAML>=6.0
+

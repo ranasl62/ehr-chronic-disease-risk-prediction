@@ -27,10 +27,10 @@ PYTHONPATH=. python scripts/group_cv_report.py --format longitudinal --data data
 ## 3. True external validation (your action items)
 
 - Second **hospital**, **time window**, or **registry** extract in the **same feature contract** (`docs/data_sources_and_schema.md`).
-- Freeze **training_manifest** + **evaluation_report** per release; cite SHA-256 in the paper appendix.
-- Prefer **pre-spec** in `docs/study_protocol.md` before touching the external file.
+- Freeze **training_manifest** + **evaluation_report** per release; record data SHA-256.
+- Document inclusion/exclusion and index/horizon definitions before touching the external file (see [`mimic_lock_checklist.md`](mimic_lock_checklist.md) and [`data_sources_and_schema.md`](data_sources_and_schema.md)).
 
 ## 4. API / UI visibility
 
 - **`GET /v1/model/metrics`** — reads `reports/evaluation_report.json` and reports whether **`data_sha256` matches** the loaded `model.pkl` manifest.
-- **Streamlit** sidebar shows the same alignment flag and headline metrics when the JSON exists.
+- Angular **Results** / **Home** checklist surfaces the same metrics when the JSON exists.

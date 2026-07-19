@@ -1,1 +1,1 @@
-"""Fairness metrics (Week 3+)."""
+"""Subgroup and disparity metrics for model evaluation."""
