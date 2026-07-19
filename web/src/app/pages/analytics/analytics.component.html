@@ -1,0 +1,198 @@
+<section class="panel">
+  <h1>Analytics dashboard</h1>
+  <p class="lede">Interactive cohort + model charts and filterable tables. Research visualization only.</p>
+
+  <div class="toolbar">
+    <label>Dataset
+      <select [(ngModel)]="path" name="path" (change)="load()">
+        @for (d of datasets(); track d.id) {
+          <option [value]="d.path">{{ d.label }}</option>
+        }
+      </select>
+    </label>
+    <div class="seg" role="group" aria-label="View mode">
+      <button type="button" class="seg-btn" [class.on]="prefs.analytics_view === 'charts'" (click)="setView('charts')">Charts</button>
+      <button type="button" class="seg-btn" [class.on]="prefs.analytics_view === 'tables'" (click)="setView('tables')">Tables</button>
+      <button type="button" class="seg-btn" [class.on]="prefs.analytics_view === 'split'" (click)="setView('split')">Split</button>
+    </div>
+    <label>Top N
+      <input type="number" min="5" max="50" [ngModel]="prefs.top_n_features" (ngModelChange)="onTopNChange($event)" name="topn" />
+    </label>
+    <label>Age band
+      <select [(ngModel)]="filterAgeBand" name="fab" (change)="load()">
+        <option value="">All ages</option>
+        @for (b of filterOptions().age_bands; track b) {
+          <option [value]="b">{{ b }}</option>
+        }
+      </select>
+    </label>
+    <label>Label
+      <select [(ngModel)]="filterLabel" name="flab" (change)="load()">
+        <option value="">All labels</option>
+        @for (l of filterOptions().labels; track l) {
+          <option [value]="l">{{ l }}</option>
+        }
+      </select>
+    </label>
+    <label>Patient id
+      <input type="text" [(ngModel)]="filterPatientId" name="fpid" (change)="load()" placeholder="optional" />
+    </label>
+    <button type="button" class="btn" (click)="load()">Refresh</button>
+  </div>
+
+  <details class="filters">
+    <summary>Chart &amp; display options</summary>
+    <div class="filter-grid">
+      <label class="chk"><input type="checkbox" [ngModel]="prefs.show_label_chart" (ngModelChange)="toggleChart('show_label_chart', $event)" name="sl" /> Labels</label>
+      <label class="chk"><input type="checkbox" [ngModel]="prefs.show_age_chart" (ngModelChange)="toggleChart('show_age_chart', $event)" name="sa" /> Age</label>
+      <label class="chk"><input type="checkbox" [ngModel]="prefs.show_missing_chart" (ngModelChange)="toggleChart('show_missing_chart', $event)" name="sm" /> Missing</label>
+      <label class="chk"><input type="checkbox" [ngModel]="prefs.show_numeric_chart" (ngModelChange)="toggleChart('show_numeric_chart', $event)" name="sn" /> Numeric</label>
+      <label class="chk"><input type="checkbox" [ngModel]="prefs.show_metric_chart" (ngModelChange)="toggleChart('show_metric_chart', $event)" name="sme" /> Metrics</label>
+      <label class="chk"><input type="checkbox" [ngModel]="prefs.show_importance_chart" (ngModelChange)="toggleChart('show_importance_chart', $event)" name="si" /> Importance</label>
+      <label class="chk"><input type="checkbox" [ngModel]="prefs.show_compare_chart" (ngModelChange)="toggleChart('show_compare_chart', $event)" name="sc" /> Compare</label>
+      <label>Label chart
+        <select [ngModel]="prefs.label_chart_type" (ngModelChange)="ui.patch({ label_chart_type: $event }); load()" name="lct">
+          <option value="doughnut">doughnut</option>
+          <option value="pie">pie</option>
+          <option value="bar">bar</option>
+        </select>
+      </label>
+      <label>Metrics chart
+        <select [ngModel]="prefs.metric_chart_type" (ngModelChange)="ui.patch({ metric_chart_type: $event }); load()" name="mct">
+          <option value="radar">radar</option>
+          <option value="bar">bar</option>
+        </select>
+      </label>
+      <label>Numeric chart
+        <select [ngModel]="prefs.numeric_chart_type" (ngModelChange)="ui.patch({ numeric_chart_type: $event }); load()" name="nct">
+          <option value="bar">bar</option>
+          <option value="line">line</option>
+        </select>
+      </label>
+      <label class="chk"><input type="checkbox" [ngModel]="prefs.chart_animation" (ngModelChange)="ui.patch({ chart_animation: $event }); load()" name="anim" /> Animation</label>
+    </div>
+  </details>
+
+  @if (error()) { <p class="err">{{ error() }}</p> }
+
+  @if (profile(); as p) {
+    <div class="kpis">
+      <div class="kpi"><span class="k">Rows</span><span class="v">{{ p.n_rows }}</span></div>
+      <div class="kpi"><span class="k">Patients</span><span class="v">{{ p.n_patients ?? '—' }}</span></div>
+      <div class="kpi"><span class="k">Columns</span><span class="v">{{ p.n_columns }}</span></div>
+      <div class="kpi"><span class="k">Time span</span><span class="v small">{{ p.time_span?.min || '—' }} → {{ p.time_span?.max || '—' }}</span></div>
+    </div>
+
+    @if (showCharts()) {
+      @if (!chartsReady() && profile()) {
+        <p class="muted">Drawing charts…</p>
+      }
+      <div class="grid">
+        <div class="card" [class.off]="!prefs.show_label_chart">
+          <canvas #labelChart data-chart="label"></canvas>
+        </div>
+        <div class="card" [class.off]="!prefs.show_age_chart">
+          <canvas #ageChart data-chart="age"></canvas>
+        </div>
+        <div class="card wide" [class.off]="!prefs.show_missing_chart">
+          <canvas #missChart data-chart="miss"></canvas>
+        </div>
+        <div class="card" [class.off]="!prefs.show_numeric_chart">
+          <canvas #numericChart data-chart="numeric"></canvas>
+        </div>
+        <div class="card" [class.off]="!prefs.show_metric_chart">
+          <canvas #metricChart data-chart="metric"></canvas>
+        </div>
+        <div class="card wide" [class.off]="!prefs.show_importance_chart">
+          <canvas #importanceChart data-chart="importance"></canvas>
+        </div>
+        <div class="card wide" [class.off]="!prefs.show_compare_chart">
+          <canvas #compareChart data-chart="compare"></canvas>
+        </div>
+      </div>
+    }
+
+    @if (showTables()) {
+      <h2>Cohort (filtered patients)</h2>
+      <app-data-table
+        [columns]="cohortCols"
+        [rows]="cohortRows"
+        [pageSize]="prefs.table_page_size"
+        exportName="cohort.csv"
+        (pageSizeChange)="onPageSize($event)"
+      />
+
+      <h2>Label counts</h2>
+      <app-data-table
+        [columns]="labelCols"
+        [rows]="labelRows"
+        [pageSize]="prefs.table_page_size"
+        exportName="label_counts.csv"
+        (pageSizeChange)="onPageSize($event)"
+      />
+
+      <h2>Age bands</h2>
+      <app-data-table
+        [columns]="ageCols"
+        [rows]="ageRows"
+        [pageSize]="prefs.table_page_size"
+        exportName="age_bands.csv"
+        (pageSizeChange)="onPageSize($event)"
+      />
+
+      <h2>Missingness</h2>
+      <app-data-table
+        [columns]="missingCols"
+        [rows]="missingRows"
+        [pageSize]="prefs.table_page_size"
+        exportName="missingness.csv"
+        (pageSizeChange)="onPageSize($event)"
+      />
+
+      <h2>Numeric preview</h2>
+      <app-data-table
+        [columns]="numericCols"
+        [rows]="numericRows"
+        [pageSize]="prefs.table_page_size"
+        exportName="numeric_preview.csv"
+        (pageSizeChange)="onPageSize($event)"
+      />
+
+      <h2>Columns</h2>
+      <app-data-table
+        [columns]="columnCols"
+        [rows]="columnRows"
+        [pageSize]="prefs.table_page_size"
+        exportName="columns.csv"
+        (pageSizeChange)="onPageSize($event)"
+      />
+
+      <h2>Hold-out metrics</h2>
+      <app-data-table
+        [columns]="metricCols"
+        [rows]="metricRows"
+        [pageSize]="prefs.table_page_size"
+        exportName="metrics.csv"
+        (pageSizeChange)="onPageSize($event)"
+      />
+
+      <h2>Feature importance</h2>
+      <app-data-table
+        [columns]="importanceCols"
+        [rows]="importanceRows"
+        [pageSize]="prefs.table_page_size"
+        exportName="importance.csv"
+        (pageSizeChange)="onPageSize($event)"
+      />
+
+      <h2>Model comparison</h2>
+      <app-data-table
+        [columns]="compareCols"
+        [rows]="compareRows"
+        [pageSize]="prefs.table_page_size"
+        exportName="model_comparison.csv"
+        (pageSizeChange)="onPageSize($event)"
+      />
+    }
+  }
+</section>

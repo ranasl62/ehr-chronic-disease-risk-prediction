@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600&display=swap');
+
+:root {
+  --ink: #1a2e28;
+  --muted: #5a6b64;
+  --line: #d5e0db;
+  --surface: #ffffff;
+  --surface-2: #f3f7f5;
+  --accent: #2a6b5a;
+  --accent-soft: #e4f2ed;
+  --ok: #1f7a4d;
+  --warn: #a66b00;
+  --danger: #a33;
+  --font: 'Source Sans 3', system-ui, sans-serif;
+  --font-display: 'Source Serif 4', Georgia, serif;
+  --pad: 1.25rem;
+  --gap: 0.75rem;
+}
+
+html[data-theme='slate'] {
+  --ink: #1b2430;
+  --muted: #5c6b7a;
+  --line: #d0d7e0;
+  --surface: #ffffff;
+  --surface-2: #f2f5f8;
+  --accent: #3d5a80;
+  --accent-soft: #e8eef5;
+  --ok: #2a7a5a;
+}
+
+html[data-theme='sand'] {
+  --ink: #2c2418;
+  --muted: #6b5e4a;
+  --line: #e2d8c8;
+  --surface: #fffcf7;
+  --surface-2: #f6f0e6;
+  --accent: #8c6a3d;
+  --accent-soft: #f3ebe0;
+  --ok: #5a7a3d;
+}
+
+html[data-density='compact'] {
+  --pad: 0.85rem;
+  --gap: 0.45rem;
+}
+html[data-density='compact'] .panel { padding: var(--pad) calc(var(--pad) + 0.1rem); }
+html[data-density='compact'] h1 { font-size: 1.35rem; }
+html[data-density='compact'] .btn { padding: 0.3rem 0.65rem; font-size: 0.9rem; }
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  font-family: var(--font);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 70%, #fff) 0%, var(--surface-2) 40%, var(--surface-2) 100%);
+  color: var(--ink);
+  min-height: 100%;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
+h2 { font-size: 1.1rem; margin: 1.25rem 0 0.5rem; }
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 1.25rem 1.35rem;
+  box-shadow: 0 1px 0 rgba(26, 46, 40, 0.04);
+}
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0.45rem 0.9rem; border-radius: 5px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink); text-decoration: none;
+  font: inherit; cursor: pointer;
+}
+.btn:hover { border-color: var(--accent); }
+.btn.primary {
+  background: var(--accent); color: #fff; border-color: var(--accent);
+}
+.btn.primary:hover { filter: brightness(1.05); }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Predict — EHR Risk Framework</title>
+  <meta name="description" content="Schema form, risk charts, SHAP drivers" />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/site.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="index.html">EHR Risk <span>Framework</span></a>
+      <nav class="nav" aria-label="Primary"></nav>
+    </div>
+  </header>
+  <main id="main" data-ui-page="ui-predict">
+    <p class="muted crumb"><a href="workbench.html">Workbench hub</a> · UI route <code>/predict</code></p>
+    <h1 style="font-family:var(--display);font-size:2rem;margin:0 0 0.5rem">Predict</h1>
+    <p class="lede muted" style="max-width:42rem;margin:0 0 1rem">Schema-driven feature form from the loaded artifact — window-grouped inputs, risk charts, and optional SHAP drivers.</p>
+    <p class="banner">Demo screenshots only — never capture PHI.</p>
+
+    <figure class="shot">
+      <img src="media/06_predict_banner.png" alt="Predict page" width="1200" height="750" />
+      <figcaption>Predict — feature form + risk / SHAP charts</figcaption>
+    </figure>
+    <section class="section">
+      <h2>Important</h2>
+      <ul>
+        <li>Inputs are <strong>model features</strong> (e.g. <code>w7d_glucose</code>), not raw EHR column names</li>
+        <li>Missing schema → Train CTA (no silent zero-fill in worklist predict)</li>
+        <li>Scores are research outputs — not clinical recommendations</li>
+      </ul>
+    </section>
+    <section class="section">
+      <h2>Features</h2>
+      <ul>
+        <li>Window-grouped form (<code>w7d_</code> / <code>w30d_</code> / <code>w180d_</code> / other)</li>
+        <li>Filter features by name; Fill medians from schema stats</li>
+        <li>Include explanation (SHAP) toggle</li>
+        <li>Keep values as next prediction input</li>
+        <li>Charts: risk gauge, SHAP drivers, vs-median comparison</li>
+        <li>Raw explanation JSON expandable</li>
+      </ul>
+      <p class="muted"><a href="api.html">Predict API</a> · <a href="ui-results.html">Generate SHAP first</a></p>
+    </section>
+
+  </main>
+  <footer class="site-footer"><div class="inner"><p class="fine">Research / education only · Md Rana Hossain · <a href="mailto:support@larucare.com">support@larucare.com</a></p></div></footer>
+  <script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+task:
+  id: unit_task_tmp
+  name: Unit Task
+  description: ''
+target:
+  column: label
+prediction:
+  horizon_days: 30
+  index_strategy: last_event
+  index_time_col: null
+features:
+  windows_days:
+  - 7
+  - 30
+  - 180
+data:
+  format: longitudinal
+  suggested_path: data/raw/ehr_data.csv
+training:
+  model_kind: logreg
+  calibrate: false
+  split_by_patient: true

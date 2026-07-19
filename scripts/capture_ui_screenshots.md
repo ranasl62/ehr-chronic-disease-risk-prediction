@@ -1,0 +1,15 @@
+# Capture UI screenshots
+
+Prefer the automated script (stack must be up):
+
+```bash
+docker compose up -d
+bash scripts/capture_docs_website_screenshots.sh
+```
+
+PNGs land in `docs/website/media/` (`01_` … `09_`). Tour: `docs/website/workbench.html`.
+
+## Hygiene
+
+- Demo / synthetic data only — never PHI or credentialed MIMIC rows
+- Crop OS usernames and private hostnames before committing

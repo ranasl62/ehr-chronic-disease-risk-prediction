@@ -1,0 +1,69 @@
+<section class="panel">
+  <h1>Train &amp; audit</h1>
+  <p class="lede">Pick a task preset or configure manually. Compare runs logreg / RF / XGBoost (+ LightGBM if installed).</p>
+
+  <form class="form" (ngSubmit)="startTrain()">
+    <label>Task preset
+      <select [(ngModel)]="taskId" name="taskId" (change)="applyTask()">
+        <option value="">— custom / manual —</option>
+        @for (t of tasks(); track t.id) {
+          <option [value]="t.id">{{ t.name }}</option>
+        }
+      </select>
+    </label>
+    <label>Data path
+      <input [(ngModel)]="dataPath" name="dataPath" required />
+    </label>
+    <label>Format
+      <select [(ngModel)]="dataFormat" name="dataFormat">
+        <option value="longitudinal">longitudinal</option>
+        <option value="tabular">tabular</option>
+      </select>
+    </label>
+    <label>Model
+      <select [(ngModel)]="modelKind" name="modelKind">
+        <option value="logreg">logreg</option>
+        <option value="xgboost">xgboost</option>
+        <option value="random_forest">random_forest</option>
+        <option value="lightgbm">lightgbm</option>
+      </select>
+    </label>
+    <label class="chk"><input type="checkbox" [(ngModel)]="calibrate" name="calibrate" /> Isotonic calibrate</label>
+    <label class="chk"><input type="checkbox" [(ngModel)]="splitByPatient" name="splitByPatient" [disabled]="temporalSplit" /> Patient-level split</label>
+    <label class="chk"><input type="checkbox" [(ngModel)]="temporalSplit" name="temporalSplit" /> Temporal patient split</label>
+    <label class="chk"><input type="checkbox" [(ngModel)]="useMultiWindow" name="useMultiWindow" /> Multi-window features</label>
+    <label>Horizon days (optional)
+      <input type="number" [(ngModel)]="horizonDays" name="horizonDays" />
+    </label>
+    <label>Index strategy
+      <select [(ngModel)]="indexStrategy" name="indexStrategy">
+        <option value="last_event">last_event</option>
+        <option value="before_last">before_last</option>
+        <option value="column">column</option>
+      </select>
+    </label>
+    <label>Index time column
+      <input [(ngModel)]="indexTimeCol" name="indexTimeCol" placeholder="index_time" />
+    </label>
+    <label>Label column
+      <input [(ngModel)]="labelCol" name="labelCol" placeholder="label / chronic_disease" />
+    </label>
+
+    <div class="actions">
+      <button type="submit" class="btn primary" [disabled]="busy()">Start train</button>
+      <button type="button" class="btn primary" [disabled]="busy()" (click)="startCompare()">Compare models</button>
+      <button type="button" class="btn" [disabled]="busy()" (click)="startAudit()">Leakage audit</button>
+      <a routerLink="/results" class="btn">View results</a>
+    </div>
+  </form>
+
+  @if (error()) { <p class="err">{{ error() }}</p> }
+
+  @if (job(); as j) {
+    <div class="job">
+      <h2>Job {{ j.id }} — {{ j.status }}</h2>
+      <p>{{ j.message }}</p>
+      <pre>{{ j.log_tail.join('\n') }}</pre>
+    </div>
+  }
+</section>

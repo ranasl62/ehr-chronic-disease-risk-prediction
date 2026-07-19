@@ -1,0 +1,32 @@
+.lede { color: var(--muted); }
+.tabs { display: flex; gap: 0.35rem; margin: 1rem 0; flex-wrap: wrap; }
+.tab {
+  border: 1px solid var(--line); background: var(--surface); padding: 0.4rem 0.75rem;
+  border-radius: 4px; cursor: pointer; font: inherit;
+}
+.tab.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+.list { list-style: none; padding: 0; margin: 1rem 0; }
+.list li {
+  padding: 0.85rem 1rem; border: 1px solid var(--line); border-radius: 6px;
+  margin-bottom: 0.5rem; cursor: pointer; background: var(--surface);
+}
+.list li:hover { border-color: var(--accent); }
+.list li.sel { border-color: var(--accent); background: var(--accent-soft); }
+.meta { display: block; font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
+.actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+label { display: flex; flex-direction: column; gap: 0.3rem; margin: 0.75rem 0; font-size: 0.9rem; }
+input, textarea {
+  padding: 0.45rem 0.55rem; border: 1px solid var(--line); border-radius: 4px;
+  background: var(--surface); color: var(--ink); font: inherit;
+}
+.hint { color: var(--muted); font-size: 0.9rem; }
+.err { color: var(--danger); }
+.ok { color: var(--ok); }
+.health {
+  margin-top: 1.25rem; padding: 1rem; border: 1px solid var(--line);
+  border-radius: 6px; background: var(--surface);
+}
+.health .kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: 0.5rem; padding-left: 1.1rem; }
+.muted { color: var(--muted); }
+.phi { color: var(--danger); font-size: 0.9rem; margin: 0.5rem 0 0; }
+

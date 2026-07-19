@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: >
+  If you use this software, please cite it as below.
+  Feedback welcome: support@larucare.com
+type: software
+title: "EHR Risk Framework — Leakage-Safe, Calibrated, Explainable Open Software"
+authors:
+  - family-names: Hossain
+    given-names: Md Rana
+    email: support@larucare.com
+    affiliation: "Maharishi International University"
+repository-code: "https://github.com/ranasl62/ehr-chronic-disease-risk-prediction"
+url: "https://github.com/ranasl62/ehr-chronic-disease-risk-prediction"
+license: MIT
+version: "1.0.0"
+date-released: "2026-07-19"
+abstract: >
+  Open reference framework for leakage-aware longitudinal EHR binary risk
+  prediction (chronic-disease and other horizon tasks) with isotonic calibration,
+  SHAP explanations, FastAPI and Angular serving, and reproducible evaluation
+  artifacts for research prototyping.
+keywords:
+  - electronic health records
+  - chronic disease
+  - calibration
+  - explainable AI
+  - temporal leakage
+# identifiers:
+#   - type: doi
+#     value: "10.5281/zenodo.XXXXXXX"

@@ -1,0 +1,35 @@
+# Example: 30-day unplanned readmission-style risk after discharge.
+# Replace suggested_path with your labeled cohort (index_time = discharge).
+# Demo CSV is not a real readmission cohort — template for BYO / MIMIC research only.
+task:
+  id: readmission_30d
+  name: 30-Day Readmission Risk
+  description: >
+    Binary risk of return within 30 days after index_time (typically discharge).
+    Features must use only pre-index / at-index data. Research and education only.
+
+target:
+  column: label
+
+prediction:
+  horizon_days: 30
+  index_strategy: column
+  index_time_col: index_time
+  feature_inclusive: true
+
+features:
+  windows_days: [7, 30, 180]
+  window_days: 180
+
+data:
+  format: longitudinal
+  suggested_path: data/raw/paper_synthetic_cohort.csv
+
+training:
+  model_kind: xgboost
+  calibrate: true
+  split_by_patient: true
+  temporal_split: false
+
+evaluation:
+  metrics: [roc_auc, pr_auc, brier, ece, precision, recall, f1]

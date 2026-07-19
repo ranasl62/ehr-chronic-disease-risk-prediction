@@ -1,0 +1,33 @@
+{
+  "data_path": "data/raw/ehr_data.csv",
+  "models_compared": [
+    "logreg"
+  ],
+  "calibrate": false,
+  "ranking_metric": "roc_auc",
+  "comparison": [
+    {
+      "model": "logreg",
+      "metrics": {
+        "roc_auc": NaN,
+        "pr_auc": NaN,
+        "brier": 0.21159150099504148,
+        "ece": 0.45489812191078605,
+        "ece_bins": 10,
+        "accuracy": 0.5,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "roc_auc": NaN,
+      "pr_auc": NaN,
+      "brier": 0.21159150099504148,
+      "ece": 0.45489812191078605,
+      "calibrated": false,
+      "model_path": "reports/compare/model_logreg.pkl",
+      "selected": true
+    }
+  ],
+  "selected_model": "logreg",
+  "disclaimer": "Research comparison only \u2014 not for clinical use."
+}

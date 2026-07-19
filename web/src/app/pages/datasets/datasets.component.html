@@ -1,0 +1,86 @@
+<section class="panel">
+  <h1>Datasets &amp; import</h1>
+  <p class="lede">
+    Multiple ingest paths — bundled demos, files (CSV/TSV/JSON/XLSX), JSON form rows, SQL, OMOP/FHIR (API).
+    All normalize to CSV under <code>data/uploads/</code>.
+  </p>
+  <p class="phi">Do not upload PHI. Research / synthetic / de-identified data only. See LIMITATIONS.md.</p>
+
+  <div class="tabs">
+    <button type="button" class="tab" [class.on]="tab()==='browse'" (click)="setTab('browse')">Browse</button>
+    <button type="button" class="tab" [class.on]="tab()==='file'" (click)="setTab('file')">File upload</button>
+    <button type="button" class="tab" [class.on]="tab()==='form'" (click)="setTab('form')">Form / JSON</button>
+    <button type="button" class="tab" [class.on]="tab()==='sql'" (click)="setTab('sql')">SQL</button>
+  </div>
+
+  @if (error()) { <p class="err">{{ error() }}</p> }
+  @if (message()) { <p class="ok">{{ message() }}</p> }
+
+  @if (tab() === 'browse') {
+    <ul class="list">
+      @for (d of datasets(); track d.id) {
+        <li [class.sel]="selected()?.id === d.id" (click)="select(d)">
+          <strong>{{ d.label }}</strong>
+          <span class="meta">{{ d.path }} · {{ d.format }} · {{ d.source_type || '—' }} · {{ d.exists ? 'ready' : 'missing' }}</span>
+        </li>
+      }
+    </ul>
+    <div class="actions">
+      <button type="button" class="btn" [disabled]="!selected()" (click)="runHealth()">Dataset health</button>
+      <button type="button" class="btn primary" [disabled]="!canTrain()" (click)="continueTrain()">Continue to train</button>
+      <a routerLink="/analytics" class="btn" [class.disabled]="!selected()">Open analytics</a>
+      <a routerLink="/docs" class="btn">Schema docs</a>
+    </div>
+
+    @if (health(); as h) {
+      <div class="health">
+        <h2>Dataset health report</h2>
+        <ul class="kpis">
+          <li>Patients: {{ h.health.patients ?? h.n_patients }}</li>
+          <li>Features: {{ h.health.features ?? h.n_columns }}</li>
+          <li>Missing: {{ h.health.missing_pct_overall }}%</li>
+          <li>Temporal: {{ h.health.temporal_integrity }}</li>
+          <li>Leakage risk: {{ h.health.leakage_risk }}</li>
+          <li>Ready: {{ h.health.ready_for_training ? 'YES' : 'NO' }}</li>
+        </ul>
+        @if (h.health.blockers?.length) {
+          <p class="err">Blockers: {{ h.health.blockers!.join('; ') }}</p>
+        }
+        @if (h.health.warnings?.length) {
+          <p class="muted">Warnings: {{ h.health.warnings!.join('; ') }}</p>
+        }
+      </div>
+    }
+  }
+
+  @if (tab() === 'file') {
+    <p class="hint">Accepted: <code>.csv .tsv .json .xlsx .xls</code> (max 50MB). Excel/JSON converted to CSV.</p>
+    <label class="btn primary">Choose file
+      <input type="file" accept=".csv,.tsv,.json,.xlsx,.xls" (change)="onFile($event)" hidden />
+    </label>
+  }
+
+  @if (tab() === 'form') {
+    <label>Filename
+      <input [(ngModel)]="formName" name="formName" />
+    </label>
+    <label>Rows (JSON array)
+      <textarea [(ngModel)]="formJson" name="formJson" rows="12"></textarea>
+    </label>
+    <button type="button" class="btn primary" (click)="submitForm()">Import rows</button>
+  }
+
+  @if (tab() === 'sql') {
+    <p class="hint">Read-only <code>SELECT</code> / <code>WITH … SELECT</code>. Uses <code>DATABASE_URL</code> or connection URL below (sqlalchemy).</p>
+    <label>Connection URL (optional if DATABASE_URL set)
+      <input [(ngModel)]="sqlUrl" name="sqlUrl" placeholder="sqlite:///./data/uploads/local.db" />
+    </label>
+    <label>Output name
+      <input [(ngModel)]="sqlName" name="sqlName" />
+    </label>
+    <label>SQL
+      <textarea [(ngModel)]="sqlText" name="sqlText" rows="8"></textarea>
+    </label>
+    <button type="button" class="btn primary" (click)="submitSql()">Run import</button>
+  }
+</section>

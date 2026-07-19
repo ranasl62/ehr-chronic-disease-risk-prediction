@@ -1,0 +1,87 @@
+<section class="panel">
+  <h1>Predict</h1>
+  <p class="lede">Schema-driven feature form from the loaded artifact. Research and education use only.</p>
+  <p class="banner-warn">
+    Inputs are <strong>model features</strong> (e.g. <code>w7d_glucose</code>), not raw EHR column names.
+    Use “Fill medians” when available. Scores are not clinical recommendations.
+  </p>
+
+  @if (error()) {
+    <p class="err">{{ error() }}</p>
+    @if (!schema()) {
+      <p><a class="btn primary" routerLink="/train">Train a model first</a></p>
+    }
+  }
+
+  @if (loading()) {
+    <p class="muted">Loading model schema…</p>
+  }
+
+  @if (schema(); as s) {
+    <p class="muted">Model: {{ s.model_kind }} · calibrated={{ s.calibrated }} · {{ s.feature_columns.length }} features</p>
+
+    <div class="toolbar">
+      <label>Filter features
+        <input type="search" [(ngModel)]="featureQuery" name="fq" placeholder="glucose, w180d…" />
+      </label>
+      <label class="chk">
+        <input type="checkbox" [(ngModel)]="includeExplanation" name="expl" /> Include explanation
+      </label>
+      <label class="chk">
+        <input type="checkbox" [(ngModel)]="reuseAsNextInput" name="reuse" />
+        Keep these values as the next prediction input
+      </label>
+    </div>
+
+    <form class="form" (ngSubmit)="submit()">
+      @for (g of featureGroups(); track g.window) {
+        <h2 class="win">{{ g.window }}</h2>
+        <div class="grid">
+          @for (col of g.cols; track col) {
+            <label>{{ col }}
+              <input type="number" step="any" [(ngModel)]="values[col]" [name]="col" />
+              @if (statsHint(col); as h) {
+                <span class="hint">{{ h }}</span>
+              }
+            </label>
+          }
+        </div>
+      }
+      <div class="actions">
+        <button type="button" class="btn" (click)="fillMedians()">Fill medians</button>
+        <button type="submit" class="btn primary">Predict</button>
+      </div>
+    </form>
+  }
+
+  @if (result(); as r) {
+    <div class="out">
+      <div class="risk-head">
+        <h2>Risk {{ riskPct() | number: '1.1-1' }}% — {{ r.risk_level }}</h2>
+        <p class="muted">Research score only. Ask: keep this entry as the next form input? (toggle above).</p>
+      </div>
+      <div class="chart-grid">
+        <div class="card"><canvas #riskChart data-chart="risk"></canvas></div>
+        <div class="card wide"><canvas #shapChart data-chart="shap"></canvas></div>
+        <div class="card wide"><canvas #vsMedianChart data-chart="vs"></canvas></div>
+      </div>
+      @if (drivers().length) {
+        <h3>Drivers</h3>
+        <ul class="drivers">
+          @for (d of drivers().slice(0, 8); track d.feature) {
+            <li>
+              <code>{{ d.feature }}</code>
+              <span [class.pos]="d.shap_value >= 0" [class.neg]="d.shap_value < 0">
+                {{ d.shap_value | number: '1.3-3' }}
+              </span>
+            </li>
+          }
+        </ul>
+      }
+      <details [open]="showRawJson">
+        <summary>Raw explanation JSON</summary>
+        <pre>{{ r.explanation | json }}</pre>
+      </details>
+    </div>
+  }
+</section>

@@ -1,0 +1,45 @@
+{
+  "demographic_parity_difference": 0.023255813953488372,
+  "subgroup_table": [
+    {
+      "group": "F",
+      "n": 37,
+      "prevalence": 0.2972972972972973,
+      "accuracy": 0.7027027027027027,
+      "mean_predicted_prob": 0.28218327771435997
+    },
+    {
+      "group": "M",
+      "n": 43,
+      "prevalence": 0.2558139534883721,
+      "accuracy": 0.7209302325581395,
+      "mean_predicted_prob": 0.25063788278620375
+    }
+  ],
+  "tpr_fpr_by_group": [
+    {
+      "group": "F",
+      "n": 37,
+      "prevalence": 0.2972972972972973,
+      "tpr": 0.0,
+      "fpr": 0.0,
+      "tp": 0,
+      "fn": 11,
+      "fp": 0,
+      "tn": 26
+    },
+    {
+      "group": "M",
+      "n": 43,
+      "prevalence": 0.2558139534883721,
+      "tpr": 0.0,
+      "fpr": 0.03125,
+      "tp": 0,
+      "fn": 11,
+      "fp": 1,
+      "tn": 31
+    }
+  ],
+  "n_test_scored": 80,
+  "artifact": "/media/ranasl62/Study4/ai/ehr-chronic-disease-risk-prediction/reports/paper/model_xgboost_cal_w7-30-180.pkl"
+}
