@@ -16,6 +16,51 @@ venv/
 .ruff_cache/
 data/processed/*
 !data/processed/.gitkeep
+data/uploads/*
+!data/uploads/.gitkeep
 reports/*.png
+!reports/paper/
+reports/paper/*.pkl
+reports/runs/
+reports/events.jsonl
+reports/clinical_audit.jsonl
+
+# --- Agentic AI / local coding assistants (never publish) ---
 .vscode/
 .cursor/
+.claude/
+.aider*
+.continue/
+.windsurf/
+.codeium/
+.agent/
+.agents/
+AGENTS.md
+CLAUDE.md
+*.plan.md
+.cursor-*.md
+agent-transcripts/
+**/.cursor/
+
+# Local-only scratch (never push)
+implimentation/
+implementation_private/
+
+# --- Private drafts: NIW / immigration / manuscripts (never publish) ---
+*niw*
+*NIW*
+*petition*
+*uscis*
+research_paper/
+docs/ieee*
+docs/*paper_draft*
+docs/study_protocol*
+docs/study_protocol_*.md
+**/manuscript*
+**/cover_letter*
+**/recommendation_letter*
+
+# Angular
+web/node_modules/
+web/dist/
+web/.angular/

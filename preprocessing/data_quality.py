@@ -38,11 +38,18 @@ def check_longitudinal(df: pd.DataFrame, *, label_candidates: tuple[str, ...] = 
         ycol = lc[0]
         vc = df.groupby("patient_id")[ycol].nunique()
         if (vc > 1).any():
+            msg = (
+                f"Patients with multiple values in {ycol}. "
+                "With --horizon-days, labels use post-index events only; "
+                "legacy training without horizon uses max() per patient."
+            )
+            if "index_time" in df.columns:
+                msg += " index_time present — prefer --horizon-days for incident designs."
             issues.append(
                 {
                     "level": "warning",
                     "code": "mixed_labels_per_patient",
-                    "message": f"Patients with multiple conflicting values in {ycol}; training uses max() per patient.",
+                    "message": msg,
                 }
             )
     return issues

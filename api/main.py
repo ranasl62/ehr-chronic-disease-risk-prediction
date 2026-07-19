@@ -19,6 +19,8 @@ from utils.json_safe import json_safe
 
 from api.middleware import RequestContextMiddleware, configure_api_logging
 from api.production_middleware import BodySizeLimitMiddleware, RateLimitMiddleware
+from api.researcher_routes import router as researcher_router
+from api.framework_routes import router as framework_router
 from api.security import require_api_key_if_configured
 
 log = logging.getLogger("ehr_api")
@@ -38,28 +40,38 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="EHR Chronic Disease Risk API",
-    version="0.6.1",
-    description="Production-style inference with optional API key, request IDs, and SHAP-ready artifacts.",
+    version="0.7.0",
+    description="Inference + researcher workbench (train/audit/shap jobs). For research and education only.",
     lifespan=lifespan,
 )
 
+# Default CORS for local Angular (override with CORS_ORIGINS)
 _origins = [o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()]
-if _origins:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=_origins,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+if not _origins:
+    _origins = [
+        "http://localhost:4200",
+        "http://127.0.0.1:4200",
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
+    ]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.add_middleware(RequestContextMiddleware)
 
-_max_body = int(os.environ.get("MAX_BODY_BYTES", "262144"))
+_max_body = int(os.environ.get("MAX_BODY_BYTES", "52428800"))  # 50MB for CSV upload
 _rpm = int(os.environ.get("RATE_LIMIT_PER_MINUTE", "0"))
 if _rpm > 0:
     app.add_middleware(RateLimitMiddleware, per_minute=_rpm)
 app.add_middleware(BodySizeLimitMiddleware, max_bytes=_max_body)
+
+app.include_router(researcher_router)
+app.include_router(framework_router)
 
 
 class PatientFeaturesV1(BaseModel):
@@ -127,6 +139,10 @@ def home():
         "metrics": "/v1/model/metrics",
         "predict": "/v1/predict",
         "explain": "/explain",
+        "workspace": "/v1/workspace/status",
+        "datasets": "/v1/datasets",
+        "jobs": "/v1/jobs",
+        "reports": "/v1/reports/summary",
         "security": "Set API_KEY env + X-API-Key header for protected routes when deployed.",
     }
 
@@ -179,13 +195,21 @@ def api_meta():
         "model_file_present": Path(MODEL_PATH).exists(),
         "clinical_use": "prohibited_without_validation",
         "description": (
-            "Research and population-health prototyping only. Not FDA-cleared; "
-            "not for diagnosis or treatment. Institutional policy and IRB govern access to real PHI."
+            "For research and education only. Not FDA-cleared; outputs are not clinical "
+            "recommendations and are not intended for patient care. Institutional policy "
+            "and IRB govern access to real PHI."
         ),
         "documentation": {
+            "architecture": "ARCHITECTURE.md",
             "data_schema": "docs/data_sources_and_schema.md",
-            "study_protocol": "docs/study_protocol.md",
+            "how_it_helps": "docs/HOW_IT_HELPS.md",
+            "mimic_lock": "docs/mimic_lock_checklist.md",
             "external_validation": "docs/external_validation.md",
+            "limitations": "LIMITATIONS.md",
+        },
+        "contact": {
+            "maintainer": "Md Rana Hossain",
+            "email": ["support@larucare.com"],
         },
         "health": {"liveness": "/health", "readiness": "/v1/ready"},
     }

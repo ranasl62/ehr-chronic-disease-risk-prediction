@@ -1,9 +1,7 @@
-# One command (train-if-needed → API → Streamlit):
+# One command (train-if-needed → API → Angular workbench):
 #   docker compose up --build
-#
-# See README "Run entirely in Docker" for separate commands.
+#   make researcher-up
 services:
-  # Runs before api/dashboard: trains only if model.pkl is missing/empty (or FORCE_TRAIN=1).
   prepare:
     build:
       context: .
@@ -23,40 +21,39 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./model.pkl:/app/model.pkl:ro
-      - ./reports:/app/reports:ro
+      - .:/app
+    working_dir: /app
     environment:
       - PYTHONPATH=/app
-      # - API_KEY=change-me
+      - CORS_ORIGINS=http://localhost:8080,http://127.0.0.1:8080,http://localhost:4200,http://127.0.0.1:4200
+      - MAX_BODY_BYTES=52428800
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 40s
+    # Ensure multipart is present even on older images; then serve API
+    command:
+      - /bin/sh
+      - -c
+      - pip install -q 'python-multipart>=0.0.9' 'openpyxl>=3.1.0' 'PyYAML>=6.0' && exec uvicorn api.main:app --host 0.0.0.0 --port 8000
     depends_on:
       prepare:
         condition: service_completed_successfully
 
-  dashboard:
+  web:
     build:
-      context: .
-      dockerfile: deployment/Dockerfile
-    command: >
-      streamlit run dashboard/app.py
-      --server.port=8501
-      --server.address=0.0.0.0
-      --server.headless=true
+      context: ./web
+      dockerfile: Dockerfile
     ports:
-      - "8501:8501"
-    volumes:
-      - ./model.pkl:/app/model.pkl:ro
-      - ./reports:/app/reports:ro
-      - ./data:/app/data:ro
-    environment:
-      - PYTHONPATH=/app
-      - PREDICT_API_URL=http://api:8000
-      # If API_KEY is set on api service, set the same value here:
-      # - PREDICT_API_KEY=change-me
+      - "8080:80"
     depends_on:
-      - api
+      api:
+        condition: service_healthy
+    restart: unless-stopped
 
-  # Always train (ignore existing model.pkl). Separate use only.
-  #   docker compose --profile train run --rm train
   train:
     profiles:
       - train

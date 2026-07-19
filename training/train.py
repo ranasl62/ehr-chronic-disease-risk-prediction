@@ -9,6 +9,11 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
+from feature_engineering.cohort_integrity import (
+    horizon_labels,
+    resolve_index_times,
+    truncate_events_to_index,
+)
 from feature_engineering.multi_window import merge_multi_window_features
 from feature_engineering.patient_features import create_features
 from feature_engineering.time_window_features import create_time_window_features
@@ -60,23 +65,75 @@ def build_xy_longitudinal(
     label_col: str | None = None,
     *,
     windows_days: tuple[int, ...] | None = None,
+    horizon_days: int | None = None,
+    index_strategy: str = "last_event",
+    index_time_col: str | None = None,
+    feature_inclusive: bool = True,
 ):
+    """
+    Build patient-level feature matrix and labels.
+
+    When ``horizon_days`` is set, labels use only events in (index, index+H]
+    and features are built from events truncated to the index time.
+    """
     df = clean_longitudinal_ehr(df)
     lc = label_col or ("label" if "label" in df.columns else "chronic_disease")
     if lc not in df.columns:
         raise ValueError(f"Label column not found: expected 'label' or 'chronic_disease'.")
 
-    y_df = df.groupby("patient_id", as_index=False)[lc].max()
+    strategy = index_strategy
+    if horizon_days is not None and strategy == "last_event" and index_time_col is None:
+        # Without an explicit index column, before_last avoids using the outcome
+        # row both as feature anchor and as the sole label signal.
+        strategy = "before_last"
+
+    index_times = resolve_index_times(
+        df,
+        patient_col="patient_id",
+        time_col="timestamp",
+        index_time_col=index_time_col,
+        index_strategy=strategy if index_time_col is None else "column",
+    )
+
+    if horizon_days is not None:
+        y_series = horizon_labels(
+            df,
+            index_times,
+            horizon_days=horizon_days,
+            patient_col="patient_id",
+            time_col="timestamp",
+            label_col=lc,
+        )
+        y_df = y_series.rename(lc).reset_index()
+        y_df.columns = ["patient_id", lc]
+        feat_df = truncate_events_to_index(
+            df,
+            index_times,
+            patient_col="patient_id",
+            time_col="timestamp",
+            inclusive=feature_inclusive,
+        )
+    else:
+        y_df = df.groupby("patient_id", as_index=False)[lc].max()
+        feat_df = df
+
     if windows_days:
         feat = merge_multi_window_features(
-            df,
+            feat_df,
             windows_days=windows_days,
             patient_col="patient_id",
             time_col="timestamp",
+            index_times=index_times,
+            inclusive=feature_inclusive,
         )
     else:
-        feat = create_time_window_features(df, window_days=window_days)
-    merged = feat.merge(y_df, on="patient_id")
+        feat = create_time_window_features(
+            feat_df,
+            window_days=window_days,
+            index_times=index_times,
+            inclusive=feature_inclusive,
+        )
+    merged = feat.merge(y_df, on="patient_id", how="inner")
     groups = merged["patient_id"].to_numpy()
     y = merged[lc].astype(int)
     X = merged.drop(columns=["patient_id", lc])
@@ -155,6 +212,11 @@ def run_training(
     temporal_split: bool = False,
     bootstrap_samples: int | None = None,
     ece_bins: int = 10,
+    horizon_days: int | None = None,
+    index_strategy: str = "last_event",
+    index_time_col: str | None = None,
+    feature_inclusive: bool = True,
+    label_col: str | None = None,
 ):
     data_path = Path(
         data_path
@@ -167,7 +229,12 @@ def run_training(
         X, y, feature_columns, groups = build_xy_longitudinal(
             df,
             window_days=window_days,
+            label_col=label_col,
             windows_days=windows_days,
+            horizon_days=horizon_days,
+            index_strategy=index_strategy,
+            index_time_col=index_time_col,
+            feature_inclusive=feature_inclusive,
         )
     else:
         df = load_data(data_path)
@@ -236,6 +303,10 @@ def run_training(
         "random_state": random_state,
         "test_size": test_size,
         "split_method": split_method,
+        "horizon_days": horizon_days,
+        "index_strategy": index_strategy if data_format == "longitudinal" else None,
+        "index_time_col": index_time_col,
+        "feature_inclusive": feature_inclusive if data_format == "longitudinal" else None,
     }
     manifest = build_training_manifest(
         data_path=data_path,
@@ -394,9 +465,83 @@ def main():
         default=10,
         help="Bins for expected calibration error (ECE) in evaluation_report.json.",
     )
+    p.add_argument(
+        "--horizon-days",
+        type=int,
+        default=None,
+        help="Longitudinal: label from events in (index, index+H] only (leakage-safe).",
+    )
+    p.add_argument(
+        "--index-strategy",
+        choices=["last_event", "before_last", "column"],
+        default="last_event",
+        help="How to choose index_time per patient (column requires --index-time-col).",
+    )
+    p.add_argument(
+        "--index-time-col",
+        type=str,
+        default=None,
+        help="Column with per-row index_time when --index-strategy column.",
+    )
+    p.add_argument(
+        "--feature-exclusive",
+        action="store_true",
+        help="Use half-open feature window [index-W, index) instead of inclusive upper bound.",
+    )
+    p.add_argument(
+        "--task",
+        type=str,
+        default=None,
+        help="Task YAML id or path (e.g. diabetes or tasks/diabetes.yaml). Fills train defaults.",
+    )
+    p.add_argument(
+        "--label-col",
+        type=str,
+        default=None,
+        help="Label column override (longitudinal).",
+    )
     args = p.parse_args()
+
+    data_path = args.data
+    data_format = args.format
+    model_kind = args.model
+    calibrate = args.calibrate
+    split_by_patient = args.split_by_patient
+    temporal_split = args.temporal_split
+    window_days = args.window_days
+    horizon_days = args.horizon_days
+    index_strategy = args.index_strategy
+    index_time_col = args.index_time_col
+    feature_inclusive = not args.feature_exclusive
+    label_col = args.label_col
     windows_days: tuple[int, ...] | None = None
-    if args.format == "longitudinal":
+    windows_from_task = False
+
+    if args.task:
+        from openhealth.task_spec import load_task
+
+        spec = load_task(args.task)
+        tp = spec.to_train_params(str(data_path) if data_path else None)
+        data_path = Path(tp["data_path"])
+        data_format = tp["data_format"]
+        model_kind = tp["model_kind"]
+        calibrate = bool(tp["calibrate"] or calibrate)
+        temporal_split = bool(tp["temporal_split"] or temporal_split)
+        split_by_patient = bool(tp["split_by_patient"]) if not temporal_split else False
+        if horizon_days is None:
+            horizon_days = tp.get("horizon_days")
+        if index_time_col is None:
+            index_time_col = tp.get("index_time_col")
+        if args.index_strategy == "last_event" and tp.get("index_strategy"):
+            index_strategy = tp["index_strategy"]
+        feature_inclusive = bool(tp.get("feature_inclusive", feature_inclusive))
+        label_col = label_col or tp.get("label_col")
+        window_days = int(tp.get("window_days") or window_days)
+        if tp.get("windows_days"):
+            windows_days = tuple(tp["windows_days"])
+            windows_from_task = True
+
+    if data_format == "longitudinal" and not windows_from_task:
         if args.windows is not None and args.windows.strip() == "":
             windows_days = None
         else:
@@ -404,19 +549,24 @@ def main():
             windows_days = tuple(int(x.strip()) for x in wspec.split(",") if x.strip())
 
     run_training(
-        data_path=args.data,
+        data_path=data_path,
         model_path=args.out,
-        model_kind=args.model,
-        data_format=args.format,
-        window_days=args.window_days,
+        model_kind=model_kind,
+        data_format=data_format,
+        window_days=window_days,
         windows_days=windows_days,
-        calibrate=args.calibrate,
+        calibrate=calibrate,
         calibration_plot_path=args.calibration_plot,
         skip_calibration_plot=args.no_calibration_plot,
-        split_by_patient=args.split_by_patient,
-        temporal_split=args.temporal_split,
+        split_by_patient=split_by_patient,
+        temporal_split=temporal_split,
         bootstrap_samples=args.bootstrap_samples if args.bootstrap_samples > 0 else None,
         ece_bins=args.ece_bins,
+        horizon_days=horizon_days,
+        index_strategy=index_strategy,
+        index_time_col=index_time_col,
+        feature_inclusive=feature_inclusive,
+        label_col=label_col,
     )
 
 

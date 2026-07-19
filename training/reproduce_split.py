@@ -29,12 +29,19 @@ def load_xy_groups_from_artifact(artifact: dict[str, Any]) -> tuple[pd.DataFrame
     if fmt == "longitudinal":
         df = load_ehr_data(data_path)
         wd_list = fe.get("windows_days")
+        kwargs = {
+            "horizon_days": fe.get("horizon_days"),
+            "index_strategy": fe.get("index_strategy") or "last_event",
+            "index_time_col": fe.get("index_time_col"),
+            "feature_inclusive": True if fe.get("feature_inclusive") is None else bool(fe.get("feature_inclusive")),
+        }
         if wd_list:
-            X, y, _, groups = build_xy_longitudinal(df, windows_days=tuple(wd_list))
+            X, y, _, groups = build_xy_longitudinal(df, windows_days=tuple(wd_list), **kwargs)
         else:
             X, y, _, groups = build_xy_longitudinal(
                 df,
                 window_days=int(fe.get("window_days") or 180),
+                **kwargs,
             )
     else:
         df = load_data(data_path)
