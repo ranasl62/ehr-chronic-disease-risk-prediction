@@ -35,4 +35,4 @@ data/uploads/*
 !data/uploads/.gitkeep
 
 # Docs site media (not needed in API image)
-docs/website/media
+docs/media

@@ -35,7 +35,7 @@ Typical workflow:
 Datasets (import + health) → Train / Compare → Analytics & Results → Predict
 ```
 
-Details: [`ARCHITECTURE.md`](../ARCHITECTURE.md) · [`docs/researcher_quickstart.md`](researcher_quickstart.md) · **website** [`docs/website/`](website/).
+Details: [`ARCHITECTURE.md`](../ARCHITECTURE.md) · [`docs/researcher_quickstart.md`](researcher_quickstart.md) · **website** [`docs/`](./).
 
 ---
 
