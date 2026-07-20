@@ -39,21 +39,21 @@ PYTHONPATH=. python scripts/validate_training_data.py \
 ## 5. Lock
 
 ```bash
-make mimic-lock
+make -C research-paper mimic-lock
 # or:
-bash scripts/lock_mimic_cohort.sh \
+bash research-paper/scripts/lock_mimic_cohort.sh \
   data/processed/mimic_diabetes_cohort.csv \
-  reports/paper/mimic
+  research-paper/reports/mimic
 ```
 
 | Artifact | Safe to share publicly? |
 |----------|-------------------------|
 | `cohort_lock.json` (`data_sha256`, `locked_at_utc`) | Yes — SHA only |
-| Aggregate metrics / figures under `reports/paper/mimic/` | Yes — no row-level data |
+| Aggregate metrics / figures under `research-paper/reports/mimic/` | Yes — no row-level data |
 | Extract CSV | **Never** commit |
 
 ## Stop conditions
 
-- Missing PhysioNet approval → stay on the public synthetic verification track (`make paper-quick`)
+- Missing PhysioNet approval → stay on the public synthetic verification track (`make -C research-paper paper-quick`)
 - Lock script exits 1 on missing CSV → complete steps 2–4 first
 - Never push `data/processed/mimic_*.csv` to GitHub

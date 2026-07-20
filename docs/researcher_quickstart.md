@@ -31,7 +31,7 @@ docker compose -f docker-compose.yml -f docker-compose.publish.yml up
 ```
 
 Defaults: `ranasl62/ehr-risk-api:latest` · `ranasl62/ehr-risk-web:latest`  
-Hub: [ehr-risk-api](https://hub.docker.com/r/ranasl62/ehr-risk-api) · [ehr-risk-web](https://hub.docker.com/r/ranasl62/ehr-risk-web) · Docs: [`docker-images.html`](docker-images.html)  
+Hub: [ehr-risk-api](https://hub.docker.com/r/ranasl62/ehr-risk-api) · [ehr-risk-web](https://hub.docker.com/r/ranasl62/ehr-risk-web) · Docs: [`docker-images`](docker-images/)  
 Override: `IMAGE_API` / `IMAGE_WEB` in `.env`. Ports **8080** (UI) / **8000** (API). Optional `API_KEY`.
 
 Optional: `cp .env.example .env` · GPU/overrides: `docker-compose.override.example.yml`.
@@ -72,6 +72,6 @@ cd web && npm install && npm start
 ## Next
 
 - Architecture: [`ARCHITECTURE.md`](../ARCHITECTURE.md)  
-- Verification matrix: `make paper-quick`  
+- Verification matrix (local academic package): `make -C research-paper paper-quick`  
 - MIMIC lock: [`mimic_lock_checklist.md`](mimic_lock_checklist.md)  
 - Cite: [`CITATION.cff`](../CITATION.cff)

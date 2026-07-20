@@ -36,7 +36,7 @@ docker compose -f docker-compose.yml -f docker-compose.publish.yml up
 | API | `ranasl62/ehr-risk-api:latest` (also `:sha-…`, `:v…`) — [hub](https://hub.docker.com/r/ranasl62/ehr-risk-api) |
 | Web | `ranasl62/ehr-risk-web:latest` — [hub](https://hub.docker.com/r/ranasl62/ehr-risk-web) |
 
-Site page: [`docs/docker-images.html`](docs/docker-images.html).
+Site page: [`docs/docker-images/`](docs/docker-images/).
 
 Pin or override in `.env`: `IMAGE_API=…` · `IMAGE_WEB=…` (see [`.env.example`](.env.example)).
 

@@ -19,12 +19,12 @@ All notable changes to this project are documented in this file.
 - **Primary UI:** Angular researcher workbench (`web/`) — Streamlit legacy UI removed
 - FastAPI researcher/framework routes
 - Docker Compose one-command stack (UI :8080, API :8000)
-- Downloadable results ZIP and software verification runner (`make paper-quick`)
+- Downloadable results ZIP; academic verification via local `research-paper/` package (`make -C research-paper paper-quick`)
 
 ### Ops / data
 
-- Synthetic software-verification track under `reports/paper/`
-- MIMIC lock path: `make mimic-lock` + `docs/mimic_lock_checklist.md` (credentialed extract required; never commit PHI)
+- Synthetic software-verification track under local-only `research-paper/reports/` (package is gitignored)
+- MIMIC lock path: `make -C research-paper mimic-lock` + `docs/mimic_lock_checklist.md` (credentialed extract required; never commit PHI)
 - Citation metadata: `CITATION.cff`
 
 ### Quality

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Workbench Home — EHR Risk Framework</title>
+  <meta name="description" content="Researcher checklist and workspace status" />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/site.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="/">EHR Risk <span>Framework</span></a>
+      <nav class="nav" aria-label="Primary"></nav>
+    </div>
+  </header>
+  <main id="main" data-ui-page="ui-home">
+    <p class="muted crumb"><a href="/workbench">Workbench hub</a> · UI route <code>/</code></p>
+    <h1 style="font-family:var(--display);font-size:2rem;margin:0 0 0.5rem">Home — researcher checklist</h1>
+    <p class="lede muted" style="max-width:42rem;margin:0 0 1rem">The landing page of the Angular workbench. It answers: is the API up, is demo data present, and which trust artifacts exist?</p>
+    <p class="banner">Demo screenshots only — never capture PHI.</p>
+
+    <figure class="shot">
+      <img src="../media/01_home_checklist.png" alt="Home checklist" width="1200" height="750" />
+      <figcaption>Home — setup checklist and hold-out metrics summary</figcaption>
+    </figure>
+    <section class="section">
+      <h2>What you see</h2>
+      <ul>
+        <li><strong>API healthy</strong> — FastAPI reachable from the UI</li>
+        <li><strong>Demo dataset available</strong> — smoke CSV under <code>data/raw/</code></li>
+        <li><strong>Model trained</strong> — active <code>model.pkl</code> artifact</li>
+        <li><strong>Metrics available</strong> — evaluation report present</li>
+        <li><strong>Leakage audit present</strong> — audit JSON from Train</li>
+        <li><strong>SHAP summary present</strong> — generated from Results</li>
+      </ul>
+      <p>Failed checks link to the Fix page (Datasets, Train, or Results).</p>
+    </section>
+    <section class="section">
+      <h2>Actions</h2>
+      <ul>
+        <li>Refresh status from <code>GET /v1/workspace/status</code></li>
+        <li>Download results ZIP when reports exist</li>
+        <li>Jump into Train / Results / Predict from the checklist</li>
+      </ul>
+      <p class="muted">Related: <a href="/ui-train">Train</a> · <a href="/ui-results">Results</a> · <a href="/quickstart">Quickstart</a></p>
+    </section>
+
+  </main>
+  <footer class="site-footer"><div class="inner"><p class="fine">Research / education only · Md Rana Hossain · <a href="mailto:support@larucare.com">support@larucare.com</a></p></div></footer>
+  <script src="../assets/site.js"></script>
+</body>
+</html>
