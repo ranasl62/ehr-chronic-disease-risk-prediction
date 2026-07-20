@@ -30,5 +30,5 @@
       "resource_type": "software"
     }
   ],
-  "notes": "Cite via CITATION.cff. Zenodo DOI is minted automatically when a GitHub Release is published after enabling the Zenodo GitHub integration. Do not invent a DOI. ORCID for the creator can be added when available."
+  "notes": "Cite via CITATION.cff. Zenodo DOI: https://doi.org/10.5281/zenodo.21448693 (10.5281/zenodo.21448693). ORCID for the creator can be added when available."
 }

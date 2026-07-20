@@ -3,6 +3,7 @@
 [![CI](https://github.com/ranasl62/ehr-chronic-disease-risk-prediction/actions/workflows/ci.yml/badge.svg)](https://github.com/ranasl62/ehr-chronic-disease-risk-prediction/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.0.0-informational.svg)](CHANGELOG.md)
+[![DOI](https://zenodo.org/badge/1195670884.svg)](https://doi.org/10.5281/zenodo.21448693)
 
 **Leakage-aware, calibrated, explainable** EHR risk modeling for research and education.  
 Default demos cover chronic-disease-style horizons; any binary outcome with an index time and horizon can use the same pipeline (see `tasks/`).  
@@ -154,16 +155,18 @@ If you use this software in research, teaching, or a methods pipeline, please ci
 
 ```bibtex
 @software{ehr_risk_framework_hossain_2026,
-  author  = {Hossain, Md Rana},
-  title   = {{EHR Risk Framework}: Leakage-Aware, Calibrated, Explainable Open Software},
-  version = {1.0.0},
-  year    = {2026},
-  url     = {https://github.com/ranasl62/ehr-chronic-disease-risk-prediction},
-  license = {MIT}
+  author       = {Hossain, Md Rana},
+  title        = {{EHR Risk Framework}: Leakage-Aware, Calibrated, Explainable Open Software},
+  version      = {1.0.0},
+  year         = {2026},
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.21448693},
+  url          = {https://doi.org/10.5281/zenodo.21448693},
+  license      = {MIT}
 }
 ```
 
-**DOI:** PENDING — after you enable [Zenodo–GitHub](https://zenodo.org/) and publish a GitHub Release, Zenodo mints a DOI (example format only: `https://doi.org/10.5281/zenodo.XXXXXXX`). Then paste the real id into `CITATION.cff` `identifiers`. Step-by-step: [`docs/citing_and_doi.md`](docs/citing_and_doi.md).
+**DOI:** [https://doi.org/10.5281/zenodo.21448693](https://doi.org/10.5281/zenodo.21448693) · details: [`docs/citing_and_doi.md`](docs/citing_and_doi.md).
 
 ---
 
