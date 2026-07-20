@@ -1,0 +1,38 @@
+# Pull published Docker Hub images instead of building from source.
+#
+# Prerequisites: clone this repo (Compose still bind-mounts `.` for data/,
+# reports/, model.pkl). Images must be public on Docker Hub (or
+# `docker login` with a Hub account that can pull).
+#
+#   docker compose -f docker-compose.yml -f docker-compose.publish.yml pull
+#   docker compose -f docker-compose.yml -f docker-compose.publish.yml up
+#   # or: make researcher-up-pull
+#
+# Or set IMAGE_API / IMAGE_WEB in `.env` (see .env.example) and use the same
+# two-file compose command. Defaults:
+#   ranasl62/ehr-risk-api:latest
+#   ranasl62/ehr-risk-web:latest
+#
+# Pin a release: IMAGE_API=ranasl62/ehr-risk-api:v1.0.0
+# Stop: docker compose -f docker-compose.yml -f docker-compose.publish.yml down
+
+services:
+  prepare:
+    image: ${IMAGE_API:-ranasl62/ehr-risk-api:latest}
+    build: !reset null
+    pull_policy: ${PULL_POLICY:-always}
+
+  api:
+    image: ${IMAGE_API:-ranasl62/ehr-risk-api:latest}
+    build: !reset null
+    pull_policy: ${PULL_POLICY:-always}
+
+  web:
+    image: ${IMAGE_WEB:-ranasl62/ehr-risk-web:latest}
+    build: !reset null
+    pull_policy: ${PULL_POLICY:-always}
+
+  train:
+    image: ${IMAGE_API:-ranasl62/ehr-risk-api:latest}
+    build: !reset null
+    pull_policy: ${PULL_POLICY:-always}

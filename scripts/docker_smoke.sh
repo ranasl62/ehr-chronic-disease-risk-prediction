@@ -3,7 +3,7 @@
 # Optional: train model.pkl first so /v1/ready returns 200.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-IMAGE="${IMAGE:-ehr-risk-smoke}"
+IMAGE="${IMAGE:-ehr-risk-api:local}"
 PORT="${PORT:-9876}"
 
 docker build -f "$ROOT/deployment/Dockerfile" -t "$IMAGE" "$ROOT"

@@ -53,8 +53,8 @@
       <h2>Docker topology</h2>
 <pre><code>docker compose up --build
   prepare  → train model.pkl if missing
-  api      → :8000
-  web      → :8080 (nginx proxies /v1 to api)</code></pre>
+  api      → :8000  (ehr-risk-api:local)
+  web      → :8080  (ehr-risk-web:local; nginx proxies /v1 to api)</code></pre>
     </section>
 
     <section class="section">

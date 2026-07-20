@@ -41,8 +41,19 @@ cd ehr-chronic-disease-risk-prediction
 
 # One-command stack (prepare → API :8000 → Angular :8080)
 docker compose up --build
-# or
-make researcher-up
+# or: make researcher-up
+# background: make researcher-up-d
+# stop: make researcher-down
+
+# Pull published Docker Hub images (no local build; repos must be public)
+docker compose -f docker-compose.yml -f docker-compose.publish.yml pull
+docker compose -f docker-compose.yml -f docker-compose.publish.yml up
+# or: make researcher-up-pull
+# images: ranasl62/ehr-risk-api:latest · ranasl62/ehr-risk-web:latest
+
+# Optional env / GPU overrides
+cp .env.example .env
+# cp docker-compose.override.example.yml docker-compose.override.yml
 
 # Local Python API
 pip install -r requirements.txt &amp;&amp; pip install -e .
@@ -130,6 +141,9 @@ make docker-smoke
 make paper-synth
 make paper-quick
 make researcher-up
+make researcher-up-d
+make researcher-down
+make researcher-logs
 make mimic-lock   # credentialed local extract only</code></pre>
     </section>
   </main>

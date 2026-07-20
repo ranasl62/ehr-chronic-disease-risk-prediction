@@ -15,6 +15,12 @@ describe('ResultsComponent', () => {
     api = jasmine.createSpyObj('ApiService', [
       'reportsSummary',
       'shap',
+      'fairness',
+      'fairnessReport',
+      'thresholds',
+      'runs',
+      'runDetail',
+      'promoteRun',
       'job',
       'reportFileUrl',
       'resultsZipUrl',
@@ -31,10 +37,51 @@ describe('ResultsComponent', () => {
             { model: 'xgboost', roc_auc: 0.81, pr_auc: 0.62, brier: 0.18, ece: 0.08, selected: true },
           ],
         },
+        fairness: {
+          present: true,
+          skipped: false,
+          by_group: [{ group: 'lt50', n: 10, prevalence: 0.2, accuracy: 0.7, mean_predicted_prob: 0.3 }],
+        },
         files: [
           { name: 'calibration.png', bytes: 100, url: '/v1/reports/file/calibration.png' },
           { name: 'evaluation_report.json', bytes: 50, url: '/v1/reports/file/evaluation_report.json' },
         ],
+      })
+    );
+    api.runs.and.returnValue(
+      of({
+        runs: [
+          {
+            run_id: 'run_a',
+            path: 'reports/runs/run_a',
+            has_model: true,
+            model_kind: 'logreg',
+            metrics: { roc_auc: 0.75 },
+          },
+        ],
+      })
+    );
+    api.fairnessReport.and.returnValue(
+      of({
+        present: true,
+        skipped: false,
+        by_group: [{ group: 'lt50', n: 10, prevalence: 0.2, accuracy: 0.7, mean_predicted_prob: 0.3 }],
+      })
+    );
+    api.thresholds.and.returnValue(
+      of({
+        present: true,
+        points: [{ threshold: 0.5, precision: 0.6, recall: 0.5, f1: 0.55, accuracy: 0.7, positive_rate: 0.4 }],
+      })
+    );
+    api.runDetail.and.returnValue(
+      of({
+        run_id: 'run_a',
+        path: 'reports/runs/run_a',
+        has_model: true,
+        model_kind: 'logreg',
+        metrics: { roc_auc: 0.75 },
+        meta: { kind: 'train' },
       })
     );
     api.reportFileUrl.and.callFake((n: string) => `/v1/reports/file/${n}`);
@@ -77,5 +124,25 @@ describe('ResultsComponent', () => {
     tick(20);
     cmp.metricFilter = 'roc';
     expect(cmp.filteredMetrics().length).toBe(1);
+  }));
+
+  it('loads experiment runs and fairness panel', fakeAsync(() => {
+    cmp.showCharts = false;
+    fixture.detectChanges();
+    tick(20);
+    expect(api.runs).toHaveBeenCalled();
+    expect(cmp.runs().length).toBe(1);
+    expect(cmp.fairnessRows.length).toBeGreaterThan(0);
+    expect(fixture.nativeElement.textContent).toContain('Experiment runs');
+    expect(fixture.nativeElement.textContent).toContain('Fairness');
+  }));
+
+  it('opens run detail', fakeAsync(() => {
+    cmp.showCharts = false;
+    fixture.detectChanges();
+    tick(20);
+    cmp.openRun('run_a');
+    expect(api.runDetail).toHaveBeenCalledWith('run_a');
+    expect(cmp.selectedRun()?.run_id).toBe('run_a');
   }));
 });

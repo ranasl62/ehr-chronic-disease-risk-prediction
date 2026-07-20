@@ -18,4 +18,14 @@ nav a:hover, nav a.active { background: rgba(255,255,255,0.08); color: #fff; }
   margin: 0; padding: 0.45rem 1.25rem; font-size: 0.8rem;
   background: #e8f0ec; color: #1a3d32; border-bottom: 1px solid var(--line);
 }
+.banner-auth {
+  margin: 0; padding: 0.55rem 1.25rem; font-size: 0.85rem;
+  background: #f8e8e6; color: #5c2218; border-bottom: 1px solid #e0b8b0;
+  display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center;
+}
+.banner-auth .auth-link { color: #5c2218; font-weight: 600; }
+.banner-auth .auth-dismiss {
+  margin-left: auto; border: 1px solid #c98a7e; background: transparent;
+  color: #5c2218; border-radius: 4px; padding: 0.2rem 0.55rem; cursor: pointer; font: inherit;
+}
 main { flex: 1; padding: 1.25rem; max-width: 1100px; width: 100%; margin: 0 auto; box-sizing: border-box; }

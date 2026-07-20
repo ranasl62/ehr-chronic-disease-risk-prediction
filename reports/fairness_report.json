@@ -7,7 +7,9 @@
       "n": 2,
       "prevalence": 0.0,
       "accuracy": 0.5,
-      "mean_predicted_prob": 0.4415743302983367
+      "mean_predicted_prob": 0.4415743302983367,
+      "tpr": null,
+      "fpr": 0.5
     }
   ]
 }

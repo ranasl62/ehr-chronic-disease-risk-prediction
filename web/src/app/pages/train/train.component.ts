@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { ApiService, CompareBody, JobInfo, TaskInfo, TrainBody } from '../../core/api.service';
+import { ApiService, CompareBody, HpoBody, JobInfo, TaskInfo, TrainBody } from '../../core/api.service';
 import { WorkspaceState } from '../../core/workspace.state';
 import { Subscription, interval, switchMap, takeWhile } from 'rxjs';
 
@@ -32,8 +32,12 @@ export class TrainComponent implements OnInit, OnDestroy {
   labelCol: string | null = null;
   dataPath = 'data/raw/ehr_data.csv';
   dataFormat = 'longitudinal';
+  /** Optional research-scoped light HPO grid. */
+  enableHpo = false;
+  hpoPromoteBest = false;
 
   job = signal<JobInfo | null>(null);
+  recentJobs = signal<JobInfo[]>([]);
   error = signal<string | null>(null);
   busy = signal(false);
 
@@ -54,14 +58,19 @@ export class TrainComponent implements OnInit, OnDestroy {
     this.api.tasks().subscribe({
       next: (r) => this.tasks.set(r.tasks),
     });
+    this.refreshJobs();
   }
 
   ngOnDestroy(): void {
     this.pollSub?.unsubscribe();
   }
 
+  selectedTask(): TaskInfo | null {
+    return this.tasks().find((x) => x.id === this.taskId) || null;
+  }
+
   applyTask(): void {
-    const t = this.tasks().find((x) => x.id === this.taskId);
+    const t = this.selectedTask();
     if (!t) return;
     if (t.suggested_path) this.dataPath = t.suggested_path;
     if (t.data_format) this.dataFormat = t.data_format;
@@ -108,7 +117,7 @@ export class TrainComponent implements OnInit, OnDestroy {
       },
       error: (e) => {
         this.busy.set(false);
-        this.error.set(e?.error?.detail || e.message);
+        this.error.set(this.fmtErr(e));
       },
     });
   }
@@ -137,7 +146,38 @@ export class TrainComponent implements OnInit, OnDestroy {
       next: (j) => this.poll(j.id),
       error: (e) => {
         this.busy.set(false);
-        this.error.set(e?.error?.detail || e.message);
+        this.error.set(this.fmtErr(e));
+      },
+    });
+  }
+
+  startHpo(): void {
+    this.error.set(null);
+    this.busy.set(true);
+    const b = this.bodyBase();
+    const body: HpoBody = {
+      data_path: b.data_path,
+      data_format: b.data_format,
+      model_kind: b.model_kind,
+      calibrate: b.calibrate,
+      split_by_patient: b.split_by_patient,
+      temporal_split: b.temporal_split,
+      windows_days: b.windows_days,
+      window_days: b.window_days,
+      horizon_days: b.horizon_days,
+      index_strategy: b.index_strategy,
+      index_time_col: b.index_time_col,
+      feature_inclusive: b.feature_inclusive,
+      label_col: b.label_col,
+      task_id: b.task_id,
+      promote_best: this.hpoPromoteBest,
+      max_trials: 6,
+    };
+    this.api.hpo(body).subscribe({
+      next: (j) => this.poll(j.id),
+      error: (e) => {
+        this.busy.set(false);
+        this.error.set(this.fmtErr(e));
       },
     });
   }
@@ -149,8 +189,28 @@ export class TrainComponent implements OnInit, OnDestroy {
       next: (j) => this.poll(j.id),
       error: (e) => {
         this.busy.set(false);
-        this.error.set(e?.error?.detail || e.message);
+        this.error.set(this.fmtErr(e));
       },
+    });
+  }
+
+  cancelActive(): void {
+    const j = this.job();
+    if (!j || (j.status !== 'queued' && j.status !== 'running')) return;
+    this.api.cancelJob(j.id).subscribe({
+      next: (x) => {
+        this.job.set(x);
+        this.busy.set(false);
+        this.refreshJobs();
+      },
+      error: (e) => this.error.set(this.fmtErr(e)),
+    });
+  }
+
+  refreshJobs(): void {
+    this.api.jobs().subscribe({
+      next: (r) => this.recentJobs.set(r.jobs || []),
+      error: () => undefined,
     });
   }
 
@@ -164,14 +224,35 @@ export class TrainComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (j) => {
           this.job.set(j);
-          if (j.status === 'succeeded' || j.status === 'failed') {
+          if (j.status === 'succeeded' || j.status === 'failed' || j.status === 'cancelled') {
             this.busy.set(false);
+            this.refreshJobs();
           }
         },
         error: (e) => {
           this.busy.set(false);
-          this.error.set(e.message);
+          this.error.set(this.fmtErr(e));
         },
       });
+  }
+
+  private fmtErr(e: unknown): string {
+    const any = e as { error?: { detail?: unknown }; message?: string; status?: number };
+    if (any?.status === 401) {
+      return 'API key required or invalid (401). Set it under Config.';
+    }
+    const d = any?.error?.detail;
+    if (typeof d === 'string') return d;
+    if (d && typeof d === 'object' && 'message' in d) {
+      const msg = String((d as { message: string }).message);
+      const blockers = (d as { blockers?: string[] }).blockers;
+      return blockers?.length ? `${msg}: ${blockers.join('; ')}` : msg;
+    }
+    if (Array.isArray(d)) {
+      return d
+        .map((x) => (typeof x === 'object' && x && 'msg' in x ? String((x as { msg: string }).msg) : String(x)))
+        .join('; ');
+    }
+    return any?.message || 'Request failed';
   }
 }

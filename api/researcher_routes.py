@@ -22,6 +22,7 @@ from api.jobs import (
     get_job,
     list_recent_jobs,
     run_compare_job,
+    run_hpo_job,
     run_leakage_audit_job,
     run_shap_job,
     run_train_job,
@@ -87,6 +88,8 @@ _REPORT_ALLOWLIST = {
     "cv_group_metrics.json",
     "model_comparison.json",
     "fairness_report.json",
+    "hpo_report.json",
+    "threshold_operating_points.json",
 }
 
 
@@ -140,6 +143,26 @@ class LeakageJobBody(BaseModel):
     index_strategy: Literal["last_event", "before_last", "column"] = "last_event"
     index_time_col: str | None = None
     feature_inclusive: bool = True
+
+
+class HpoJobBody(BaseModel):
+    data_path: str
+    data_format: Literal["longitudinal", "tabular"] = "longitudinal"
+    model_kind: Literal["logreg", "xgboost", "random_forest", "lightgbm"] = "logreg"
+    calibrate: bool = False
+    split_by_patient: bool = True
+    temporal_split: bool = False
+    window_days: int = 180
+    windows_days: list[int] | None = Field(default=[7, 30, 180])
+    horizon_days: int | None = None
+    index_strategy: Literal["last_event", "before_last", "column"] = "last_event"
+    index_time_col: str | None = None
+    feature_inclusive: bool = True
+    label_col: str | None = None
+    task_id: str | None = None
+    promote_best: bool = False
+    max_trials: int = Field(default=6, ge=1, le=12)
+    grid: list[dict[str, Any]] | None = None
 
 
 class FormImportBody(BaseModel):
@@ -489,6 +512,50 @@ def start_shap(_: bool = AuthDep):
     return _job_public(rec)
 
 
+@router.post("/jobs/hpo")
+def start_hpo(body: HpoJobBody, _: bool = AuthDep):
+    from openhealth.health import dataset_health_report
+
+    params = body.model_dump()
+    if body.task_id:
+        from openhealth.task_spec import load_task
+
+        try:
+            spec = load_task(body.task_id)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+        tp = spec.to_train_params(body.data_path)
+        for k, v in tp.items():
+            if k != "task_id" and v is not None and params.get(k) in (None, "", []):
+                params[k] = v
+        if not params.get("model_kind") and tp.get("model_kind"):
+            params["model_kind"] = tp["model_kind"]
+    path = _resolve_under_project(params["data_path"])
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail=f"data not found: {params['data_path']}")
+    try:
+        health = dataset_health_report(path).get("health") or {}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"health check failed: {e}") from e
+    if not health.get("ready_for_training"):
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "message": "dataset not ready for HPO",
+                "blockers": health.get("blockers"),
+                "warnings": health.get("warnings"),
+            },
+        )
+    params["data_path"] = str(path)
+    if params.get("temporal_split"):
+        params["split_by_patient"] = False
+    try:
+        rec = submit_job("hpo", lambda r: run_hpo_job(r, params))
+    except RuntimeError as e:
+        raise HTTPException(status_code=409, detail=str(e)) from e
+    return _job_public(rec)
+
+
 @router.get("/jobs/{job_id}")
 def job_status(job_id: str, _: bool = AuthDep):
     rec = get_job(job_id)
@@ -526,6 +593,27 @@ def reports_summary(_: bool = AuthDep):
             comparison = json.loads(cmp.read_text(encoding="utf-8"))
         except Exception:
             comparison = None
+    fairness = None
+    fp = REPORTS_DIR / "fairness_report.json"
+    if fp.is_file():
+        try:
+            fairness = json.loads(fp.read_text(encoding="utf-8"))
+        except Exception:
+            fairness = None
+    hpo = None
+    hp = REPORTS_DIR / "hpo_report.json"
+    if hp.is_file():
+        try:
+            hpo = json.loads(hp.read_text(encoding="utf-8"))
+        except Exception:
+            hpo = None
+    thresholds = None
+    tp = REPORTS_DIR / "threshold_operating_points.json"
+    if tp.is_file():
+        try:
+            thresholds = json.loads(tp.read_text(encoding="utf-8"))
+        except Exception:
+            thresholds = None
     files = []
     for name in sorted(_REPORT_ALLOWLIST):
         p = REPORTS_DIR / name
@@ -537,9 +625,13 @@ def reports_summary(_: bool = AuthDep):
         {
             "metrics": (ev or {}).get("metrics"),
             "evaluation_generated_at_utc": (ev or {}).get("generated_at_utc"),
+            "threshold": (ev or {}).get("threshold"),
             "leakage_audit": leakage,
             "feature_importance": feature_importance,
             "model_comparison": comparison,
+            "fairness": fairness,
+            "hpo": hpo,
+            "thresholds": thresholds,
             "files": files,
             "download_zip": "/v1/reports/download.zip",
         }

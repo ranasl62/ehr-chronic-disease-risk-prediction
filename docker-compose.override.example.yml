@@ -1,0 +1,30 @@
+# Optional local overrides — copy to docker-compose.override.yml (gitignored).
+# Compose merges this automatically with docker-compose.yml.
+#
+#   cp docker-compose.override.example.yml docker-compose.override.yml
+#
+# Prefer putting secrets in `.env` (see .env.example). Use this file for
+# GPU devices, extra mounts, or non-secret compose tweaks.
+
+services:
+  api:
+    # Uncomment to require X-API-Key (or set API_KEY in `.env` instead):
+    # environment:
+    #   API_KEY: change-me-before-exposing
+
+    # NVIDIA GPU (requires nvidia-container-toolkit / Docker Desktop GPU support).
+    # Useful for heavier XGBoost / future GPU models; default CPU demos do not need this.
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+  # Example: map custom host ports without editing the main compose file
+  # (or set UI_PORT / API_PORT in `.env`):
+  # web:
+  #   ports: ["9080:80"]
+  # api:
+  #   ports: ["9000:8000"]

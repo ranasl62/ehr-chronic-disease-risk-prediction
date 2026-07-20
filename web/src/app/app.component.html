@@ -13,6 +13,13 @@
     </nav>
   </header>
   <p class="banner">For research and education only. Outputs are not clinical recommendations and are not intended for patient care.</p>
+  @if (auth.message(); as authMsg) {
+    <p class="banner-auth" role="alert">
+      <span>{{ authMsg }}</span>
+      <a routerLink="/config" class="auth-link">Open Config</a>
+      <button type="button" class="auth-dismiss" (click)="dismissAuth()">Dismiss</button>
+    </p>
+  }
   <main>
     <router-outlet />
   </main>

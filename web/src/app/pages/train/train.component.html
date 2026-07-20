@@ -1,6 +1,6 @@
 <section class="panel">
   <h1>Train &amp; audit</h1>
-  <p class="lede">Pick a task preset or configure manually. Compare runs logreg / RF / XGBoost (+ LightGBM if installed).</p>
+  <p class="lede">Pick a task preset or configure manually. Compare runs logreg / RF / XGBoost (+ LightGBM if installed). LSTM is not available.</p>
 
   <form class="form" (ngSubmit)="startTrain()">
     <label>Task preset
@@ -11,6 +11,20 @@
         }
       </select>
     </label>
+
+    @if (selectedTask(); as t) {
+      <div class="task-hint">
+        <p class="task-desc">{{ t.description || 'No description for this task.' }}</p>
+        <p class="muted">
+          Required columns:
+          <code>{{ (t.required_columns || []).join(', ') || '—' }}</code>
+          @if (t.id === 'readmission_30d') {
+            <span> · Needs <code>index_time</code> (typically discharge) and binary <code>label</code>.</span>
+          }
+        </p>
+      </div>
+    }
+
     <label>Data path
       <input [(ngModel)]="dataPath" name="dataPath" required />
     </label>
@@ -49,9 +63,19 @@
       <input [(ngModel)]="labelCol" name="labelCol" placeholder="label / chronic_disease" />
     </label>
 
+    <details class="hpo-box">
+      <summary>Light HPO (optional, research-scoped)</summary>
+      <p class="muted">Small grid over a few hyperparameters (e.g. logreg C). Not full AutoML.</p>
+      <label class="chk"><input type="checkbox" [(ngModel)]="enableHpo" name="enableHpo" /> Show HPO action</label>
+      <label class="chk"><input type="checkbox" [(ngModel)]="hpoPromoteBest" name="hpoPromote" [disabled]="!enableHpo" /> Promote best after HPO (full retrain)</label>
+    </details>
+
     <div class="actions">
       <button type="submit" class="btn primary" [disabled]="busy()">Start train</button>
       <button type="button" class="btn primary" [disabled]="busy()" (click)="startCompare()">Compare models</button>
+      @if (enableHpo) {
+        <button type="button" class="btn" [disabled]="busy()" (click)="startHpo()">Light HPO</button>
+      }
       <button type="button" class="btn" [disabled]="busy()" (click)="startAudit()">Leakage audit</button>
       <a routerLink="/results" class="btn">View results</a>
     </div>
@@ -61,9 +85,35 @@
 
   @if (job(); as j) {
     <div class="job">
-      <h2>Job {{ j.id }} — {{ j.status }}</h2>
+      <div class="job-head">
+        <h2>Job {{ j.id }} — {{ j.status }}</h2>
+        @if (j.status === 'queued' || j.status === 'running') {
+          <button type="button" class="btn" (click)="cancelActive()">Cancel</button>
+        }
+      </div>
       <p>{{ j.message }}</p>
       <pre>{{ j.log_tail.join('\n') }}</pre>
     </div>
   }
+
+  <div class="history">
+    <div class="job-head">
+      <h2>Recent jobs</h2>
+      <button type="button" class="btn" (click)="refreshJobs()">Refresh</button>
+    </div>
+    @if (!recentJobs().length) {
+      <p class="muted">No jobs in this API process yet.</p>
+    } @else {
+      <ul class="job-list">
+        @for (rj of recentJobs(); track rj.id) {
+          <li>
+            <code>{{ rj.id }}</code>
+            <span>{{ rj.kind }}</span>
+            <span [class.ok]="rj.status === 'succeeded'" [class.bad]="rj.status === 'failed' || rj.status === 'cancelled'">{{ rj.status }}</span>
+            <span class="muted">{{ rj.message }}</span>
+          </li>
+        }
+      </ul>
+    }
+  </div>
 </section>

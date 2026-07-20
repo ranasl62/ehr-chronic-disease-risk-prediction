@@ -188,6 +188,62 @@ describe('ApiService (UI → backend contract)', () => {
     });
   });
 
+  it('GET /v1/jobs, POST cancel, runs, fairness, hpo', () => {
+    api.jobs().subscribe((r) => expect(r.jobs.length).toBe(1));
+    http.expectOne('/v1/jobs').flush({
+      jobs: [{ id: 'j1', kind: 'train', status: 'succeeded', message: '', result: {}, log_tail: [] }],
+    });
+
+    api.cancelJob('j1').subscribe((j) => expect(j.status).toBe('cancelled'));
+    http.expectOne('/v1/jobs/j1/cancel').flush({
+      id: 'j1',
+      kind: 'train',
+      status: 'cancelled',
+      message: 'cancelled',
+      result: {},
+      log_tail: [],
+    });
+
+    api.runs(10).subscribe((r) => expect(r.runs.length).toBe(1));
+    const runsReq = http.expectOne((r) => r.url === '/v1/runs');
+    expect(runsReq.request.params.get('limit')).toBe('10');
+    runsReq.flush({ runs: [{ run_id: 'r1', path: 'reports/runs/r1', has_model: true }] });
+
+    api.fairness().subscribe((j) => expect(j.kind).toBe('fairness'));
+    http.expectOne('/v1/jobs/fairness').flush({
+      id: 'f1',
+      kind: 'fairness',
+      status: 'queued',
+      message: '',
+      result: {},
+      log_tail: [],
+    });
+
+    api.hpo({
+      data_path: 'data/raw/ehr_data.csv',
+      data_format: 'longitudinal',
+      model_kind: 'logreg',
+      calibrate: false,
+      split_by_patient: true,
+      temporal_split: false,
+      windows_days: [7, 30, 180],
+      window_days: 180,
+      horizon_days: null,
+      index_strategy: 'last_event',
+      index_time_col: null,
+      feature_inclusive: true,
+      max_trials: 2,
+    }).subscribe((j) => expect(j.kind).toBe('hpo'));
+    http.expectOne('/v1/jobs/hpo').flush({
+      id: 'h1',
+      kind: 'hpo',
+      status: 'queued',
+      message: '',
+      result: {},
+      log_tail: [],
+    });
+  });
+
   it('GET /v1/reports/summary and URL helpers', () => {
     api.reportsSummary().subscribe((r) => expect(r.files.length).toBe(1));
     http.expectOne('/v1/reports/summary').flush({

@@ -54,6 +54,24 @@ class TaskSpec:
             "task_id": self.id,
         }
 
+    def required_columns(self) -> list[str]:
+        """Columns expected in the source CSV for this task (UI hints)."""
+        cols: list[str] = ["patient_id"]
+        if self.data_format == "longitudinal":
+            cols.append("timestamp")
+        if self.target_column:
+            cols.append(self.target_column)
+        if self.index_strategy == "column" and self.index_time_col:
+            cols.append(self.index_time_col)
+        # de-dupe preserve order
+        seen: set[str] = set()
+        out: list[str] = []
+        for c in cols:
+            if c and c not in seen:
+                seen.add(c)
+                out.append(c)
+        return out
+
     def to_public(self) -> dict[str, Any]:
         return {
             "id": self.id,
@@ -74,6 +92,7 @@ class TaskSpec:
             "temporal_split": self.temporal_split,
             "metrics": list(self.metrics),
             "source_path": self.source_path,
+            "required_columns": self.required_columns(),
         }
 
 

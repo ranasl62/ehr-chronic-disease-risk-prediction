@@ -1,5 +1,5 @@
 persona: researcher
-active_task_id: postgres
+active_task_id: null
 windows_days:
 - 7
 - 30

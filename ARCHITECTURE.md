@@ -62,12 +62,14 @@ Research / education prototype — **not** a medical device.
 
 ```text
 docker compose up --build
+# or: docker compose -f docker-compose.yml -f docker-compose.publish.yml up
         │
         ├─ prepare  → train model.pkl if missing (scripts/docker_prepare.sh)
-        ├─ api      → :8000  (FastAPI, mounts repo)
-        └─ web      → :8080  (Angular + nginx proxy to api)
+        ├─ api      → :8000  FastAPI  (IMAGE_API → ehr-risk-api:local or ranasl62/ehr-risk-api)
+        └─ web      → :8080  Angular + nginx (IMAGE_WEB → ehr-risk-web:local or ranasl62/ehr-risk-web)
 
 Optional: --profile train → one-shot training container
+Host persistence: data/, reports/, model.pkl via bind mount
 ```
 
 Local alternative: `uvicorn api.main:app` + `cd web && npm start` (proxy to API).
