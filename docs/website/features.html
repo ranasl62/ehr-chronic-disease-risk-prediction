@@ -100,7 +100,11 @@
         </article>
         <article class="card">
           <h3>Named runs</h3>
-          <p class="muted">Artifacts under <code>reports/runs/</code> with manifests (data hash, params).</p>
+          <p class="muted">Artifacts under <code>reports/runs/</code> with manifests (data hash, params). Browse and promote from Results.</p>
+        </article>
+        <article class="card">
+          <h3>Light HPO</h3>
+          <p class="muted">Optional small hyperparameter grid on Train (<code>POST /v1/jobs/hpo</code>). Research-scoped — not full AutoML.</p>
         </article>
         <article class="card">
           <h3>CLI</h3>
@@ -117,8 +121,9 @@
           <tr><td>Leakage audit</td><td>UI Train → Leakage / <code>POST /v1/jobs/leakage-audit</code></td><td><code>reports/leakage_audit.json</code></td></tr>
           <tr><td>Calibration</td><td>Train with calibrate flag</td><td>Brier, ECE, calibration plot</td></tr>
           <tr><td>SHAP</td><td>Results → Generate SHAP</td><td>SHAP summary + explain on predict</td></tr>
-          <tr><td>Fairness helpers</td><td>API job / scripts</td><td>Group metrics (age bands / aligned CSV)</td></tr>
+          <tr><td>Fairness helpers</td><td>Results → Run fairness / <code>POST /v1/jobs/fairness</code></td><td>Group metrics (age bands / aligned CSV)</td></tr>
           <tr><td>Analytics</td><td>Workbench Analytics</td><td>Cohort charts + model tables</td></tr>
+          <tr><td>Operating points</td><td>Results → Threshold table</td><td><code>reports/threshold_operating_points.json</code></td></tr>
         </tbody>
       </table>
     </section>

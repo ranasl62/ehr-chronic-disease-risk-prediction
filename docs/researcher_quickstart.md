@@ -7,16 +7,38 @@
 
 ## Option A — Docker (recommended)
 
+**Build from source**
+
 ```bash
 git clone https://github.com/ranasl62/ehr-chronic-disease-risk-prediction.git
 cd ehr-chronic-disease-risk-prediction
-make researcher-up
-# or: docker compose up --build
+docker compose up --build
+# or: make researcher-up
+# stop: docker compose down
 ```
 
-- Angular workbench: http://127.0.0.1:8080  
-- FastAPI + OpenAPI: http://127.0.0.1:8000/docs  
-- **Download results pack:** Results page → ZIP, or `GET /v1/reports/download.zip`
+**Pull published images** (Docker Hub; repos must be public or `docker login`)
+
+```bash
+git clone https://github.com/ranasl62/ehr-chronic-disease-risk-prediction.git
+cd ehr-chronic-disease-risk-prediction
+docker compose -f docker-compose.yml -f docker-compose.publish.yml pull
+docker compose -f docker-compose.yml -f docker-compose.publish.yml up
+# or: make researcher-up-pull
+```
+
+Defaults: `ranasl62/ehr-risk-api:latest` · `ranasl62/ehr-risk-web:latest`  
+Override: `IMAGE_API` / `IMAGE_WEB` in `.env`. Ports **8080** (UI) / **8000** (API). Optional `API_KEY`.
+
+Optional: `cp .env.example .env` · GPU/overrides: `docker-compose.override.example.yml`.
+
+| | |
+|--|--|
+| Angular workbench | http://127.0.0.1:8080 (`ehr-risk-web:local` or Docker Hub web image) |
+| FastAPI + OpenAPI | http://127.0.0.1:8000/docs (`ehr-risk-api:local` or Docker Hub api image) |
+| Results ZIP | Results page, or `GET /v1/reports/download.zip` |
+
+`data/`, `reports/`, and `model.pkl` persist on the host (bind mount). Research / education only — contact [support@larucare.com](mailto:support@larucare.com).
 
 ### In the Angular UI
 

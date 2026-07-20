@@ -27,6 +27,8 @@ _ZIP_ALLOW = [
     "cv_group_metrics.json",
     "model_comparison.json",
     "fairness_report.json",
+    "hpo_report.json",
+    "threshold_operating_points.json",
 ]
 
 

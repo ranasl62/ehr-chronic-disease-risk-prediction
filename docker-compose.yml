@@ -1,8 +1,34 @@
-# One command (train-if-needed → API → Angular workbench):
+# EHR Risk Framework — research workbench (FastAPI + Angular)
+#
+# Build from source (default):
 #   docker compose up --build
-#   make researcher-up
+#   # or: make researcher-up
+#
+# Pull published Docker Hub images (no local build):
+#   docker compose -f docker-compose.yml -f docker-compose.publish.yml pull
+#   docker compose -f docker-compose.yml -f docker-compose.publish.yml up
+#   # or: make researcher-up-pull
+#
+# Override image refs via .env (see .env.example):
+#   IMAGE_API=ranasl62/ehr-risk-api:latest
+#   IMAGE_WEB=ranasl62/ehr-risk-web:latest
+
+#
+# URLs (defaults):
+#   UI  http://127.0.0.1:8080
+#   API http://127.0.0.1:8000/docs
+#
+# Persistence: the project directory is bind-mounted into `api` / `prepare`,
+# so data/, reports/, model.pkl, and uploads survive restarts.
+#
+# Optional: copy .env.example → .env and/or docker-compose.override.example.yml
+# → docker-compose.override.yml (API_KEY, ports, GPU). See INSTALLATION.md.
+
+name: ehr-risk
+
 services:
   prepare:
+    image: ${IMAGE_API:-ehr-risk-api:local}
     build:
       context: .
       dockerfile: deployment/Dockerfile
@@ -15,48 +41,65 @@ services:
     command: ["/bin/sh", "scripts/docker_prepare.sh"]
 
   api:
+    image: ${IMAGE_API:-ehr-risk-api:local}
     build:
       context: .
       dockerfile: deployment/Dockerfile
     ports:
-      - "8000:8000"
+      - "${API_PORT:-8000}:8000"
     volumes:
+      # Host project root → persist demo/BYO data, reports, model.pkl
       - .:/app
     working_dir: /app
     environment:
-      - PYTHONPATH=/app
-      - CORS_ORIGINS=http://localhost:8080,http://127.0.0.1:8080,http://localhost:4200,http://127.0.0.1:4200
-      - MAX_BODY_BYTES=52428800
+      PYTHONPATH: /app
+      API_KEY: ${API_KEY:-}
+      MODEL_PATH: ${MODEL_PATH:-model.pkl}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080,http://localhost:4200,http://127.0.0.1:4200}
+      MAX_BODY_BYTES: ${MAX_BODY_BYTES:-52428800}
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-0}
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)",
+        ]
       interval: 10s
       timeout: 5s
       retries: 6
       start_period: 40s
-    # Ensure multipart is present even on older images; then serve API
-    command:
-      - /bin/sh
-      - -c
-      - pip install -q 'python-multipart>=0.0.9' 'openpyxl>=3.1.0' 'PyYAML>=6.0' && exec uvicorn api.main:app --host 0.0.0.0 --port 8000
+    command: ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
     depends_on:
       prepare:
         condition: service_completed_successfully
 
   web:
+    image: ${IMAGE_WEB:-ehr-risk-web:local}
     build:
       context: ./web
       dockerfile: Dockerfile
     ports:
-      - "8080:80"
+      - "${UI_PORT:-8080}:80"
     depends_on:
       api:
         condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
+  # Optional one-shot train (does not start with default `up`):
+  #   docker compose --profile train run --rm train
   train:
     profiles:
       - train
+    image: ${IMAGE_API:-ehr-risk-api:local}
     build:
       context: .
       dockerfile: deployment/Dockerfile

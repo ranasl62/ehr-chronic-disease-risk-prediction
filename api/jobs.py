@@ -268,7 +268,7 @@ def run_fairness_job(rec: JobRecord, params: dict[str, Any]) -> None:
     import numpy as np
     import pandas as pd
 
-    from fairness.bias_metrics import subgroup_metrics_table
+    from fairness.bias_metrics import binary_rates_by_group, subgroup_metrics_table
     from training.reproduce_split import split_train_test_from_artifact
     from utils.json_safe import json_safe
 
@@ -296,7 +296,9 @@ def run_fairness_job(rec: JobRecord, params: dict[str, Any]) -> None:
         else:
             groups = gdf[group_col].astype(str).to_numpy()
             table = subgroup_metrics_table(y_true, y_pred, proba, groups)
-            out = {"skipped": False, "by_group": table.to_dict(orient="records")}
+            rates = binary_rates_by_group(y_true, y_pred, groups)
+            merged = table.merge(rates[["group", "tpr", "fpr"]], on="group", how="left")
+            out = {"skipped": False, "group_column": group_col, "by_group": merged.to_dict(orient="records")}
     else:
         age_cols = [c for c in X_test.columns if "age" in str(c).lower()]
         if not age_cols:
@@ -306,7 +308,13 @@ def run_fairness_job(rec: JobRecord, params: dict[str, Any]) -> None:
             bands = pd.cut(ages, bins=[-np.inf, 50, 65, np.inf], labels=["lt50", "50_65", "ge65"])
             groups = bands.astype(str).fillna("unk").to_numpy()
             table = subgroup_metrics_table(y_true, y_pred, proba, groups)
-            out = {"skipped": False, "group_column": age_cols[0], "by_group": table.to_dict(orient="records")}
+            rates = binary_rates_by_group(y_true, y_pred, groups)
+            merged = table.merge(rates[["group", "tpr", "fpr"]], on="group", how="left")
+            out = {
+                "skipped": False,
+                "group_column": age_cols[0],
+                "by_group": merged.to_dict(orient="records"),
+            }
     out_path = REPORTS_DIR / "fairness_report.json"
     out_path.write_text(json.dumps(json_safe(out), indent=2), encoding="utf-8")
     rec.result = {"report_path": str(out_path), **out}
@@ -363,6 +371,54 @@ def _audit_passed(report: dict) -> bool:
     if ti and ti.get("passed") is False:
         return False
     return True
+
+
+def run_hpo_job(rec: JobRecord, params: dict[str, Any]) -> None:
+    """Optional light hyperparameter grid (research-scoped)."""
+    from training.hpo import run_light_hpo
+
+    data_path = Path(params["data_path"])
+    if not data_path.is_absolute():
+        data_path = PROJECT_ROOT / data_path
+    if not data_path.is_file():
+        raise FileNotFoundError(f"data not found: {data_path}")
+
+    windows = params.get("windows_days")
+    rec.append(f"light HPO for {params.get('model_kind', 'logreg')} on {data_path.name}")
+    out = run_light_hpo(
+        data_path=data_path,
+        model_kind=params.get("model_kind", "logreg"),
+        data_format=params.get("data_format", "longitudinal"),
+        calibrate=bool(params.get("calibrate", False)),
+        split_by_patient=bool(params.get("split_by_patient", True)),
+        temporal_split=bool(params.get("temporal_split", False)),
+        windows_days=tuple(windows) if windows else (7, 30, 180),
+        window_days=int(params.get("window_days", 180)),
+        horizon_days=params.get("horizon_days"),
+        index_strategy=params.get("index_strategy", "last_event"),
+        index_time_col=params.get("index_time_col"),
+        feature_inclusive=bool(params.get("feature_inclusive", True)),
+        label_col=params.get("label_col"),
+        grid=params.get("grid"),
+        promote_best=bool(params.get("promote_best", False)),
+        max_trials=int(params.get("max_trials", 6)),
+    )
+    try:
+        from api.main import get_artifact
+
+        get_artifact.cache_clear()
+    except Exception:
+        pass
+    rec.result = {
+        "report_path": out.get("report_path"),
+        "best": out.get("best"),
+        "n_trials": out.get("n_trials"),
+        "promoted": out.get("promoted"),
+    }
+    best = out.get("best") or {}
+    rec.message = (
+        f"HPO done: best roc_auc={best.get('roc_auc')} params={best.get('params')}"
+    )
 
 
 def run_shap_job(rec: JobRecord, params: dict[str, Any]) -> None:

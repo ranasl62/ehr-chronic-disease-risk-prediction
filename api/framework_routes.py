@@ -8,7 +8,7 @@ from typing import Any, Literal
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from api.jobs import cancel_job, get_job, run_fairness_job, submit_job, _job_public
+from api.jobs import cancel_job, run_fairness_job, submit_job, _job_public
 from api.security import require_api_key_if_configured
 from utils.config import PROJECT_ROOT
 from utils.json_safe import json_safe
@@ -199,7 +199,19 @@ def get_events(limit: int = 50, _: bool = AuthDep):
 def get_runs(limit: int = 30, _: bool = AuthDep):
     from openhealth.runs import list_runs
 
-    return {"runs": list_runs(limit=limit)}
+    return json_safe({"runs": list_runs(limit=limit)})
+
+
+@router.get("/runs/{run_id}")
+def get_run_detail(run_id: str, _: bool = AuthDep):
+    from openhealth.runs import get_run
+
+    try:
+        return json_safe(get_run(run_id))
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.post("/runs/{run_id}/promote")
@@ -212,6 +224,62 @@ def promote_run_route(run_id: str, _: bool = AuthDep):
         raise HTTPException(status_code=404, detail=str(e)) from e
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@router.get("/reports/fairness")
+def get_fairness_report(_: bool = AuthDep):
+    import json
+
+    from utils.config import REPORTS_DIR
+
+    path = REPORTS_DIR / "fairness_report.json"
+    if not path.is_file():
+        return {"present": False, "skipped": True, "reason": "no fairness_report.json yet"}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"invalid fairness report: {e}") from e
+    return json_safe({"present": True, **data})
+
+
+@router.get("/reports/thresholds")
+def get_threshold_points(_: bool = AuthDep):
+    """Operating-point table from the active model hold-out (research only)."""
+    import joblib
+    import numpy as np
+
+    from training.evaluate import threshold_operating_points
+    from training.reproduce_split import split_train_test_from_artifact
+    from utils.config import MODEL_PATH, REPORTS_DIR
+
+    path = REPORTS_DIR / "threshold_operating_points.json"
+    if path.is_file():
+        import json
+
+        try:
+            return json_safe({"present": True, **json.loads(path.read_text(encoding="utf-8"))})
+        except Exception:
+            pass
+    if not Path(MODEL_PATH).is_file():
+        raise HTTPException(status_code=404, detail="model.pkl missing — train first")
+    art = joblib.load(MODEL_PATH)
+    _, X_test, _, y_test, _, _ = split_train_test_from_artifact(art)
+    proba = art["model"].predict_proba(X_test)[:, 1]
+    y_true = y_test.to_numpy() if hasattr(y_test, "to_numpy") else np.asarray(y_test)
+    rows = threshold_operating_points(y_true, proba)
+    out = {
+        "present": True,
+        "threshold": 0.5,
+        "points": rows,
+        "note": "Research operating points; not clinical decision thresholds.",
+    }
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    import json
+
+    from utils.json_safe import json_safe as _js
+
+    path.write_text(json.dumps(_js(out), indent=2), encoding="utf-8")
+    return json_safe(out)
 
 
 @router.post("/jobs/{job_id}/cancel")

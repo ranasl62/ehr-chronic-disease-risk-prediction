@@ -275,8 +275,8 @@ JSON response → Predict page charts
 <pre><code>docker compose up --build
         │
         ├─ prepare   one-shot: train model.pkl if missing
-        ├─ api       :8000  FastAPI (repo mounted at /app)
-        └─ web       :8080  Angular static + nginx
+        ├─ api       :8000  FastAPI (ehr-risk-api:local, repo mounted)
+        └─ web       :8080  Angular + nginx (ehr-risk-web:local)
                               │
                               ├─ SPA   /  /datasets /train /results /analytics
                               │        /predict /config /docs

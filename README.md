@@ -27,25 +27,52 @@ Package `openhealth` · CLI `ehr-ai` · Angular workbench · FastAPI.
 
 ---
 
-## 5-minute start
+## 5-minute start — Docker (recommended)
+
+### Build from source
 
 ```bash
 git clone https://github.com/ranasl62/ehr-chronic-disease-risk-prediction.git
 cd ehr-chronic-disease-risk-prediction
 docker compose up --build
-# or: pip install -e . && ehr-ai start
+# detached: make researcher-up-d
+# stop:     docker compose down   # or: make researcher-down
 ```
 
-| Service | URL |
-|---------|-----|
-| Angular workbench | http://127.0.0.1:8080 |
-| API + OpenAPI | http://127.0.0.1:8000/docs (also http://127.0.0.1:8080/api-docs) |
-| Results ZIP | http://127.0.0.1:8000/v1/reports/download.zip |
-| **Docs website** | [`docs/website/`](docs/website/) → [GitHub Pages](https://ranasl62.github.io/ehr-chronic-disease-risk-prediction/) after enable |
+### Pull published images (no local build)
 
-**Workflow:** Datasets (import + health) → Train / Compare → Analytics / Results → Predict.
+When images are published to Docker Hub (public repos, or after `docker login`):
 
-Task presets: [`tasks/`](tasks/). Architecture diagram: [`ARCHITECTURE.md`](ARCHITECTURE.md).
+```bash
+git clone https://github.com/ranasl62/ehr-chronic-disease-risk-prediction.git
+cd ehr-chronic-disease-risk-prediction
+docker compose -f docker-compose.yml -f docker-compose.publish.yml pull
+docker compose -f docker-compose.yml -f docker-compose.publish.yml up
+# or: make researcher-up-pull
+```
+
+| Image | Default ref |
+|-------|-------------|
+| API / prepare / train | `ranasl62/ehr-risk-api:latest` |
+| Angular workbench | `ranasl62/ehr-risk-web:latest` |
+
+Override with `IMAGE_API` / `IMAGE_WEB` in `.env` (see [`.env.example`](.env.example)). Still clone the repo — Compose bind-mounts `.` so `data/`, `reports/`, and `model.pkl` persist on the host.
+
+Optional: `cp .env.example .env` (set `API_KEY`, ports). GPU / overrides: `cp docker-compose.override.example.yml docker-compose.override.yml`.
+
+| Service | URL | Local build | Published |
+|---------|-----|-------------|-----------|
+| Angular workbench | http://127.0.0.1:8080 | `ehr-risk-web:local` | `ranasl62/ehr-risk-web` |
+| API + OpenAPI | http://127.0.0.1:8000/docs (also http://127.0.0.1:8080/api-docs) | `ehr-risk-api:local` | `ranasl62/ehr-risk-api` |
+| Results ZIP | http://127.0.0.1:8000/v1/reports/download.zip | — | — |
+| **Docs website** | [`docs/website/`](docs/website/) → [GitHub Pages](https://ranasl62.github.io/ehr-chronic-disease-risk-prediction/) | — | — |
+
+**First loop:** Datasets (demo + health) → Train → Results / Analytics → Predict.  
+Demo CSVs only — no PHI. **Research and education only** — not for patient care.
+
+**Stop / clean:** `docker compose down` · `docker compose down --rmi local` (also drop local images).
+
+Task presets: [`tasks/`](tasks/). Install notes: [`INSTALLATION.md`](INSTALLATION.md). Architecture: [`ARCHITECTURE.md`](ARCHITECTURE.md).
 
 ---
 

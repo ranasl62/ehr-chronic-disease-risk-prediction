@@ -42,7 +42,7 @@ Demo data only — never capture PHI.
 | `diagrams.html` / `fine-tuning.html` | Design + iteration |
 | `quickstart.html` / `commands.html` | Run recipes |
 | `architecture.html` / `api.html` / `data.html` | Deep technical |
-| `limits.html` / `cite.html` | Boundaries + contact |
+| `limits.html` / `help.html` / `cite.html` | Boundaries, full guide library, contact |
 
 Navigation, feedback strip, continue-reading, and footer map: `assets/site.js`.
 

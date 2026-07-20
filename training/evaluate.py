@@ -42,6 +42,31 @@ def evaluate_binary(model, X_test, y_test, threshold: float = 0.5, *, ece_bins: 
     return out
 
 
+def threshold_operating_points(
+    y_true,
+    y_prob,
+    thresholds: list[float] | None = None,
+) -> list[dict[str, float]]:
+    """Precision/recall/F1 at a few decision thresholds (research operating-point table)."""
+    thr_list = thresholds or [0.3, 0.4, 0.5, 0.6, 0.7]
+    y_true_arr = np.asarray(y_true)
+    y_prob_arr = np.asarray(y_prob, dtype=float)
+    rows: list[dict[str, float]] = []
+    for thr in thr_list:
+        y_pred = (y_prob_arr >= thr).astype(int)
+        rows.append(
+            {
+                "threshold": float(thr),
+                "precision": float(precision_score(y_true_arr, y_pred, zero_division=0)),
+                "recall": float(recall_score(y_true_arr, y_pred, zero_division=0)),
+                "f1": float(f1_score(y_true_arr, y_pred, zero_division=0)),
+                "accuracy": float(accuracy_score(y_true_arr, y_pred)),
+                "positive_rate": float(y_pred.mean()) if len(y_pred) else 0.0,
+            }
+        )
+    return rows
+
+
 def print_metrics(
     model,
     X_test,

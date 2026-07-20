@@ -1,4 +1,4 @@
-.PHONY: install test test-web test-all train train-patient train-temporal leak-audit shap docker-smoke cv-report paper-synth paper-exp paper-quick researcher-up mimic-lock
+.PHONY: install test test-web test-all train train-patient train-temporal leak-audit shap docker-smoke cv-report paper-synth paper-exp paper-quick researcher-up researcher-up-d researcher-up-pull researcher-up-pull-d researcher-down researcher-logs mimic-lock
 
 install:
 	pip install -r requirements.txt && pip install -e .
@@ -45,6 +45,24 @@ paper-exp:
 
 researcher-up:
 	docker compose up --build
+
+researcher-up-d:
+	docker compose up --build -d
+
+# Pull Docker Hub images (no local build). Repos must be public or `docker login`.
+researcher-up-pull:
+	docker compose -f docker-compose.yml -f docker-compose.publish.yml pull
+	docker compose -f docker-compose.yml -f docker-compose.publish.yml up
+
+researcher-up-pull-d:
+	docker compose -f docker-compose.yml -f docker-compose.publish.yml pull
+	docker compose -f docker-compose.yml -f docker-compose.publish.yml up -d
+
+researcher-down:
+	docker compose down
+
+researcher-logs:
+	docker compose logs -f --tail=100 api web
 
 # Requires local PhysioNet extract at data/processed/mimic_diabetes_cohort.csv (gitignored).
 mimic-lock:

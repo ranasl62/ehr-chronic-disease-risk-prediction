@@ -13,7 +13,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
-import { ApiService, JobInfo, ReportsSummary } from '../../core/api.service';
+import {
+  ApiService,
+  FairnessReport,
+  JobInfo,
+  ReportsSummary,
+  RunDetail,
+  RunSummary,
+  ThresholdReport,
+} from '../../core/api.service';
 import { UiPrefsService } from '../../core/ui-prefs.service';
 import { DataTableColumn, DataTableComponent } from '../../shared/data-table.component';
 import { interval, switchMap, takeWhile } from 'rxjs';
@@ -38,6 +46,11 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('importanceChart') importanceChartRef?: ElementRef<HTMLCanvasElement>;
 
   summary = signal<ReportsSummary | null>(null);
+  runs = signal<RunSummary[]>([]);
+  selectedRun = signal<RunDetail | null>(null);
+  fairness = signal<FairnessReport | null>(null);
+  thresholds = signal<ThresholdReport | null>(null);
+  compareRunIds: string[] = [];
   error = signal<string | null>(null);
   job = signal<JobInfo | null>(null);
   busy = signal(false);
@@ -51,6 +64,10 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
   fileRows: Record<string, unknown>[] = [];
   leakageRows: Record<string, unknown>[] = [];
   importanceRows: Record<string, unknown>[] = [];
+  fairnessRows: Record<string, unknown>[] = [];
+  thresholdRows: Record<string, unknown>[] = [];
+  hpoRows: Record<string, unknown>[] = [];
+  runCompareRows: Record<string, unknown>[] = [];
 
   compareCols: DataTableColumn[] = [
     { key: 'model', label: 'Model' },
@@ -77,6 +94,37 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
     { key: 'feature', label: 'Feature' },
     { key: 'importance', label: 'Importance', numeric: true, format: 'number' },
     { key: 'abs', label: '|Importance|', numeric: true, format: 'number' },
+  ];
+  fairnessCols: DataTableColumn[] = [
+    { key: 'group', label: 'Group' },
+    { key: 'n', label: 'N', numeric: true, format: 'number', digits: '1.0-0' },
+    { key: 'prevalence', label: 'Prevalence', numeric: true, format: 'number' },
+    { key: 'accuracy', label: 'Accuracy', numeric: true, format: 'number' },
+    { key: 'mean_pred', label: 'Mean pred', numeric: true, format: 'number' },
+    { key: 'tpr', label: 'TPR', numeric: true, format: 'number' },
+    { key: 'fpr', label: 'FPR', numeric: true, format: 'number' },
+  ];
+  thresholdCols: DataTableColumn[] = [
+    { key: 'threshold', label: 'Threshold', numeric: true, format: 'number' },
+    { key: 'precision', label: 'Precision', numeric: true, format: 'number' },
+    { key: 'recall', label: 'Recall', numeric: true, format: 'number' },
+    { key: 'f1', label: 'F1', numeric: true, format: 'number' },
+    { key: 'accuracy', label: 'Accuracy', numeric: true, format: 'number' },
+    { key: 'positive_rate', label: 'Pos rate', numeric: true, format: 'number' },
+  ];
+  hpoCols: DataTableColumn[] = [
+    { key: 'trial', label: 'Trial', numeric: true, format: 'number', digits: '1.0-0' },
+    { key: 'params', label: 'Params' },
+    { key: 'roc_auc', label: 'ROC-AUC', numeric: true, format: 'number' },
+    { key: 'pr_auc', label: 'PR-AUC', numeric: true, format: 'number' },
+    { key: 'brier', label: 'Brier', numeric: true, format: 'number' },
+  ];
+  runCompareCols: DataTableColumn[] = [
+    { key: 'run_id', label: 'Run' },
+    { key: 'model_kind', label: 'Model' },
+    { key: 'roc_auc', label: 'ROC-AUC', numeric: true, format: 'number' },
+    { key: 'pr_auc', label: 'PR-AUC', numeric: true, format: 'number' },
+    { key: 'brier', label: 'Brier', numeric: true, format: 'number' },
   ];
 
   private charts: Chart[] = [];
@@ -111,6 +159,17 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
       },
       error: (e) => this.error.set(this.fmtErr(e)),
     });
+    this.api.runs(40).subscribe({
+      next: (r) => this.runs.set(r.runs || []),
+      error: () => undefined,
+    });
+    this.api.fairnessReport().subscribe({
+      next: (f) => {
+        this.fairness.set(f);
+        this.buildFairnessRows(f);
+      },
+      error: () => undefined,
+    });
   }
 
   onShowCharts(v: boolean): void {
@@ -133,9 +192,80 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.metricRows.filter((r) => String(r['metric'] ?? '').toLowerCase().includes(q));
   }
 
-  runShap(): void {
+  openRun(runId: string): void {
+    this.error.set(null);
+    this.api.runDetail(runId).subscribe({
+      next: (d) => this.selectedRun.set(d),
+      error: (e) => this.error.set(this.fmtErr(e)),
+    });
+  }
+
+  promoteSelected(): void {
+    const d = this.selectedRun();
+    if (!d?.run_id) return;
     this.busy.set(true);
-    this.api.shap().subscribe({
+    this.api.promoteRun(d.run_id).subscribe({
+      next: () => {
+        this.busy.set(false);
+        this.reload();
+      },
+      error: (e) => {
+        this.busy.set(false);
+        this.error.set(this.fmtErr(e));
+      },
+    });
+  }
+
+  toggleCompareRun(runId: string, checked: boolean): void {
+    if (checked) {
+      if (!this.compareRunIds.includes(runId)) this.compareRunIds = [...this.compareRunIds, runId].slice(-4);
+    } else {
+      this.compareRunIds = this.compareRunIds.filter((id) => id !== runId);
+    }
+    this.buildRunCompare();
+  }
+
+  private buildRunCompare(): void {
+    const map = new Map(this.runs().map((r) => [r.run_id, r]));
+    this.runCompareRows = this.compareRunIds
+      .map((id) => map.get(id))
+      .filter((r): r is RunSummary => !!r)
+      .map((r) => ({
+        run_id: r.run_id,
+        model_kind: r.model_kind || (r.meta?.['model_kind'] as string) || '—',
+        roc_auc: r.metrics?.['roc_auc'] ?? null,
+        pr_auc: r.metrics?.['pr_auc'] ?? null,
+        brier: r.metrics?.['brier'] ?? null,
+      }));
+  }
+
+  runShap(): void {
+    this.startJob(() => this.api.shap());
+  }
+
+  runFairness(): void {
+    this.startJob(() => this.api.fairness({ group_column: 'age_band' }));
+  }
+
+  loadThresholds(): void {
+    this.busy.set(true);
+    this.api.thresholds().subscribe({
+      next: (t) => {
+        this.busy.set(false);
+        this.thresholds.set(t);
+        this.thresholdRows = (t.points || []).map((p) => ({ ...p }));
+        this.reload();
+      },
+      error: (e) => {
+        this.busy.set(false);
+        this.error.set(this.fmtErr(e));
+      },
+    });
+  }
+
+  private startJob(fn: () => ReturnType<ApiService['shap']>): void {
+    this.busy.set(true);
+    fn().subscribe({
       next: (j) => {
         interval(1000)
           .pipe(
@@ -145,7 +275,7 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
           .subscribe({
             next: (x) => {
               this.job.set(x);
-              if (x.status === 'succeeded' || x.status === 'failed') {
+              if (x.status === 'succeeded' || x.status === 'failed' || x.status === 'cancelled') {
                 this.busy.set(false);
                 this.reload();
               }
@@ -176,10 +306,17 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private fmtErr(e: unknown): string {
-    const any = e as { error?: { detail?: unknown }; message?: string };
+    const any = e as { error?: { detail?: unknown }; message?: string; status?: number };
+    if (any?.status === 401) {
+      return 'API key required or invalid (401). Set it under Config.';
+    }
     const d = any?.error?.detail;
     if (typeof d === 'string') return d;
-    if (Array.isArray(d)) return d.map((x) => (typeof x === 'object' && x && 'msg' in x ? String((x as { msg: string }).msg) : String(x))).join('; ');
+    if (Array.isArray(d)) {
+      return d
+        .map((x) => (typeof x === 'object' && x && 'msg' in x ? String((x as { msg: string }).msg) : String(x)))
+        .join('; ');
+    }
     if (d && typeof d === 'object' && 'message' in d) return String((d as { message: string }).message);
     return any?.message || 'Request failed';
   }
@@ -191,6 +328,22 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
       this.redrawTimer = null;
       requestAnimationFrame(() => this.renderCharts(this.lastSummary));
     }, 0);
+  }
+
+  private buildFairnessRows(f: FairnessReport | null): void {
+    const rows = f?.by_group || [];
+    this.fairnessRows = rows.map((row) => {
+      const r = row as Record<string, unknown>;
+      return {
+        group: r['group'] ?? r['subgroup'] ?? r['age_band'] ?? '—',
+        n: r['n'] ?? r['count'] ?? null,
+        prevalence: r['prevalence'] ?? r['positive_rate'] ?? null,
+        accuracy: r['accuracy'] ?? null,
+        mean_pred: r['mean_pred'] ?? r['mean_predicted_prob'] ?? null,
+        tpr: r['tpr'] ?? r['recall'] ?? null,
+        fpr: r['fpr'] ?? null,
+      };
+    });
   }
 
   private buildTables(s: ReportsSummary): void {
@@ -217,6 +370,22 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.importanceRows = Object.entries(map)
       .filter(([, v]) => typeof v === 'number' && Number.isFinite(v))
       .map(([feature, importance]) => ({ feature, importance, abs: Math.abs(importance) }));
+
+    if (s.fairness) {
+      this.fairness.set(s.fairness);
+      this.buildFairnessRows(s.fairness);
+    }
+    if (s.thresholds?.points?.length) {
+      this.thresholds.set(s.thresholds);
+      this.thresholdRows = s.thresholds.points.map((p) => ({ ...p }));
+    }
+    this.hpoRows = (s.hpo?.trials || []).map((t) => ({
+      trial: t['trial'],
+      params: JSON.stringify(t['params'] ?? {}),
+      roc_auc: t['roc_auc'],
+      pr_auc: t['pr_auc'],
+      brier: t['brier'],
+    }));
   }
 
   private flattenAudit(obj: Record<string, unknown>, prefix = ''): Record<string, unknown>[] {

@@ -1,0 +1,52 @@
+{
+  "model_kind": "logreg",
+  "n_trials": 2,
+  "trials": [
+    {
+      "trial": 0,
+      "params": {
+        "C": 0.1
+      },
+      "roc_auc": null,
+      "pr_auc": null,
+      "brier": 0.224344809313147,
+      "ece": 0.46974632619207346,
+      "f1": 0.0
+    },
+    {
+      "trial": 1,
+      "params": {
+        "C": 1.0
+      },
+      "roc_auc": null,
+      "pr_auc": null,
+      "brier": 0.20762754191886204,
+      "ece": 0.4415743302983367,
+      "f1": 0.0
+    }
+  ],
+  "best": {
+    "trial": 0,
+    "params": {
+      "C": 0.1
+    },
+    "roc_auc": null,
+    "pr_auc": null,
+    "brier": 0.224344809313147,
+    "ece": 0.46974632619207346,
+    "f1": 0.0,
+    "metrics": {
+      "roc_auc": null,
+      "pr_auc": null,
+      "brier": 0.224344809313147,
+      "ece": 0.46974632619207346,
+      "ece_bins": 10,
+      "accuracy": 0.5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    }
+  },
+  "promoted": false,
+  "note": "Research-scoped light grid only; not clinical AutoML."
+}

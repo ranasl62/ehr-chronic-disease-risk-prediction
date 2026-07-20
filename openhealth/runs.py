@@ -30,6 +30,32 @@ def ensure_run(run_id: str) -> Path:
     return p
 
 
+def _read_json(path: Path) -> dict[str, Any] | None:
+    if not path.is_file():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else None
+    except Exception:
+        return None
+
+
+def _run_summary(d: Path) -> dict[str, Any]:
+    meta = _read_json(d / "run_meta.json") or {}
+    ev = _read_json(d / "evaluation_report.json") or {}
+    metrics = ev.get("metrics") if isinstance(ev.get("metrics"), dict) else None
+    return {
+        "run_id": d.name,
+        "path": str(d.relative_to(PROJECT_ROOT)),
+        "has_model": (d / "model.pkl").is_file(),
+        "has_evaluation": (d / "evaluation_report.json").is_file(),
+        "has_manifest": (d / "training_manifest.json").is_file(),
+        "meta": meta,
+        "metrics": metrics,
+        "model_kind": meta.get("model_kind") or (ev.get("meta") or {}).get("model_kind"),
+    }
+
+
 def list_runs(limit: int = 30) -> list[dict[str, Any]]:
     if not RUNS_DIR.is_dir():
         return []
@@ -37,24 +63,29 @@ def list_runs(limit: int = 30) -> list[dict[str, Any]]:
     for d in sorted(RUNS_DIR.iterdir(), reverse=True):
         if not d.is_dir():
             continue
-        meta = {}
-        mp = d / "run_meta.json"
-        if mp.is_file():
-            try:
-                meta = json.loads(mp.read_text(encoding="utf-8"))
-            except Exception:
-                meta = {}
-        items.append(
-            {
-                "run_id": d.name,
-                "path": str(d.relative_to(PROJECT_ROOT)),
-                "has_model": (d / "model.pkl").is_file(),
-                "meta": meta,
-            }
-        )
+        items.append(_run_summary(d))
         if len(items) >= limit:
             break
     return items
+
+
+def get_run(run_id: str) -> dict[str, Any]:
+    """Full run detail: meta, metrics, manifest excerpt, file list."""
+    p = run_path(run_id)
+    if not p.is_dir():
+        raise FileNotFoundError(f"run not found: {run_id}")
+    summary = _run_summary(p)
+    files = []
+    for child in sorted(p.iterdir()):
+        if child.is_file():
+            files.append({"name": child.name, "bytes": child.stat().st_size})
+    return {
+        **summary,
+        "evaluation": _read_json(p / "evaluation_report.json"),
+        "manifest": _read_json(p / "training_manifest.json"),
+        "feature_importance": _read_json(p / "feature_importance.json"),
+        "files": files,
+    }
 
 
 def write_run_meta(run_id: str, meta: dict[str, Any]) -> Path:

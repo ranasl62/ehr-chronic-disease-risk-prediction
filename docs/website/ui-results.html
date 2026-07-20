@@ -29,9 +29,13 @@
     <section class="section">
       <h2>Surfaces</h2>
       <ul>
+        <li><strong>Experiment runs</strong> — browse <code>reports/runs/</code>, open manifests/metrics, compare up to four runs, promote to active model</li>
         <li><strong>Charts</strong> — model compare, selected metric, feature importance (Chart.js)</li>
         <li><strong>Model comparison</strong> — table of multi-model runs</li>
         <li><strong>Metrics</strong> — filterable hold-out metrics (AUROC, PR-AUC, Brier, ECE, …)</li>
+        <li><strong>Fairness</strong> — age-band / group metrics table (run from Results; not ZIP-only)</li>
+        <li><strong>Operating points</strong> — precision/recall at several probability thresholds (research only)</li>
+        <li><strong>Light HPO</strong> — optional grid trials when run from Train</li>
         <li><strong>Feature importance</strong> — top drivers from the fitted model</li>
         <li><strong>Leakage audit</strong> — findings from the audit job</li>
         <li><strong>Report files</strong> — JSON/CSV artifacts under <code>reports/</code></li>
@@ -42,7 +46,9 @@
       <h2>Actions</h2>
       <ul>
         <li><strong>Generate SHAP</strong> — background job for summary explanations</li>
-        <li><strong>Download ZIP</strong> — pack metrics, audits, fairness (when present), figures</li>
+        <li><strong>Run fairness</strong> — subgroup metrics on hold-out</li>
+        <li><strong>Threshold table</strong> — compute operating points from the active artifact</li>
+        <li><strong>Download ZIP</strong> — pack metrics, audits, fairness/HPO (when present), figures</li>
         <li>Empty state links back to Train when no model exists</li>
       </ul>
       <p class="muted">Next: <a href="ui-predict.html">Predict</a> · <a href="ui-analytics.html">Analytics</a></p>

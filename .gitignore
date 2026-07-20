@@ -5,6 +5,7 @@ __pycache__/
 dist/
 build/
 .env
+docker-compose.override.yml
 .venv/
 .venv2/
 venv/
@@ -46,7 +47,6 @@ agent-transcripts/
 implimentation/
 implementation_private/
 
-# --- Private drafts: NIW / immigration / manuscripts (never publish) ---
 *niw*
 *NIW*
 *petition*

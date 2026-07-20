@@ -79,6 +79,47 @@ export class ApiService {
     return this.http.get<JobInfo>(`${this.base}/v1/jobs/${id}`);
   }
 
+  jobs(): Observable<{ jobs: JobInfo[] }> {
+    return this.http.get<{ jobs: JobInfo[] }>(`${this.base}/v1/jobs`);
+  }
+
+  cancelJob(id: string): Observable<JobInfo> {
+    return this.http.post<JobInfo>(`${this.base}/v1/jobs/${id}/cancel`, {});
+  }
+
+  fairness(body: { groups_path?: string | null; group_column?: string } = {}): Observable<JobInfo> {
+    return this.http.post<JobInfo>(`${this.base}/v1/jobs/fairness`, body);
+  }
+
+  fairnessReport(): Observable<FairnessReport> {
+    return this.http.get<FairnessReport>(`${this.base}/v1/reports/fairness`);
+  }
+
+  thresholds(): Observable<ThresholdReport> {
+    return this.http.get<ThresholdReport>(`${this.base}/v1/reports/thresholds`);
+  }
+
+  hpo(body: HpoBody): Observable<JobInfo> {
+    return this.http.post<JobInfo>(`${this.base}/v1/jobs/hpo`, body);
+  }
+
+  runs(limit = 30): Observable<{ runs: RunSummary[] }> {
+    return this.http.get<{ runs: RunSummary[] }>(`${this.base}/v1/runs`, {
+      params: { limit: String(limit) },
+    });
+  }
+
+  runDetail(runId: string): Observable<RunDetail> {
+    return this.http.get<RunDetail>(`${this.base}/v1/runs/${encodeURIComponent(runId)}`);
+  }
+
+  promoteRun(runId: string): Observable<{ run_id: string; model_path: string }> {
+    return this.http.post<{ run_id: string; model_path: string }>(
+      `${this.base}/v1/runs/${encodeURIComponent(runId)}/promote`,
+      {}
+    );
+  }
+
   reportsSummary(): Observable<ReportsSummary> {
     return this.http.get<ReportsSummary>(`${this.base}/v1/reports/summary`);
   }
@@ -170,6 +211,25 @@ export interface CompareBody {
   promote_best?: boolean;
 }
 
+export interface HpoBody {
+  data_path: string;
+  data_format: string;
+  model_kind: string;
+  calibrate: boolean;
+  split_by_patient: boolean;
+  temporal_split: boolean;
+  windows_days: number[] | null;
+  window_days: number;
+  horizon_days: number | null;
+  index_strategy: string;
+  index_time_col: string | null;
+  feature_inclusive: boolean;
+  label_col?: string | null;
+  task_id?: string | null;
+  promote_best?: boolean;
+  max_trials?: number;
+}
+
 export interface TaskInfo {
   id: string;
   name: string;
@@ -186,6 +246,7 @@ export interface TaskInfo {
   calibrate?: boolean;
   split_by_patient?: boolean;
   temporal_split?: boolean;
+  required_columns?: string[];
 }
 
 export interface DatasetHealth {
@@ -214,10 +275,53 @@ export interface JobInfo {
   message: string;
   result: Record<string, unknown>;
   log_tail: string[];
+  created_at?: string;
+  finished_at?: string | null;
+}
+
+export interface RunSummary {
+  run_id: string;
+  path: string;
+  has_model: boolean;
+  has_evaluation?: boolean;
+  has_manifest?: boolean;
+  meta?: Record<string, unknown>;
+  metrics?: Record<string, number | null> | null;
+  model_kind?: string | null;
+}
+
+export interface RunDetail extends RunSummary {
+  evaluation?: Record<string, unknown> | null;
+  manifest?: Record<string, unknown> | null;
+  feature_importance?: Record<string, unknown> | null;
+  files?: { name: string; bytes: number }[];
+}
+
+export interface FairnessReport {
+  present?: boolean;
+  skipped?: boolean;
+  reason?: string;
+  group_column?: string;
+  by_group?: Record<string, unknown>[];
+}
+
+export interface ThresholdReport {
+  present?: boolean;
+  threshold?: number;
+  points?: {
+    threshold: number;
+    precision: number;
+    recall: number;
+    f1: number;
+    accuracy: number;
+    positive_rate: number;
+  }[];
+  note?: string;
 }
 
 export interface ReportsSummary {
   metrics?: Record<string, number | null>;
+  threshold?: number;
   leakage_audit?: Record<string, unknown>;
   feature_importance?: Record<string, number> | { importance?: Record<string, number> };
   model_comparison?: {
@@ -231,6 +335,15 @@ export interface ReportsSummary {
       selected?: boolean;
     }[];
   };
+  fairness?: FairnessReport | null;
+  hpo?: {
+    model_kind?: string;
+    n_trials?: number;
+    trials?: Record<string, unknown>[];
+    best?: Record<string, unknown>;
+    note?: string;
+  } | null;
+  thresholds?: ThresholdReport | null;
   files: { name: string; bytes: number; url: string }[];
   download_zip?: string;
 }

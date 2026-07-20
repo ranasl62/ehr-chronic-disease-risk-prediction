@@ -1,4 +1,4 @@
-.form { display: grid; gap: 0.75rem; max-width: 28rem; }
+.form { display: grid; gap: 0.75rem; max-width: 32rem; }
 label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.9rem; }
 input, select {
   padding: 0.45rem 0.55rem; border: 1px solid var(--line); border-radius: 4px;
@@ -6,13 +6,26 @@ input, select {
 }
 .chk { flex-direction: row; align-items: center; gap: 0.5rem; }
 .actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
-.job {
+.job, .history {
   margin-top: 1.5rem; padding: 1rem; background: var(--surface-2);
   border: 1px solid var(--line); border-radius: 6px;
 }
+.job-head { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.job-head h2 { margin: 0; font-size: 1.05rem; }
 pre {
   font-size: 0.75rem; max-height: 12rem; overflow: auto;
   background: #0f1419; color: #c8d0d8; padding: 0.75rem; border-radius: 4px;
 }
 .err { color: var(--danger); }
-.lede { color: var(--muted); }
+.lede, .muted { color: var(--muted); }
+.task-hint {
+  padding: 0.65rem 0.75rem; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--surface); font-size: 0.88rem;
+}
+.task-desc { margin: 0 0 0.35rem; }
+.hpo-box { font-size: 0.9rem; }
+.hpo-box summary { cursor: pointer; margin-bottom: 0.5rem; }
+.job-list { list-style: none; margin: 0.5rem 0 0; padding: 0; display: grid; gap: 0.35rem; }
+.job-list li { display: flex; flex-wrap: wrap; gap: 0.5rem; font-size: 0.85rem; align-items: baseline; }
+.job-list .ok { color: #1a5c45; }
+.job-list .bad { color: var(--danger); }
