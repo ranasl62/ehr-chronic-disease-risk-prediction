@@ -484,15 +484,56 @@ pre code { background: transparent; padding: 0; color: inherit; }
 .path-band a span { display: block; font-size: 0.72rem; color: var(--muted); }
 .path-sep { color: var(--accent); font-weight: 700; }
 
+.footer-map {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin-top: 0.35rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+.footer-map h3 {
+  margin-bottom: 0.65rem;
+}
 .footer-map ul {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
-  gap: 0.25rem 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem 1rem;
   list-style: none;
   margin: 0;
   padding: 0;
+  width: 100%;
 }
-.footer-map a { font-weight: 600; font-size: 0.88rem; }
+@media (min-width: 520px) {
+  .footer-map ul {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 720px) {
+  .footer-map ul {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (min-width: 960px) {
+  .footer-map ul {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1200px) {
+  .footer-map ul {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+.footer-map li {
+  margin: 0;
+  min-width: 0;
+}
+.footer-map a {
+  font-weight: 600;
+  font-size: 0.88rem;
+  display: block;
+  padding: 0.2rem 0;
+  word-break: break-word;
+}
 
 .ui-subnav {
   display: flex;

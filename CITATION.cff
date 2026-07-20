@@ -9,6 +9,7 @@ authors:
   - family-names: Hossain
     given-names: Md Rana
     email: support@larucare.com
+    orcid: "https://orcid.org/0009-0005-5996-719X"
     affiliation: "Maharishi International University"
 repository-code: "https://github.com/ranasl62/ehr-chronic-disease-risk-prediction"
 url: "https://github.com/ranasl62/ehr-chronic-disease-risk-prediction"

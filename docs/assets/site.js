@@ -179,6 +179,11 @@
         return '<li><a href="' + p.href + '">' + p.label + "</a></li>";
       }).join("") +
       "</ul>";
-    footerInner.appendChild(map);
+    var fine = footerInner.querySelector(".fine");
+    if (fine) {
+      footerInner.insertBefore(map, fine);
+    } else {
+      footerInner.appendChild(map);
+    }
   }
 })();

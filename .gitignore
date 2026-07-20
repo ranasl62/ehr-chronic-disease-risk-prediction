@@ -64,3 +64,8 @@ docs/study_protocol_*.md
 web/node_modules/
 web/dist/
 web/.angular/
+
+
+book/
+research_paper/
+research-paper/
