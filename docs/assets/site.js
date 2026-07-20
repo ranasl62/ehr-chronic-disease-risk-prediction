@@ -1,117 +1,122 @@
 (function () {
   var PAGES = [
-    { href: "index.html", label: "Home", group: "start" },
-    { href: "why.html", label: "Why it matters", group: "start" },
-    { href: "features.html", label: "Features", group: "start" },
-    { href: "workbench.html", label: "Workbench", group: "guide" },
-    { href: "quickstart.html", label: "Quickstart", group: "guide" },
-    { href: "docker-images.html", label: "Docker images", group: "guide" },
-    { href: "commands.html", label: "Commands", group: "guide" },
-    { href: "diagrams.html", label: "Diagrams", group: "deep" },
-    { href: "fine-tuning.html", label: "Fine-tuning", group: "deep" },
-    { href: "architecture.html", label: "Architecture", group: "deep" },
-    { href: "data.html", label: "Data", group: "deep" },
-    { href: "api.html", label: "API", group: "deep" },
-    { href: "limits.html", label: "Limits", group: "meta" },
-    { href: "help.html", label: "Help library", group: "meta" },
-    { href: "sitemap.html", label: "Sitemap", group: "meta" },
-    { href: "cite.html", label: "Cite & feedback", group: "meta" },
+    { href: "/", label: "Home", group: "start" },
+    { href: "/why", label: "Why it matters", group: "start" },
+    { href: "/features", label: "Features", group: "start" },
+    { href: "/workbench", label: "Workbench", group: "guide" },
+    { href: "/quickstart", label: "Quickstart", group: "guide" },
+    { href: "/docker-images", label: "Docker images", group: "guide" },
+    { href: "/commands", label: "Commands", group: "guide" },
+    { href: "/diagrams", label: "Diagrams", group: "deep" },
+    { href: "/fine-tuning", label: "Fine-tuning", group: "deep" },
+    { href: "/architecture", label: "Architecture", group: "deep" },
+    { href: "/data", label: "Data", group: "deep" },
+    { href: "/api", label: "API", group: "deep" },
+    { href: "/limits", label: "Limits", group: "meta" },
+    { href: "/help", label: "Help library", group: "meta" },
+    { href: "/sitemap", label: "Sitemap", group: "meta" },
+    { href: "/cite", label: "Cite & feedback", group: "meta" },
   ];
 
   var UI_PAGES = [
-    { href: "ui-home.html", label: "Home", route: "/" },
-    { href: "ui-datasets.html", label: "Datasets", route: "/datasets" },
-    { href: "ui-train.html", label: "Train", route: "/train" },
-    { href: "ui-results.html", label: "Results", route: "/results" },
-    { href: "ui-analytics.html", label: "Analytics", route: "/analytics" },
-    { href: "ui-predict.html", label: "Predict", route: "/predict" },
-    { href: "ui-config.html", label: "Config", route: "/config" },
-    { href: "ui-docs.html", label: "Docs (UI)", route: "/docs" },
-    { href: "ui-openapi.html", label: "OpenAPI", route: ":8000/docs" },
+    { href: "/ui-home", label: "Home", route: "/" },
+    { href: "/ui-datasets", label: "Datasets", route: "/datasets" },
+    { href: "/ui-train", label: "Train", route: "/train" },
+    { href: "/ui-results", label: "Results", route: "/results" },
+    { href: "/ui-analytics", label: "Analytics", route: "/analytics" },
+    { href: "/ui-predict", label: "Predict", route: "/predict" },
+    { href: "/ui-config", label: "Config", route: "/config" },
+    { href: "/ui-docs", label: "Docs (UI)", route: "/docs" },
+    { href: "/ui-openapi", label: "OpenAPI", route: ":8000/docs" },
   ];
 
   var BLURBS = {
-    "index.html": "Overview, U.S. research context, and docs map",
-    "why.html": "Problems, audiences, and U.S. research context",
-    "features.html": "Capability catalog from ingest to serve",
-    "workbench.html": "Hub for every UI page with screenshots",
-    "quickstart.html": "Docker → first train → predict",
-    "docker-images.html": "Pull Hub images: api + web",
-    "commands.html": "Make, curl, tests, docs recipes",
-    "diagrams.html": "SVG architecture and temporal design",
-    "fine-tuning.html": "Compare, calibrate, promote runs",
-    "architecture.html": "Components, jobs, config surfaces",
-    "data.html": "Columns, BYO CSV, index/horizon rules",
-    "api.html": "Predict, jobs, schema endpoints",
-    "limits.html": "Honest non-goals and model card",
-    "help.html": "Full guide library, examples, intended use",
-    "sitemap.html": "Full map of every documentation page",
-    "cite.html": "Citation and support@larucare.com",
-    "ui-home.html": "Workbench checklist and status",
-    "ui-datasets.html": "Import tabs and health gate",
-    "ui-train.html": "Train, compare, leakage audit",
-    "ui-results.html": "Metrics, SHAP, figures, ZIP",
-    "ui-analytics.html": "Cohort charts and filters",
-    "ui-predict.html": "Schema form and risk charts",
-    "ui-config.html": "Persona, defaults, UI prefs",
-    "ui-docs.html": "In-app help and intended use",
-    "ui-openapi.html": "Interactive Swagger API docs",
+    "/": "Overview, U.S. research context, and docs map",
+    "/why": "Problems, audiences, and U.S. research context",
+    "/features": "Capability catalog from ingest to serve",
+    "/workbench": "Hub for every UI page with screenshots",
+    "/quickstart": "Docker → first train → predict",
+    "/docker-images": "Pull Hub images: api + web",
+    "/commands": "Make, curl, tests, docs recipes",
+    "/diagrams": "SVG architecture and temporal design",
+    "/fine-tuning": "Compare, calibrate, promote runs",
+    "/architecture": "Components, jobs, config surfaces",
+    "/data": "Columns, BYO CSV, index/horizon rules",
+    "/api": "Predict, jobs, schema endpoints",
+    "/limits": "Honest non-goals and model card",
+    "/help": "Full guide library, examples, intended use",
+    "/sitemap": "Full map of every documentation page",
+    "/cite": "Citation and support@larucare.com",
+    "/ui-home": "Workbench checklist and status",
+    "/ui-datasets": "Import tabs and health gate",
+    "/ui-train": "Train, compare, leakage audit",
+    "/ui-results": "Metrics, SHAP, figures, ZIP",
+    "/ui-analytics": "Cohort charts and filters",
+    "/ui-predict": "Schema form and risk charts",
+    "/ui-config": "Persona, defaults, UI prefs",
+    "/ui-docs": "In-app help and intended use",
+    "/ui-openapi": "Interactive Swagger API docs",
   };
 
   var RELATED = {
-    "index.html": ["why.html", "workbench.html", "quickstart.html", "diagrams.html"],
-    "why.html": ["features.html", "workbench.html", "limits.html", "cite.html"],
-    "features.html": ["workbench.html", "diagrams.html", "fine-tuning.html", "limits.html"],
-    "workbench.html": ["ui-home.html", "ui-train.html", "ui-predict.html", "quickstart.html"],
-    "quickstart.html": ["docker-images.html", "workbench.html", "commands.html", "data.html"],
-    "docker-images.html": ["quickstart.html", "commands.html", "architecture.html", "limits.html"],
-    "commands.html": ["quickstart.html", "docker-images.html", "fine-tuning.html", "api.html"],
-    "diagrams.html": ["fine-tuning.html", "architecture.html", "data.html", "features.html"],
-    "fine-tuning.html": ["ui-train.html", "commands.html", "diagrams.html", "limits.html"],
-    "architecture.html": ["diagrams.html", "features.html", "api.html", "data.html"],
-    "data.html": ["ui-datasets.html", "diagrams.html", "fine-tuning.html", "limits.html"],
-    "api.html": ["ui-openapi.html", "commands.html", "ui-predict.html", "features.html"],
-    "limits.html": ["help.html", "features.html", "cite.html", "sitemap.html"],
-    "help.html": ["cite.html", "quickstart.html", "why.html", "limits.html"],
-    "sitemap.html": ["index.html", "help.html", "workbench.html", "limits.html"],
-    "cite.html": ["help.html", "why.html", "limits.html", "index.html"],
-    "ui-home.html": ["ui-datasets.html", "ui-train.html", "ui-results.html", "workbench.html"],
-    "ui-datasets.html": ["ui-train.html", "data.html", "ui-config.html", "workbench.html"],
-    "ui-train.html": ["ui-results.html", "fine-tuning.html", "ui-config.html", "workbench.html"],
-    "ui-results.html": ["ui-predict.html", "ui-analytics.html", "ui-train.html", "workbench.html"],
-    "ui-analytics.html": ["ui-results.html", "ui-datasets.html", "features.html", "workbench.html"],
-    "ui-predict.html": ["ui-results.html", "api.html", "ui-train.html", "workbench.html"],
-    "ui-config.html": ["ui-train.html", "ui-analytics.html", "ui-home.html", "workbench.html"],
-    "ui-docs.html": ["help.html", "cite.html", "limits.html", "workbench.html"],
-    "ui-openapi.html": ["api.html", "commands.html", "ui-predict.html", "workbench.html"],
+    "/": ["/why", "/workbench", "/quickstart", "/diagrams"],
+    "/why": ["/features", "/workbench", "/limits", "/cite"],
+    "/features": ["/workbench", "/diagrams", "/fine-tuning", "/limits"],
+    "/workbench": ["/ui-home", "/ui-train", "/ui-predict", "/quickstart"],
+    "/quickstart": ["/docker-images", "/workbench", "/commands", "/data"],
+    "/docker-images": ["/quickstart", "/commands", "/architecture", "/limits"],
+    "/commands": ["/quickstart", "/docker-images", "/fine-tuning", "/api"],
+    "/diagrams": ["/fine-tuning", "/architecture", "/data", "/features"],
+    "/fine-tuning": ["/ui-train", "/commands", "/diagrams", "/limits"],
+    "/architecture": ["/diagrams", "/features", "/api", "/data"],
+    "/data": ["/ui-datasets", "/diagrams", "/fine-tuning", "/limits"],
+    "/api": ["/ui-openapi", "/commands", "/ui-predict", "/features"],
+    "/limits": ["/help", "/features", "/cite", "/sitemap"],
+    "/help": ["/cite", "/quickstart", "/why", "/limits"],
+    "/sitemap": ["/", "/help", "/workbench", "/limits"],
+    "/cite": ["/help", "/why", "/limits", "/"],
+    "/ui-home": ["/ui-datasets", "/ui-train", "/ui-results", "/workbench"],
+    "/ui-datasets": ["/ui-train", "/data", "/ui-config", "/workbench"],
+    "/ui-train": ["/ui-results", "/fine-tuning", "/ui-config", "/workbench"],
+    "/ui-results": ["/ui-predict", "/ui-analytics", "/ui-train", "/workbench"],
+    "/ui-analytics": ["/ui-results", "/ui-datasets", "/features", "/workbench"],
+    "/ui-predict": ["/ui-results", "/api", "/ui-train", "/workbench"],
+    "/ui-config": ["/ui-train", "/ui-analytics", "/ui-home", "/workbench"],
+    "/ui-docs": ["/help", "/cite", "/limits", "/workbench"],
+    "/ui-openapi": ["/api", "/commands", "/ui-predict", "/workbench"],
   };
 
+  function normalizePath(pathname) {
+    var path = (pathname || "/").replace(/\/index\.html$/i, "").replace(/\.html$/i, "");
+    if (!path || path === "/") return "/";
+    return path.replace(/\/+$/, "") || "/";
+  }
+
   function currentPage() {
-    var path = (location.pathname.split("/").pop() || "index.html").replace(/\/$/, "");
-    if (!path) path = "index.html";
-    return path;
+    return normalizePath(location.pathname);
   }
 
   function labelFor(href) {
-    var p = PAGES.find(function (x) { return x.href === href; });
+    var key = normalizePath(href);
+    var p = PAGES.find(function (x) { return x.href === key; });
     if (p) return p.label;
-    var u = UI_PAGES.find(function (x) { return x.href === href; });
+    var u = UI_PAGES.find(function (x) { return x.href === key; });
     return u ? u.label : href;
   }
 
   function blurbFor(href) {
-    return BLURBS[href] || "Part of the connected documentation set";
+    return BLURBS[normalizePath(href)] || "Part of the connected documentation set";
   }
 
   var path = currentPage();
-  var isUiDoc = path.indexOf("ui-") === 0 || path === "workbench.html";
+  var isUiDoc = path.indexOf("/ui-") === 0 || path === "/workbench";
 
   var nav = document.querySelector(".nav");
   if (nav) {
     nav.innerHTML =
       PAGES.map(function (p) {
         var cur =
-          p.href === path || (p.href === "workbench.html" && isUiDoc)
+          p.href === path || (p.href === "/workbench" && isUiDoc)
             ? ' aria-current="page"'
             : "";
         return '<a href="' + p.href + '"' + cur + ">" + p.label + "</a>";
@@ -140,7 +145,7 @@
       "Questions or feedback: " +
       '<a href="mailto:support@larucare.com?subject=%5Behr-risk-framework%5D%20feedback">support@larucare.com</a>. ' +
       "No PHI. " +
-      '<a href="sitemap.html">Documentation map →</a>';
+      '<a href="/sitemap">Documentation map →</a>';
     if (main) {
       var after = main.querySelector(".ui-subnav");
       if (after && after.nextSibling) main.insertBefore(strip, after.nextSibling);

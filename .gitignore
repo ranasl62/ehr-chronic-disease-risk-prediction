@@ -20,8 +20,6 @@ data/processed/*
 data/uploads/*
 !data/uploads/.gitkeep
 reports/*.png
-!reports/paper/
-reports/paper/*.pkl
 reports/runs/
 reports/events.jsonl
 reports/clinical_audit.jsonl

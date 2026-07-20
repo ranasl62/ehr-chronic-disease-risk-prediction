@@ -11,4 +11,4 @@ Synced automatically by [`.github/workflows/publish-images.yml`](../../.github/w
 
 **Token scope:** `DOCKERHUB_TOKEN` must allow **Read / Write / Delete** (Hub PAT) so the overview can be updated.
 
-Site docs: [`docs/docker-images.html`](../../docs/docker-images.html).
+Site docs: [`docs/docker-images/`](../../docs/docker-images/).

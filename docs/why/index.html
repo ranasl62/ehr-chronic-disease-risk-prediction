@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Why it matters — EHR Risk Framework</title>
+  <meta name="description" content="Why a leakage-aware EHR risk framework helps students, labs, and open-science reproducibility." />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/site.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="/">EHR Risk <span>Framework</span></a>
+      <nav class="nav" aria-label="Primary">
+        <a href="/">Home</a>
+        <a href="/why">Why it matters</a>
+        <a href="/features">Features</a>
+        <a href="/workbench">Workbench</a>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/architecture">Architecture</a>
+        <a href="/api">API</a>
+        <a href="/data">Data</a>
+        <a href="/cite">Cite &amp; feedback</a>
+        <a class="btn btn-primary" href="https://github.com/ranasl62/ehr-chronic-disease-risk-prediction">GitHub</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+    <h1 class="page-title">Why this framework matters</h1>
+    <p class="page-lead">
+      Chronic-disease and other horizon-based risk models are easy to demo and hard to trust.
+      This project makes the trustworthy path the default for education and research prototypes.
+    </p>
+    <p class="banner"><strong>Research and education only</strong> — not for patient care or device claims.</p>
+
+    <section class="section">
+      <h2>The problem students and labs hit</h2>
+      <div class="grid-2">
+        <article class="card">
+          <h3>Temporal leakage is silent</h3>
+          <p class="muted">Features built from “all history” often include post-index labs or diagnoses. Accuracy looks great; the science does not.</p>
+        </article>
+        <article class="card">
+          <h3>Probabilities are uncalibrated</h3>
+          <p class="muted">A model can rank well (AUROC) while reporting risk percentages that do not match observed rates.</p>
+        </article>
+        <article class="card">
+          <h3>Explainability is bolted on late</h3>
+          <p class="muted">SHAP and schema-aligned inference are often missing from classroom notebooks, so demos stop at a CSV score column.</p>
+        </article>
+        <article class="card">
+          <h3>Reproducibility is optional</h3>
+          <p class="muted">Without task presets, manifests, and a results pack, two students cannot compare the same experiment.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>What “useful” means here</h2>
+      <table class="data">
+        <thead><tr><th>Audience</th><th>Concrete outcome</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Course / thesis student</td>
+            <td>A complete loop you can cite: data → health → train → leakage audit → SHAP → predict UI</td>
+          </tr>
+          <tr>
+            <td>Research lab</td>
+            <td>Shared Docker baseline, task YAML, named runs, downloadable metrics/figures for methods appendices</td>
+          </tr>
+          <tr>
+            <td>Open-source contributor</td>
+            <td>Clear non-goals, tests spanning API↔UI contracts, and documentation that matches the code</td>
+          </tr>
+          <tr>
+            <td>Instructor</td>
+            <td>Demo data that runs offline; students learn trust surfaces before chasing leaderboard metrics</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>Use cases</h2>
+      <ol class="steps">
+        <li><strong>Classroom lab</strong> — Run Docker, train on the tiny longitudinal demo, inspect leakage audit and calibration plots, submit a short methods write-up.</li>
+        <li><strong>Thesis baseline</strong> — Fork, map your BYO CSV columns, lock a task YAML, report AUROC/PR-AUC/Brier/ECE with an explicit limitations section.</li>
+        <li><strong>Lab onboarding</strong> — New members reproduce the demo end-to-end before touching credentialed extracts.</li>
+        <li><strong>Methods comparison</strong> — Multi-model compare with promote-best; keep artifacts under <code>reports/</code> for peer review.</li>
+        <li><strong>API teaching</strong> — Call <code>/v1/model/schema</code> and <code>/v1/predict</code> to show schema-driven inference and explanations.</li>
+      </ol>
+    </section>
+
+    <section class="section" id="us-research">
+      <h2>Relevance to U.S. healthcare research</h2>
+      <p class="section-lead">
+        U.S. healthcare systems carry a heavy chronic-disease burden. Research progress on predictive models
+        requires tooling that makes temporal integrity, calibration, and explanation the default—
+        especially in university labs and health-informatics classrooms that train the next workforce.
+      </p>
+      <div class="grid-2">
+        <article class="card soft">
+          <h3>Stronger methods culture</h3>
+          <p class="muted">Index/horizon discipline and leakage audits reduce silent errors that inflate published AUROC and mislead follow-on work.</p>
+        </article>
+        <article class="card soft">
+          <h3>Workforce-ready practice</h3>
+          <p class="muted">Students learn the same loop used in research prototypes: health checks, compare, calibrate, SHAP, schema-driven predict.</p>
+        </article>
+        <article class="card soft">
+          <h3>Reproducible sharing</h3>
+          <p class="muted">Task YAML, named runs, and results ZIPs help U.S. academic teams share methods appendices without exchanging PHI.</p>
+        </article>
+        <article class="card soft">
+          <h3>Equity-aware evaluation</h3>
+          <p class="muted">When group columns exist, fairness helpers and Analytics filters support subgroup reporting expected in careful health AI research.</p>
+        </article>
+      </div>
+      <p class="muted">This software is a research and education prototype—not a clinical product or medical device.</p>
+    </section>
+
+    <section class="section">
+      <h2>Impact without overclaiming</h2>
+      <p>
+        The framework’s value is <strong>methodological hygiene + researcher UX</strong>, not clinical deployment.
+        That honesty is intentional: it keeps the project useful for learning, peer review, and open science,
+        and avoids implying regulated medical-device status.
+      </p>
+      <div class="pill-row">
+        <span class="pill">Temporal integrity</span>
+        <span class="pill">Calibration</span>
+        <span class="pill">Explainability</span>
+        <span class="pill">Reproducible packs</span>
+        <span class="pill">Explicit limits</span>
+      </div>
+      <p class="muted">Next: <a href="/features">Features in detail</a> · <a href="/diagrams">How it works</a> · <a href="/limits">Limits &amp; model card</a> · <a href="/sitemap">Full map</a></p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="inner">
+      <div>
+        <h3>Contact</h3>
+        <ul>
+          <li><a href="mailto:support@larucare.com">support@larucare.com</a></li>
+        </ul>
+      </div>
+      <p class="fine">Maintainer: Md Rana Hossain. Research / education only — not a medical device.</p>
+    </div>
+  </footer>
+  <script src="../assets/site.js"></script>
+</body>
+</html>

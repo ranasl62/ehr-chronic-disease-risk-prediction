@@ -12,21 +12,21 @@ After PhysioNet approval:
 4. Run:
 
 ```bash
-make mimic-lock
+make -C research-paper mimic-lock
 # equivalent:
-bash scripts/lock_mimic_cohort.sh data/processed/mimic_diabetes_cohort.csv reports/paper/mimic
+bash research-paper/scripts/lock_mimic_cohort.sh data/processed/mimic_diabetes_cohort.csv research-paper/reports/mimic
 ```
 
 Outputs (aggregate only; do not commit PHI):
 
-- `reports/paper/mimic/cohort_lock.json` (SHA-256 of extract)
+- `research-paper/reports/mimic/cohort_lock.json` (SHA-256 of extract)
 - `experiment_summary.json`, `results_table.csv`
 - `leakage_audit.json`, calibration PNGs, SHAP, fairness JSON
 
 ## Public software verification (no MIMIC)
 
 ```bash
-make paper-quick
+make -C research-paper paper-quick
 ```
 
 Mark synthetic metrics as **method verification only** — not clinical performance.

@@ -27,7 +27,6 @@ web/.angular
 # Large / generated artifacts (bind-mounted at runtime from host)
 reports/*.png
 reports/runs
-reports/paper
 *.pkl
 data/processed/*
 data/uploads/*

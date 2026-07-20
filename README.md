@@ -22,8 +22,8 @@ Package `openhealth` · CLI `ehr-ai` · Angular workbench · FastAPI.
 | Install | [`INSTALLATION.md`](INSTALLATION.md) |
 | Data | [`DATA_GUIDE.md`](DATA_GUIDE.md) |
 | Why / limits | [`WHY_THIS_FRAMEWORK.md`](WHY_THIS_FRAMEWORK.md) · [`LIMITATIONS.md`](LIMITATIONS.md) |
-| Quickstart | [`docs/researcher_quickstart.md`](docs/researcher_quickstart.md) · [`docs/quickstart.html`](docs/quickstart.html) |
-| Docker Hub images | [`docs/docker-images.html`](docs/docker-images.html) — `ranasl62/ehr-risk-api` · `ranasl62/ehr-risk-web` |
+| Quickstart | [`docs/researcher_quickstart.md`](docs/researcher_quickstart.md) · [`docs/quickstart/`](docs/quickstart/) |
+| Docker Hub images | [`docs/docker-images/`](docs/docker-images/) — `ranasl62/ehr-risk-api` · `ranasl62/ehr-risk-web` |
 | Model card | [`docs/model_card.md`](docs/model_card.md) |
 | Cite | [`CITATION.cff`](CITATION.cff) · [`docs/citing_and_doi.md`](docs/citing_and_doi.md) |
 
@@ -65,7 +65,7 @@ docker compose -f docker-compose.yml -f docker-compose.publish.yml up
 | API / prepare / train | `ranasl62/ehr-risk-api:latest` | [hub.docker.com/r/ranasl62/ehr-risk-api](https://hub.docker.com/r/ranasl62/ehr-risk-api) |
 | Angular workbench | `ranasl62/ehr-risk-web:latest` | [hub.docker.com/r/ranasl62/ehr-risk-web](https://hub.docker.com/r/ranasl62/ehr-risk-web) |
 
-Docs: [`docs/docker-images.html`](docs/docker-images.html) · [`docs/quickstart.html`](docs/quickstart.html).
+Docs: [`docs/docker-images/`](docs/docker-images/) · [`docs/quickstart/`](docs/quickstart/).
 
 Override with `IMAGE_API` / `IMAGE_WEB` in `.env` (see [`.env.example`](.env.example)). Still clone the repo — Compose bind-mounts `.` so `data/`, `reports/`, and `model.pkl` persist on the host.
 
@@ -109,7 +109,8 @@ If you use this project, please email feedback or open a GitHub issue — detail
 - Export metrics, audits, and figures; call `POST /v1/predict` with schema-aligned features
 - Customize UI theme/density and train defaults in Config Center
 
-Software verification metrics (synthetic, not clinical): `make paper-quick` → `reports/paper/`.  
+Software verification metrics (synthetic, not clinical) live under the local-only
+`research-paper/` package: `make -C research-paper paper-quick` → `research-paper/reports/`.
 Credentialed MIMIC (local only): [`docs/mimic_lock_checklist.md`](docs/mimic_lock_checklist.md).
 
 ---
@@ -141,7 +142,7 @@ Data ingest → health → task YAML → multi-window features → train/compare
 |-----------|---------|--------|---------|
 | ![Analytics](docs/media/08_analytics_dashboard.png) | ![Predict](docs/media/06_predict_banner.png) | ![Config](docs/media/03_config_center.png) | ![OpenAPI](docs/media/07_api_docs.png) |
 
-Full UI tour: [`docs/workbench.html`](docs/workbench.html). Refresh: `bash scripts/capture_docs_website_screenshots.sh`.
+Full UI tour: [`docs/workbench/`](docs/workbench/). Refresh: `bash scripts/capture_docs_website_screenshots.sh`.
 
 ---
 

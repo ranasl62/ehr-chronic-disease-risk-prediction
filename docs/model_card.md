@@ -30,7 +30,7 @@
 ## 4. Evaluation
 
 ROC-AUC, PR-AUC, Brier, ECE; patient / temporal splits; leakage audit; optional fairness JSON.  
-Synthetic table: `reports/paper/results_table.csv` (**not** clinical performance).
+Synthetic table (local academic package): `research-paper/reports/results_table.csv` (**not** clinical performance).
 
 ## 5. Ethical considerations
 

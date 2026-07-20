@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quickstart — EHR Risk Framework</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/site.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="/">EHR Risk <span>Framework</span></a>
+      <nav class="nav" aria-label="Primary">
+        <a href="/">Home</a>
+        <a href="/why">Why it matters</a>
+        <a href="/features">Features</a>
+        <a href="/workbench">Workbench</a>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/architecture">Architecture</a>
+        <a href="/api">API</a>
+        <a href="/data">Data</a>
+        <a href="/cite">Cite &amp; feedback</a>
+        <a class="btn btn-primary" href="https://github.com/ranasl62/ehr-chronic-disease-risk-prediction">GitHub</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+    <h1 class="page-title">Quickstart</h1>
+    <p class="page-lead">Get the workbench running in minutes. Use demo or synthetic data only in public demos.</p>
+    <p class="banner">Never commit PHI or credentialed patient rows.</p>
+
+    <section class="section">
+      <h2>Option A — Docker (recommended)</h2>
+      <h3>Build from source</h3>
+<pre><code>git clone https://github.com/ranasl62/ehr-chronic-disease-risk-prediction.git
+cd ehr-chronic-disease-risk-prediction
+docker compose up --build
+# stop: docker compose down</code></pre>
+      <h3>Pull published images (no local build)</h3>
+      <p class="muted">Images are on <strong>Docker Hub</strong> (public). Pull either image alone, or use Compose:</p>
+<pre><code>docker pull ranasl62/ehr-risk-api:latest
+docker pull ranasl62/ehr-risk-web:latest
+
+git clone https://github.com/ranasl62/ehr-chronic-disease-risk-prediction.git
+cd ehr-chronic-disease-risk-prediction
+docker compose -f docker-compose.yml -f docker-compose.publish.yml pull
+docker compose -f docker-compose.yml -f docker-compose.publish.yml up
+# or: make researcher-up-pull</code></pre>
+      <p class="muted">Defaults: <code>ranasl62/ehr-risk-api:latest</code> · <code>ranasl62/ehr-risk-web:latest</code>. Override with <code>IMAGE_API</code> / <code>IMAGE_WEB</code> in <code>.env</code>. Still clone the repo — Compose bind-mounts <code>.</code> for persistence. Full details: <a href="/docker-images">Docker Hub images</a>.</p>
+      <p class="muted">Optional: <code>cp .env.example .env</code> (API key, ports). GPU / local overrides: <code>docker-compose.override.example.yml</code>.</p>
+      <table class="data">
+        <thead><tr><th>Service</th><th>URL</th><th>Local / published</th></tr></thead>
+        <tbody>
+          <tr><td>Angular workbench</td><td><a href="http://127.0.0.1:8080">http://127.0.0.1:8080</a></td><td><code>ehr-risk-web:local</code> · <code>ranasl62/ehr-risk-web</code></td></tr>
+          <tr><td>API + OpenAPI</td><td><a href="http://127.0.0.1:8000/docs">http://127.0.0.1:8000/docs</a></td><td><code>ehr-risk-api:local</code> · <code>ranasl62/ehr-risk-api</code></td></tr>
+          <tr><td>Results ZIP</td><td><a href="http://127.0.0.1:8000/v1/reports/download.zip">/v1/reports/download.zip</a></td><td>—</td></tr>
+        </tbody>
+      </table>
+      <p class="muted"><code>data/</code>, <code>reports/</code>, and <code>model.pkl</code> persist on the host. Demo data only — no PHI. Research / education only · <a href="mailto:support@larucare.com">support@larucare.com</a>.</p>
+    </section>
+
+    <section class="section">
+      <h2>Docker Hub images</h2>
+      <p>Published by GitHub Actions on <code>main</code> / <code>v*</code> tags. Both repos are public.</p>
+<pre><code>docker pull ranasl62/ehr-risk-api:latest
+docker pull ranasl62/ehr-risk-web:latest</code></pre>
+      <table class="data">
+        <thead><tr><th>Image</th><th>Hub</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>ranasl62/ehr-risk-api</code></td>
+            <td><a href="https://hub.docker.com/r/ranasl62/ehr-risk-api">hub.docker.com/r/ranasl62/ehr-risk-api</a></td>
+            <td>FastAPI, prepare, train</td>
+          </tr>
+          <tr>
+            <td><code>ranasl62/ehr-risk-web</code></td>
+            <td><a href="https://hub.docker.com/r/ranasl62/ehr-risk-web">hub.docker.com/r/ranasl62/ehr-risk-web</a></td>
+            <td>Angular workbench (nginx)</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="muted">Also tagged <code>:sha-…</code> and semver from release tags. See <a href="/docker-images">Docker Hub images</a> for compose, pins, and troubleshooting.</p>
+    </section>
+
+    <section class="section">
+      <h2>First successful loop</h2>
+      <ol class="steps">
+        <li>Open <strong>Datasets</strong> → select the tiny longitudinal demo → Run health.</li>
+        <li>Open <strong>Train</strong> → start train (logreg is fine) → wait for succeeded.</li>
+        <li>Open <strong>Results</strong> / <strong>Analytics</strong> → inspect metrics and charts.</li>
+        <li>Optional: Generate SHAP · run leakage audit.</li>
+        <li>Open <strong>Predict</strong> → Fill medians → Predict.</li>
+      </ol>
+    </section>
+
+    <section class="section">
+      <h2>Stop &amp; clean</h2>
+<pre><code>docker compose down                 # stop stack (keeps host data)
+docker compose down --rmi local     # also remove project images
+# optional host cleanup:
+# rm -f model.pkl; rm -rf reports/runs data/uploads/*</code></pre>
+    </section>
+
+    <section class="section">
+      <h2>Option B — Local Python + Angular</h2>
+<pre><code>pip install -r requirements.txt &amp;&amp; pip install -e .
+PYTHONPATH=. uvicorn api.main:app --reload --port 8000
+
+# another terminal
+cd web &amp;&amp; npm install &amp;&amp; npm start
+# UI http://127.0.0.1:4200 (proxies API)</code></pre>
+      <p class="muted">Or CLI: <code>ehr-ai start</code> after editable install. Full install notes live in repository <code>INSTALLATION.md</code>.</p>
+    </section>
+
+    <section class="section">
+      <h2>Tests</h2>
+<pre><code>PYTHONPATH=. pytest tests/ -q
+cd web &amp;&amp; npm run test:ci
+# or: make test-all</code></pre>
+    </section>
+
+    <section class="section">
+      <h2>Next reading</h2>
+      <div class="pill-row">
+        <a class="btn" href="/data">Data guide</a>
+        <a class="btn" href="/diagrams">Diagrams</a>
+        <a class="btn" href="/fine-tuning">Fine-tuning</a>
+        <a class="btn" href="/workbench">UI tour</a>
+        <a class="btn" href="/sitemap">Doc map</a>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="inner"><p class="fine">Maintainer: Md Rana Hossain · support@larucare.com</p></div>
+  </footer>
+  <script src="../assets/site.js"></script>
+</body>
+</html>
