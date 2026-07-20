@@ -1,0 +1,7 @@
+{
+  "n_patients": 3000,
+  "n_event_rows": 16577,
+  "seed": 42,
+  "label_prevalence": 0.301,
+  "note": "Synthetic verification cohort only. Not clinical data. No PHI."
+}

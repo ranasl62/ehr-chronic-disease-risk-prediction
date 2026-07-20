@@ -1,21 +1,21 @@
 {
-  "generated_at_utc": "2026-07-19T22:21:03.684226+00:00",
+  "generated_at_utc": "2026-07-20T05:34:55.489961+00:00",
   "threshold": 0.5,
   "metrics": {
-    "roc_auc": NaN,
-    "pr_auc": NaN,
-    "brier": 0.20762754191886204,
-    "ece": 0.4415743302983367,
+    "roc_auc": 0.6205796157603387,
+    "pr_auc": 0.4009005543696041,
+    "brier": 0.22989313304424286,
+    "ece": 0.1256514026845495,
     "ece_bins": 10,
-    "accuracy": 0.5,
-    "precision": 0.0,
-    "recall": 0.0,
-    "f1": 0.0
+    "accuracy": 0.6233333333333333,
+    "precision": 0.4055299539170507,
+    "recall": 0.4756756756756757,
+    "f1": 0.43781094527363185
   },
-  "classification_report_text": "              precision    recall  f1-score   support\n\n           0       1.00      0.50      0.67         2\n           1       0.00      0.00      0.00         0\n\n    accuracy                           0.50         2\n   macro avg       0.50      0.25      0.33         2\nweighted avg       1.00      0.50      0.67         2\n",
+  "classification_report_text": "              precision    recall  f1-score   support\n\n           0       0.75      0.69      0.72       415\n           1       0.41      0.48      0.44       185\n\n    accuracy                           0.62       600\n   macro avg       0.58      0.58      0.58       600\nweighted avg       0.64      0.62      0.63       600\n",
   "meta": {
-    "model_path": "/app/reports/runs/20260719T222103Z_logreg/model.pkl",
-    "model_kind": "logreg",
+    "model_path": "/media/ranasl62/Study4/ai/ehr-chronic-disease-risk-prediction/reports/paper/model_xgboost_raw_w7-30-180.pkl",
+    "model_kind": "xgboost",
     "calibrated": false,
     "feature_engineering": {
       "format": "longitudinal",
@@ -25,24 +25,24 @@
         30,
         180
       ],
-      "data_path": "/app/data/raw/ehr_data.csv",
+      "data_path": "/media/ranasl62/Study4/ai/ehr-chronic-disease-risk-prediction/data/raw/paper_synthetic_cohort.csv",
       "random_state": 42,
       "test_size": 0.2,
       "split_method": "patient_group",
-      "horizon_days": null,
-      "index_strategy": "last_event",
-      "index_time_col": null,
+      "horizon_days": 365,
+      "index_strategy": "column",
+      "index_time_col": "index_time",
       "feature_inclusive": true
     },
-    "training_manifest_path": "/app/reports/training_manifest.json",
+    "training_manifest_path": "/media/ranasl62/Study4/ai/ehr-chronic-disease-risk-prediction/reports/training_manifest.json",
     "training_manifest": {
-      "generated_at_utc": "2026-07-19T22:21:03.641863+00:00",
-      "data_sha256": "d7be825a5f58fb9aea610ded521799e510c2777754be68629a64b88db87688ae",
-      "git_revision": "unknown",
+      "generated_at_utc": "2026-07-20T05:34:55.414278+00:00",
+      "data_sha256": "e5b8df41317ee8e124ed37f09e82cddab347f4246678755531d4a4221eb43dcc",
+      "git_revision": "b1fee779da02ce62ec737a5678c1c27add419a5d",
       "split_method": "patient_group",
-      "model_kind": "logreg",
+      "model_kind": "xgboost",
       "calibrated": false
     },
-    "psi_train_vs_test_predicted_prob": 10.361589631740209
+    "psi_train_vs_test_predicted_prob": 0.1506710413807753
   }
 }

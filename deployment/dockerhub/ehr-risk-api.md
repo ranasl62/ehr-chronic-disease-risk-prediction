@@ -2,7 +2,7 @@
 
 **Image:** [`ranasl62/ehr-risk-api`](https://hub.docker.com/r/ranasl62/ehr-risk-api)  
 **Source:** [github.com/ranasl62/ehr-chronic-disease-risk-prediction](https://github.com/ranasl62/ehr-chronic-disease-risk-prediction)  
-**Docs:** [ehr.larucare.com](https://ehr.larucare.com/) · [Docker images page](https://ehr.larucare.com/docker-images.html)  
+**Docs:** [ehr.larucare.com](https://ehr.larucare.com/) · [Docker images page](https://ehr.larucare.com/docker-images)  
 **DOI:** [10.5281/zenodo.21448693](https://doi.org/10.5281/zenodo.21448693)
 
 > **Research and education only.** Not a medical device. Not for patient care. Use demo/synthetic data only — never put PHI in public containers.
@@ -50,7 +50,7 @@ Override: `IMAGE_API=ranasl62/ehr-risk-api:latest` in `.env`.
 ## Links
 
 - Installation: https://github.com/ranasl62/ehr-chronic-disease-risk-prediction/blob/main/INSTALLATION.md  
-- Quickstart: https://ehr.larucare.com/quickstart.html  
+- Quickstart: https://ehr.larucare.com/quickstart  
 - Limitations: https://github.com/ranasl62/ehr-chronic-disease-risk-prediction/blob/main/LIMITATIONS.md  
 - Support: support@larucare.com  
 

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Architecture — EHR Risk Framework</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/site.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="/">EHR Risk <span>Framework</span></a>
+      <nav class="nav" aria-label="Primary">
+        <a href="/">Home</a>
+        <a href="/why">Why it matters</a>
+        <a href="/features">Features</a>
+        <a href="/workbench">Workbench</a>
+        <a href="/quickstart">Quickstart</a>
+        <a href="/architecture">Architecture</a>
+        <a href="/api">API</a>
+        <a href="/data">Data</a>
+        <a href="/cite">Cite &amp; feedback</a>
+        <a class="btn btn-primary" href="https://github.com/ranasl62/ehr-chronic-disease-risk-prediction">GitHub</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+    <h1 style="font-family:var(--display);font-size:2rem;margin:0 0 0.75rem">Architecture</h1>
+    <p class="muted" style="max-width:42rem">Package <code>openhealth</code> · CLI <code>ehr-ai</code> · Angular workbench · FastAPI. Research / education prototype — not a medical device.</p>
+
+    <section class="section">
+      <h2>System context</h2>
+<pre><code>Researcher / developer
+  browser (:8080)  ·  CLI (ehr-ai)  ·  OpenAPI (:8000)
+           │                │                 │
+           └────────┬───────┴─────────────────┘
+                    ▼
+              FastAPI api/
+         jobs · datasets · predict · config
+                    │
+                    ▼
+     feature_engineering / training / models
+     explainability / fairness
+                    │
+                    ▼
+     model.pkl · reports/ · config/workspace.yaml
+     data/raw (demo) · data/uploads (local)</code></pre>
+    </section>
+
+    <section class="section">
+      <h2>Docker topology</h2>
+<pre><code>docker compose up --build
+  prepare  → train model.pkl if missing
+  api      → :8000  (ehr-risk-api:local)
+  web      → :8080  (ehr-risk-web:local; nginx proxies /v1 to api)</code></pre>
+    </section>
+
+    <section class="section">
+      <h2>ML pipeline</h2>
+      <ol class="steps">
+        <li><strong>Ingest</strong> — demo CSV / upload / form / SQL / map</li>
+        <li><strong>Health</strong> — readiness blockers &amp; warnings</li>
+        <li><strong>Features</strong> — multi-window aggregates truncated at index time</li>
+        <li><strong>Train / compare</strong> — calibrated models, manifests, runs</li>
+        <li><strong>Trust</strong> — leakage audit, SHAP, calibration plots</li>
+        <li><strong>Serve</strong> — schema + predict + workbench</li>
+      </ol>
+    </section>
+
+    <section class="section">
+      <h2>Key paths</h2>
+      <table class="data">
+        <thead><tr><th>Area</th><th>Path</th></tr></thead>
+        <tbody>
+          <tr><td>Framework</td><td><code>openhealth/</code>, <code>tasks/</code>, <code>config/</code></td></tr>
+          <tr><td>ML</td><td><code>training/</code>, <code>feature_engineering/</code>, <code>models/</code></td></tr>
+          <tr><td>API / jobs</td><td><code>api/</code></td></tr>
+          <tr><td>UI</td><td><code>web/</code></td></tr>
+          <tr><td>Trust scripts</td><td><code>scripts/leakage_audit.py</code>, <code>explain_shap.py</code></td></tr>
+          <tr><td>This site</td><td><code>docs/</code></td></tr>
+        </tbody>
+      </table>
+      <p class="muted">Canonical long-form: repository <code>ARCHITECTURE.md</code>. Visual diagrams: <a href="/diagrams">Diagrams</a>. Model iteration: <a href="/fine-tuning">Fine-tuning</a>.</p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="inner"><p class="fine">Maintainer: Md Rana Hossain</p></div>
+  </footer>
+  <script src="../assets/site.js"></script>
+</body>
+</html>

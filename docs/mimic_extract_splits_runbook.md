@@ -2,7 +2,7 @@
 
 This is an **operational checklist** after you receive **PhysioNet MIMIC-IV credentialing**. It does not grant access to MIMIC data.
 
-**Lock path:** [`mimic_lock_checklist.md`](mimic_lock_checklist.md) · [`mimic_results_lock.md`](mimic_results_lock.md) → `make mimic-lock`
+**Lock path:** [`mimic_lock_checklist.md`](mimic_lock_checklist.md) · [`mimic_results_lock.md`](mimic_results_lock.md) → `make -C research-paper mimic-lock`
 
 ## 1. Credentialing and environment
 
@@ -41,7 +41,7 @@ python -m training.train \
 **Preferred one-shot Results lock:**
 
 ```bash
-bash scripts/lock_mimic_cohort.sh data/processed/mimic_diabetes_cohort.csv reports/paper/mimic
+bash research-paper/scripts/lock_mimic_cohort.sh data/processed/mimic_diabetes_cohort.csv research-paper/reports/mimic
 ```
 
 ## 4. Leakage audit (artifact)
@@ -58,7 +58,7 @@ Expect `patient_disjoint_train_test: true` and `temporal_integrity.passed: true`
 
 - **SHAP:** `python scripts/explain_shap.py --artifact model.pkl`
 - **Fairness:** `scripts/fairness_report.py` with `patient_id,sex` (or `age_band`) CSV
-- **Paper matrix:** `scripts/run_paper_experiments.py`
+- **Paper matrix (local academic):** `research-paper/scripts/run_paper_experiments.py`
 - **Container smoke:** `bash scripts/docker_smoke.sh`
 
 ## 6. Out of scope for this checklist

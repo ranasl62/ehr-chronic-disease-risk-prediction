@@ -7,7 +7,7 @@ docker compose up -d
 bash scripts/capture_docs_website_screenshots.sh
 ```
 
-PNGs land in `docs/media/` (`01_` … `09_`). Tour: `docs/workbench.html`.
+PNGs land in `docs/media/` (`01_` … `09_`). Tour: `docs/workbench/`.
 
 ## Hygiene
 

@@ -10,6 +10,15 @@ python3 -m http.server 4173
 # open http://127.0.0.1:4173/
 ```
 
+Clean URLs use the folder/`index.html` pattern (GitHub Pages native):
+
+| Live URL | File |
+|----------|------|
+| `/` | `index.html` |
+| `/quickstart` | `quickstart/index.html` |
+| `/why` | `why/index.html` |
+| … | … |
+
 ## GitHub Pages (point reviewers here)
 
 Publish from this folder as the site root (so `index.html` is at `/`):
@@ -19,7 +28,7 @@ Publish from this folder as the site root (so `index.html` is at `/`):
 
 Custom domain: `https://ehr.larucare.com/` (see `CNAME`).
 
-Relative links are used throughout so project-pages URLs work without a custom base href.
+Internal links use site-root absolute paths (`/`, `/quickstart`, …) so the custom domain and project-pages URLs stay consistent.
 
 ## Screenshots
 
@@ -32,18 +41,18 @@ Demo data only — never capture PHI.
 
 ## Pages
 
-| File | Content |
+| Path | Content |
 |------|---------|
-| `index.html` | Landing, U.S. healthcare research context, capabilities |
-| `why.html` | Problems, audiences, U.S. research relevance |
-| `features.html` | Feature catalog |
-| `workbench.html` | Hub — every UI route + screenshots |
-| `ui-*.html` | Per-page UI detail (9 pages) |
-| `sitemap.html` | Full map |
-| `diagrams.html` / `fine-tuning.html` | Design + iteration |
-| `quickstart.html` / `commands.html` | Run recipes |
-| `architecture.html` / `api.html` / `data.html` | Deep technical |
-| `limits.html` / `help.html` / `cite.html` | Boundaries, full guide library, contact |
+| `/` | Landing, U.S. healthcare research context, capabilities |
+| `/why` | Problems, audiences, U.S. research relevance |
+| `/features` | Feature catalog |
+| `/workbench` | Hub — every UI route + screenshots |
+| `/ui-*` | Per-page UI detail (9 pages) |
+| `/sitemap` | Full map |
+| `/diagrams` · `/fine-tuning` | Design + iteration |
+| `/quickstart` · `/commands` · `/docker-images` | Run recipes |
+| `/architecture` · `/api` · `/data` | Deep technical |
+| `/limits` · `/help` · `/cite` | Boundaries, full guide library, contact |
 
 Navigation, feedback strip, continue-reading, and footer map: `assets/site.js`.
 

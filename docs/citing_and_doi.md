@@ -37,10 +37,10 @@ For later versions: create a new GitHub Release with Zenodo–GitHub still enabl
 
 | Artifact | When to cite |
 |----------|----------------|
-| This GitHub / Zenodo software DOI | You used the code, Docker images, or `make paper-quick` pipeline |
+| This GitHub / Zenodo software DOI | You used the code, Docker images, or the local academic verification pipeline (`make -C research-paper paper-quick`) |
 | Future journal article DOI | You rely on the peer-reviewed methods narrative |
 
-Do not treat synthetic verification AUCs in `reports/paper/` as clinical performance when citing.
+Do not treat synthetic verification AUCs in `research-paper/reports/` as clinical performance when citing.
 
 ## License
 

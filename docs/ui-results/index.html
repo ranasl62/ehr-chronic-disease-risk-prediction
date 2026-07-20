@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Results — EHR Risk Framework</title>
+  <meta name="description" content="Metrics, charts, SHAP, figures, ZIP pack" />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/site.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="/">EHR Risk <span>Framework</span></a>
+      <nav class="nav" aria-label="Primary"></nav>
+    </div>
+  </header>
+  <main id="main" data-ui-page="ui-results">
+    <p class="muted crumb"><a href="/workbench">Workbench hub</a> · UI route <code>/results</code></p>
+    <h1 style="font-family:var(--display);font-size:2rem;margin:0 0 0.5rem">Results</h1>
+    <p class="lede muted" style="max-width:42rem;margin:0 0 1rem">Inspect hold-out metrics, comparison tables, feature importance, leakage audit, figures, and generate SHAP.</p>
+    <p class="banner">Demo screenshots only — never capture PHI.</p>
+
+    <figure class="shot">
+      <img src="../media/05_results_zip.png" alt="Results page" width="1200" height="750" />
+      <figcaption>Results — charts, tables, figures, ZIP</figcaption>
+    </figure>
+    <section class="section">
+      <h2>Surfaces</h2>
+      <ul>
+        <li><strong>Experiment runs</strong> — browse <code>reports/runs/</code>, open manifests/metrics, compare up to four runs, promote to active model</li>
+        <li><strong>Charts</strong> — model compare, selected metric, feature importance (Chart.js)</li>
+        <li><strong>Model comparison</strong> — table of multi-model runs</li>
+        <li><strong>Metrics</strong> — filterable hold-out metrics (AUROC, PR-AUC, Brier, ECE, …)</li>
+        <li><strong>Fairness</strong> — age-band / group metrics table (run from Results; not ZIP-only)</li>
+        <li><strong>Operating points</strong> — precision/recall at several probability thresholds (research only)</li>
+        <li><strong>Light HPO</strong> — optional grid trials when run from Train</li>
+        <li><strong>Feature importance</strong> — top drivers from the fitted model</li>
+        <li><strong>Leakage audit</strong> — findings from the audit job</li>
+        <li><strong>Report files</strong> — JSON/CSV artifacts under <code>reports/</code></li>
+        <li><strong>Figures</strong> — calibration and other PNGs</li>
+      </ul>
+    </section>
+    <section class="section">
+      <h2>Actions</h2>
+      <ul>
+        <li><strong>Generate SHAP</strong> — background job for summary explanations</li>
+        <li><strong>Run fairness</strong> — subgroup metrics on hold-out</li>
+        <li><strong>Threshold table</strong> — compute operating points from the active artifact</li>
+        <li><strong>Download ZIP</strong> — pack metrics, audits, fairness/HPO (when present), figures</li>
+        <li>Empty state links back to Train when no model exists</li>
+      </ul>
+      <p class="muted">Next: <a href="/ui-predict">Predict</a> · <a href="/ui-analytics">Analytics</a></p>
+    </section>
+
+  </main>
+  <footer class="site-footer"><div class="inner"><p class="fine">Research / education only · Md Rana Hossain · <a href="mailto:support@larucare.com">support@larucare.com</a></p></div></footer>
+  <script src="../assets/site.js"></script>
+</body>
+</html>
