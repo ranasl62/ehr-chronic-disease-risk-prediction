@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Capture Angular + OpenAPI screenshots into docs/website/media/
+# Capture Angular + OpenAPI screenshots into docs/media/
 # Requires: stack on :8080 / :8000, google-chrome or chromium.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-MEDIA="$ROOT/docs/website/media"
+MEDIA="$ROOT/docs/media"
 mkdir -p "$MEDIA"
 CHROME="$(command -v google-chrome || command -v chromium-browser || command -v chromium || true)"
 if [[ -z "$CHROME" ]]; then
@@ -34,4 +34,4 @@ shot "http://127.0.0.1:8080/docs" "$MEDIA/09_ui_docs.png"
 if [[ "$(wc -c < "$MEDIA/07_api_docs.png")" -lt 30000 ]]; then
   echo "warning: 07_api_docs.png looks empty; check :8000/docs is up" >&2
 fi
-echo "Done. Preview: cd docs/website && python3 -m http.server 4173"
+echo "Done. Preview: cd docs && python3 -m http.server 4173"

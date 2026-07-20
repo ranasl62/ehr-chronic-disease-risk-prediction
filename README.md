@@ -16,7 +16,7 @@ Package `openhealth` · CLI `ehr-ai` · Angular workbench · FastAPI.
 
 | Doc | Link |
 |-----|------|
-| **Documentation website** | [`docs/website/`](docs/website/) → [GitHub Pages](https://ranasl62.github.io/ehr-chronic-disease-risk-prediction/) (enable Actions source in Settings → Pages) |
+| **Documentation website** | [`docs/`](docs/) → [GitHub Pages](https://ranasl62.github.io/ehr-chronic-disease-risk-prediction/) (enable Actions source in Settings → Pages) |
 | Architecture | [`ARCHITECTURE.md`](ARCHITECTURE.md) |
 | Install | [`INSTALLATION.md`](INSTALLATION.md) |
 | Data | [`DATA_GUIDE.md`](DATA_GUIDE.md) |
@@ -65,7 +65,7 @@ Optional: `cp .env.example .env` (set `API_KEY`, ports). GPU / overrides: `cp do
 | Angular workbench | http://127.0.0.1:8080 | `ehr-risk-web:local` | `ranasl62/ehr-risk-web` |
 | API + OpenAPI | http://127.0.0.1:8000/docs (also http://127.0.0.1:8080/api-docs) | `ehr-risk-api:local` | `ranasl62/ehr-risk-api` |
 | Results ZIP | http://127.0.0.1:8000/v1/reports/download.zip | — | — |
-| **Docs website** | [`docs/website/`](docs/website/) → [GitHub Pages](https://ranasl62.github.io/ehr-chronic-disease-risk-prediction/) | — | — |
+| **Docs website** | [`docs/`](docs/) → [GitHub Pages](https://ranasl62.github.io/ehr-chronic-disease-risk-prediction/) | — | — |
 
 **First loop:** Datasets (demo + health) → Train → Results / Analytics → Predict.  
 Demo CSVs only — no PHI. **Research and education only** — not for patient care.
@@ -124,13 +124,13 @@ Data ingest → health → task YAML → multi-window features → train/compare
 
 | Home | Datasets | Train | Results |
 |------|----------|-------|---------|
-| ![Home](docs/website/media/01_home_checklist.png) | ![Datasets](docs/website/media/02_datasets_health.png) | ![Train](docs/website/media/04_train_compare.png) | ![Results](docs/website/media/05_results_zip.png) |
+| ![Home](docs/media/01_home_checklist.png) | ![Datasets](docs/media/02_datasets_health.png) | ![Train](docs/media/04_train_compare.png) | ![Results](docs/media/05_results_zip.png) |
 
 | Analytics | Predict | Config | OpenAPI |
 |-----------|---------|--------|---------|
-| ![Analytics](docs/website/media/08_analytics_dashboard.png) | ![Predict](docs/website/media/06_predict_banner.png) | ![Config](docs/website/media/03_config_center.png) | ![OpenAPI](docs/website/media/07_api_docs.png) |
+| ![Analytics](docs/media/08_analytics_dashboard.png) | ![Predict](docs/media/06_predict_banner.png) | ![Config](docs/media/03_config_center.png) | ![OpenAPI](docs/media/07_api_docs.png) |
 
-Full UI tour: [`docs/website/workbench.html`](docs/website/workbench.html). Refresh: `bash scripts/capture_docs_website_screenshots.sh`.
+Full UI tour: [`docs/workbench.html`](docs/workbench.html). Refresh: `bash scripts/capture_docs_website_screenshots.sh`.
 
 ---
 
