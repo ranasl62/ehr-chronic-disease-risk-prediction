@@ -51,13 +51,10 @@ implementation_private/
 *NIW*
 *petition*
 *uscis*
-research_paper/
 docs/ieee*
 docs/*paper_draft*
 docs/study_protocol*
 docs/study_protocol_*.md
-**/manuscript*
-**/cover_letter*
 **/recommendation_letter*
 
 # Angular
@@ -65,7 +62,7 @@ web/node_modules/
 web/dist/
 web/.angular/
 
-
+# Local-only academic writing (not part of software repo)
 book/
-research_paper/
 research-paper/
+research_paper/

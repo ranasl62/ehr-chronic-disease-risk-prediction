@@ -1,4 +1,4 @@
-# Build and push API + web images to Docker Hub.
+# Build and push API + web images to Docker Hub, and sync Hub overviews.
 #
 # Triggers: push to main/master, version tags (v*), manual dispatch.
 # Images:
@@ -7,14 +7,19 @@
 # Default username in docs/compose: ranasl62
 # Tags: latest (default branch), git SHA, and semver from v* tags.
 #
+# Hub full descriptions are synced from:
+#   deployment/dockerhub/ehr-risk-api.md
+#   deployment/dockerhub/ehr-risk-web.md
+#
 # Required GitHub Actions secrets (repo → Settings → Secrets and variables → Actions):
 #   DOCKERHUB_USERNAME  — Docker Hub username (e.g. ranasl62)
-#   DOCKERHUB_TOKEN     — Docker Hub access token with write (Account Settings → Security)
+#   DOCKERHUB_TOKEN     — Docker Hub access token with Read/Write/Delete (needed for Hub description sync)
 #
 # After the first successful push (maintainers):
 #   1. Create repos on hub.docker.com if they do not auto-create (ehr-risk-api, ehr-risk-web)
 #   2. Set visibility to Public for anonymous `docker pull`
 #   3. Confirm: docker pull ranasl62/ehr-risk-api:latest
+#   4. Confirm Hub Overview shows the synced README for each repo
 
 name: Publish Docker images
 
@@ -42,10 +47,14 @@ jobs:
             context: .
             file: deployment/Dockerfile
             image_suffix: ehr-risk-api
+            readme: deployment/dockerhub/ehr-risk-api.md
+            short_description: "EHR Risk Framework API — leakage-aware FastAPI risk modeling (research/education only)"
           - name: web
             context: ./web
             file: web/Dockerfile
             image_suffix: ehr-risk-web
+            readme: deployment/dockerhub/ehr-risk-web.md
+            short_description: "EHR Risk Framework Angular workbench (research/education only)"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -94,3 +103,13 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+
+      - name: Update Docker Hub description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ steps.image.outputs.name }}
+          short-description: ${{ matrix.short_description }}
+          readme-filepath: ${{ matrix.readme }}
+          enable-url-completion: "true"

@@ -39,13 +39,16 @@ cd ehr-chronic-disease-risk-prediction
 docker compose up --build
 # stop: docker compose down</code></pre>
       <h3>Pull published images (no local build)</h3>
-      <p class="muted">When Docker Hub repos are <strong>public</strong> (or after <code>docker login</code>):</p>
-<pre><code>git clone https://github.com/ranasl62/ehr-chronic-disease-risk-prediction.git
+      <p class="muted">Images are on <strong>Docker Hub</strong> (public). Pull either image alone, or use Compose:</p>
+<pre><code>docker pull ranasl62/ehr-risk-api:latest
+docker pull ranasl62/ehr-risk-web:latest
+
+git clone https://github.com/ranasl62/ehr-chronic-disease-risk-prediction.git
 cd ehr-chronic-disease-risk-prediction
 docker compose -f docker-compose.yml -f docker-compose.publish.yml pull
 docker compose -f docker-compose.yml -f docker-compose.publish.yml up
 # or: make researcher-up-pull</code></pre>
-      <p class="muted">Defaults: <code>ranasl62/ehr-risk-api:latest</code> · <code>ranasl62/ehr-risk-web:latest</code>. Override with <code>IMAGE_API</code> / <code>IMAGE_WEB</code> in <code>.env</code>. Still clone the repo — Compose bind-mounts <code>.</code> for persistence.</p>
+      <p class="muted">Defaults: <code>ranasl62/ehr-risk-api:latest</code> · <code>ranasl62/ehr-risk-web:latest</code>. Override with <code>IMAGE_API</code> / <code>IMAGE_WEB</code> in <code>.env</code>. Still clone the repo — Compose bind-mounts <code>.</code> for persistence. Full details: <a href="docker-images.html">Docker Hub images</a>.</p>
       <p class="muted">Optional: <code>cp .env.example .env</code> (API key, ports). GPU / local overrides: <code>docker-compose.override.example.yml</code>.</p>
       <table class="data">
         <thead><tr><th>Service</th><th>URL</th><th>Local / published</th></tr></thead>
@@ -56,6 +59,29 @@ docker compose -f docker-compose.yml -f docker-compose.publish.yml up
         </tbody>
       </table>
       <p class="muted"><code>data/</code>, <code>reports/</code>, and <code>model.pkl</code> persist on the host. Demo data only — no PHI. Research / education only · <a href="mailto:support@larucare.com">support@larucare.com</a>.</p>
+    </section>
+
+    <section class="section">
+      <h2>Docker Hub images</h2>
+      <p>Published by GitHub Actions on <code>main</code> / <code>v*</code> tags. Both repos are public.</p>
+<pre><code>docker pull ranasl62/ehr-risk-api:latest
+docker pull ranasl62/ehr-risk-web:latest</code></pre>
+      <table class="data">
+        <thead><tr><th>Image</th><th>Hub</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>ranasl62/ehr-risk-api</code></td>
+            <td><a href="https://hub.docker.com/r/ranasl62/ehr-risk-api">hub.docker.com/r/ranasl62/ehr-risk-api</a></td>
+            <td>FastAPI, prepare, train</td>
+          </tr>
+          <tr>
+            <td><code>ranasl62/ehr-risk-web</code></td>
+            <td><a href="https://hub.docker.com/r/ranasl62/ehr-risk-web">hub.docker.com/r/ranasl62/ehr-risk-web</a></td>
+            <td>Angular workbench (nginx)</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="muted">Also tagged <code>:sha-…</code> and semver from release tags. See <a href="docker-images.html">Docker Hub images</a> for compose, pins, and troubleshooting.</p>
     </section>
 
     <section class="section">

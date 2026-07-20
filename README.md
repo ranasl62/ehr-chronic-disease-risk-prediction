@@ -3,7 +3,7 @@
 [![CI](https://github.com/ranasl62/ehr-chronic-disease-risk-prediction/actions/workflows/ci.yml/badge.svg)](https://github.com/ranasl62/ehr-chronic-disease-risk-prediction/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.0.0-informational.svg)](CHANGELOG.md)
-[![DOI](https://zenodo.org/badge/1195670884.svg)](https://doi.org/10.5281/zenodo.21448693)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21448693.svg)](https://doi.org/10.5281/zenodo.21448693)
 
 **Leakage-aware, calibrated, explainable** EHR risk modeling for research and education.  
 Default demos cover chronic-disease-style horizons; any binary outcome with an index time and horizon can use the same pipeline (see `tasks/`).  
@@ -22,7 +22,8 @@ Package `openhealth` · CLI `ehr-ai` · Angular workbench · FastAPI.
 | Install | [`INSTALLATION.md`](INSTALLATION.md) |
 | Data | [`DATA_GUIDE.md`](DATA_GUIDE.md) |
 | Why / limits | [`WHY_THIS_FRAMEWORK.md`](WHY_THIS_FRAMEWORK.md) · [`LIMITATIONS.md`](LIMITATIONS.md) |
-| Quickstart | [`docs/researcher_quickstart.md`](docs/researcher_quickstart.md) |
+| Quickstart | [`docs/researcher_quickstart.md`](docs/researcher_quickstart.md) · [`docs/quickstart.html`](docs/quickstart.html) |
+| Docker Hub images | [`docs/docker-images.html`](docs/docker-images.html) — `ranasl62/ehr-risk-api` · `ranasl62/ehr-risk-web` |
 | Model card | [`docs/model_card.md`](docs/model_card.md) |
 | Cite | [`CITATION.cff`](CITATION.cff) · [`docs/citing_and_doi.md`](docs/citing_and_doi.md) |
 
@@ -42,7 +43,14 @@ docker compose up --build
 
 ### Pull published images (no local build)
 
-When images are published to Docker Hub (public repos, or after `docker login`):
+Images are on **Docker Hub** (public):
+
+```bash
+docker pull ranasl62/ehr-risk-api:latest
+docker pull ranasl62/ehr-risk-web:latest
+```
+
+Then clone and run Compose (bind-mounts still need the repo tree):
 
 ```bash
 git clone https://github.com/ranasl62/ehr-chronic-disease-risk-prediction.git
@@ -52,10 +60,12 @@ docker compose -f docker-compose.yml -f docker-compose.publish.yml up
 # or: make researcher-up-pull
 ```
 
-| Image | Default ref |
-|-------|-------------|
-| API / prepare / train | `ranasl62/ehr-risk-api:latest` |
-| Angular workbench | `ranasl62/ehr-risk-web:latest` |
+| Image | Default ref | Hub |
+|-------|-------------|-----|
+| API / prepare / train | `ranasl62/ehr-risk-api:latest` | [hub.docker.com/r/ranasl62/ehr-risk-api](https://hub.docker.com/r/ranasl62/ehr-risk-api) |
+| Angular workbench | `ranasl62/ehr-risk-web:latest` | [hub.docker.com/r/ranasl62/ehr-risk-web](https://hub.docker.com/r/ranasl62/ehr-risk-web) |
+
+Docs: [`docs/docker-images.html`](docs/docker-images.html) · [`docs/quickstart.html`](docs/quickstart.html).
 
 Override with `IMAGE_API` / `IMAGE_WEB` in `.env` (see [`.env.example`](.env.example)). Still clone the repo — Compose bind-mounts `.` so `data/`, `reports/`, and `model.pkl` persist on the host.
 
