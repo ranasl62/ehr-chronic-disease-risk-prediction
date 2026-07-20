@@ -17,9 +17,12 @@ docker compose up --build
 # stop: docker compose down
 ```
 
-**Pull published images** (Docker Hub; repos must be public or `docker login`)
+**Pull published images** (Docker Hub; public)
 
 ```bash
+docker pull ranasl62/ehr-risk-api:latest
+docker pull ranasl62/ehr-risk-web:latest
+
 git clone https://github.com/ranasl62/ehr-chronic-disease-risk-prediction.git
 cd ehr-chronic-disease-risk-prediction
 docker compose -f docker-compose.yml -f docker-compose.publish.yml pull
@@ -28,6 +31,7 @@ docker compose -f docker-compose.yml -f docker-compose.publish.yml up
 ```
 
 Defaults: `ranasl62/ehr-risk-api:latest` · `ranasl62/ehr-risk-web:latest`  
+Hub: [ehr-risk-api](https://hub.docker.com/r/ranasl62/ehr-risk-api) · [ehr-risk-web](https://hub.docker.com/r/ranasl62/ehr-risk-web) · Docs: [`docker-images.html`](docker-images.html)  
 Override: `IMAGE_API` / `IMAGE_WEB` in `.env`. Ports **8080** (UI) / **8000** (API). Optional `API_KEY`.
 
 Optional: `cp .env.example .env` · GPU/overrides: `docker-compose.override.example.yml`.

@@ -18,9 +18,12 @@ docker compose up --build
 
 ### Pull published images (no local build)
 
-Images are published to **Docker Hub** by the [`publish-images`](.github/workflows/publish-images.yml) workflow (`main` / `v*` tags). **Repos must be Public** for anonymous pull (or `docker login`).
+Images are published to **Docker Hub** by the [`publish-images`](.github/workflows/publish-images.yml) workflow (`main` / `v*` tags). Repos are **Public**.
 
 ```bash
+docker pull ranasl62/ehr-risk-api:latest
+docker pull ranasl62/ehr-risk-web:latest
+
 git clone https://github.com/ranasl62/ehr-chronic-disease-risk-prediction.git
 cd ehr-chronic-disease-risk-prediction
 docker compose -f docker-compose.yml -f docker-compose.publish.yml pull
@@ -30,8 +33,10 @@ docker compose -f docker-compose.yml -f docker-compose.publish.yml up
 
 | Image | Docker Hub ref |
 |-------|----------------|
-| API | `ranasl62/ehr-risk-api:latest` (also `:sha-…`, `:v…`) |
-| Web | `ranasl62/ehr-risk-web:latest` |
+| API | `ranasl62/ehr-risk-api:latest` (also `:sha-…`, `:v…`) — [hub](https://hub.docker.com/r/ranasl62/ehr-risk-api) |
+| Web | `ranasl62/ehr-risk-web:latest` — [hub](https://hub.docker.com/r/ranasl62/ehr-risk-web) |
+
+Site page: [`docs/docker-images.html`](docs/docker-images.html).
 
 Pin or override in `.env`: `IMAGE_API=…` · `IMAGE_WEB=…` (see [`.env.example`](.env.example)).
 
@@ -76,6 +81,7 @@ docker compose down --rmi local  # also remove project images
 3. Optionally create public repos `ehr-risk-api` and `ehr-risk-web` under that Hub user (or let the first push auto-create them, then set **Public**).
 4. Push to `main` or tag `v*` (or run **Publish Docker images** via Actions → workflow_dispatch).
 5. Confirm: `docker pull ranasl62/ehr-risk-api:latest` and `docker pull ranasl62/ehr-risk-web:latest`.
+6. Confirm each Hub repo **Overview** shows the synced README (`deployment/dockerhub/ehr-risk-api.md` / `ehr-risk-web.md`). The access token needs **Read / Write / Delete** for description sync.
 
 Why two images (not one mega-image)? Keeps the research workbench architecture clear (FastAPI + nginx Angular), faster rebuilds when only UI or only API changes, and matches local `npm start` + `uvicorn` development.
 

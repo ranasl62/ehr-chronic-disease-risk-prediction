@@ -36,3 +36,8 @@ data/uploads/*
 
 # Docs site media (not needed in API image)
 docs/media
+
+# Local-only academic writing (not part of software images)
+book/
+research-paper/
+research_paper/
