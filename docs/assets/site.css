@@ -386,6 +386,9 @@ pre code { background: transparent; padding: 0; color: inherit; }
   font-size: 0.85em;
 }
 
+.diagram-figure {
+  margin: 1rem 0 1.5rem;
+}
 .diagram-frame {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -393,12 +396,32 @@ pre code { background: transparent; padding: 0; color: inherit; }
   padding: 0.75rem;
   margin: 1rem 0 1.25rem;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.diagram-figure .diagram-frame {
+  margin: 0;
 }
 .diagram-svg {
   width: 100%;
   height: auto;
   display: block;
   min-width: 640px;
+}
+.diagram-caption {
+  margin: 0.65rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--muted);
+  max-width: 48rem;
+}
+.diagram-caption code {
+  font-size: 0.85em;
+}
+
+@media (max-width: 640px) {
+  .diagram-svg {
+    min-width: 560px;
+  }
 }
 
 .flow-steps {
