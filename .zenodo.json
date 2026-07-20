@@ -1,0 +1,34 @@
+{
+  "title": "EHR Risk Framework — Leakage-Aware, Calibrated, Explainable Open Software",
+  "description": "Open research software for leakage-aware longitudinal EHR-like binary risk prediction (chronic-disease and other horizon tasks). Index/horizon feature construction, isotonic calibration (Brier/ECE), SHAP and exploratory fairness jobs, FastAPI + Angular workbench, task YAML, training manifests, and reproducible synthetic verification. Research and education only — not a medical device; not for patient care.",
+  "upload_type": "software",
+  "license": "mit",
+  "creators": [
+    {
+      "name": "Hossain, Md Rana",
+      "affiliation": "Maharishi International University"
+    }
+  ],
+  "keywords": [
+    "electronic health records",
+    "chronic disease risk prediction",
+    "temporal leakage",
+    "calibration",
+    "explainable AI",
+    "fairness",
+    "reproducibility",
+    "research software",
+    "FastAPI",
+    "Angular"
+  ],
+  "access_right": "open",
+  "version": "1.0.0",
+  "related_identifiers": [
+    {
+      "relation": "isSupplementTo",
+      "identifier": "https://github.com/ranasl62/ehr-chronic-disease-risk-prediction",
+      "resource_type": "software"
+    }
+  ],
+  "notes": "Cite via CITATION.cff. Zenodo DOI is minted automatically when a GitHub Release is published after enabling the Zenodo GitHub integration. Do not invent a DOI. ORCID for the creator can be added when available."
+}
