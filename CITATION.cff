@@ -1,9 +1,10 @@
 cff-version: 1.2.0
 message: >
-  If you use this software, please cite it as below.
-  Feedback welcome: support@larucare.com
+  If you use the EHR Risk Framework software, please cite it using the
+  metadata below (and the Zenodo DOI once a GitHub Release is archived).
+  Feedback: support@larucare.com
 type: software
-title: "EHR Risk Framework — Leakage-Safe, Calibrated, Explainable Open Software"
+title: "EHR Risk Framework — Leakage-Aware, Calibrated, Explainable Open Software"
 authors:
   - family-names: Hossain
     given-names: Md Rana
@@ -15,16 +16,23 @@ license: MIT
 version: "1.0.0"
 date-released: "2026-07-19"
 abstract: >
-  Open reference framework for leakage-aware longitudinal EHR binary risk
-  prediction (chronic-disease and other horizon tasks) with isotonic calibration,
-  SHAP explanations, FastAPI and Angular serving, and reproducible evaluation
-  artifacts for research prototyping.
+  Open research software for leakage-aware longitudinal EHR-like binary risk
+  prediction (chronic-disease and other horizon tasks). Provides index/horizon
+  feature construction, isotonic calibration with Brier/ECE, SHAP and exploratory
+  fairness jobs, FastAPI + Angular workbench, task YAML, training manifests, and
+  reproducible synthetic verification artifacts. Research and education only —
+  not a medical device; not for patient care.
 keywords:
   - electronic health records
-  - chronic disease
+  - chronic disease risk prediction
+  - temporal leakage
   - calibration
   - explainable AI
-  - temporal leakage
+  - fairness
+  - reproducibility
+  - research software
+# After creating a GitHub Release with Zenodo–GitHub enabled, uncomment and set:
 # identifiers:
 #   - type: doi
-#     value: "10.5281/zenodo.XXXXXXX"
+#     value: "10.5281/zenodo.XXXXXXX"   # PENDING — replace XXXXXXX with the real Zenodo record id
+# preferred-citation can point at a journal article DOI once the paper is published.

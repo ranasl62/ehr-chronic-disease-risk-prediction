@@ -21,9 +21,12 @@ Create a GitHub Release from the tag; attach nothing that contains restricted EH
 
 ## Optional Zenodo DOI
 
-1. Connect the GitHub repo to [Zenodo](https://zenodo.org/) (or upload a source zip from the tag).
-2. Publish the version; copy the DOI (e.g. `10.5281/zenodo.XXXXXXX`).
-3. Uncomment and fill in [`CITATION.cff`](../CITATION.cff):
+See full steps: [`citing_and_doi.md`](citing_and_doi.md).
+
+1. Connect the GitHub repo to [Zenodo](https://zenodo.org/) (GitHub app → enable this repository).
+2. Publish a GitHub Release from an annotated tag; Zenodo archives it and mints a DOI.
+3. Copy the real DOI (do **not** invent one). Example format only: `10.5281/zenodo.XXXXXXX`.
+4. Uncomment and fill in [`CITATION.cff`](../CITATION.cff):
 
 ```yaml
 identifiers:
@@ -31,7 +34,7 @@ identifiers:
     value: "10.5281/zenodo.XXXXXXX"
 ```
 
-4. Update DOI badge in [`README.md`](../README.md) and citation note in [`docs/model_card.md`](model_card.md).
+5. Update the Cite section in [`README.md`](../README.md) and optionally [`.zenodo.json`](../.zenodo.json).
 
 ## Optional next steps
 
