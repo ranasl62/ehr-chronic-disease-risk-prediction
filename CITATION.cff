@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: >
   If you use the EHR Risk Framework software, please cite it using the
-  metadata below (and the Zenodo DOI once a GitHub Release is archived).
+  metadata below (including the Zenodo DOI).
   Feedback: support@larucare.com
 type: software
 title: "EHR Risk Framework — Leakage-Aware, Calibrated, Explainable Open Software"
@@ -31,8 +31,7 @@ keywords:
   - fairness
   - reproducibility
   - research software
-# After creating a GitHub Release with Zenodo–GitHub enabled, uncomment and set:
-# identifiers:
-#   - type: doi
-#     value: "10.5281/zenodo.XXXXXXX"   # PENDING — replace XXXXXXX with the real Zenodo record id
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.21448693"
 # preferred-citation can point at a journal article DOI once the paper is published.

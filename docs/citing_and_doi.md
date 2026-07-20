@@ -2,39 +2,36 @@
 
 Researchers should cite the **software artifact** when they use the EHR Risk Framework pipeline (and cite any future journal paper separately once published).
 
-## Quick cite (before Zenodo DOI)
+## Quick cite
 
 1. On GitHub, open this repository → **Cite this repository** (uses [`CITATION.cff`](../CITATION.cff)).
 2. Or copy the BibTeX below.
 
 ```bibtex
 @software{ehr_risk_framework_hossain_2026,
-  author  = {Hossain, Md Rana},
-  title   = {{EHR Risk Framework}: Leakage-Aware, Calibrated, Explainable Open Software},
-  version = {1.0.0},
-  year    = {2026},
-  url     = {https://github.com/ranasl62/ehr-chronic-disease-risk-prediction},
-  license = {MIT},
-  note    = {Add Zenodo DOI after first GitHub Release archive}
+  author       = {Hossain, Md Rana},
+  title        = {{EHR Risk Framework}: Leakage-Aware, Calibrated, Explainable Open Software},
+  version      = {1.0.0},
+  year         = {2026},
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.21448693},
+  url          = {https://doi.org/10.5281/zenodo.21448693},
+  license      = {MIT}
 }
 ```
 
-**DOI status:** PENDING until you create a GitHub Release with Zenodo linked. Example format only (not a real DOI for this project): `https://doi.org/10.5281/zenodo.XXXXXXX`.
+**DOI:** [https://doi.org/10.5281/zenodo.21448693](https://doi.org/10.5281/zenodo.21448693) (`10.5281/zenodo.21448693`).
 
-## Mint a Zenodo DOI (GitHub → Zenodo)
+## Zenodo DOI
 
-Do **not** invent a DOI. Follow these steps once:
+This repository is archived on Zenodo:
 
-1. Create/sign in to [Zenodo](https://zenodo.org/) (or CERN Sandbox for a dry run).
-2. Connect GitHub: Zenodo → **GitHub** → enable the repository `ranasl62/ehr-chronic-disease-risk-prediction`.
-3. On GitHub, create a **Release** (e.g. tag `v1.0.0`) with release notes. Zenodo archives the tag and mints a DOI.
-4. Copy the **Concept DOI** (version-independent) and/or **Version DOI** from the Zenodo record.
-5. Update tracked citation metadata:
-   - Uncomment `identifiers` in [`CITATION.cff`](../CITATION.cff) and set `value` to the real `10.5281/zenodo.…` id.
-   - Optionally add the DOI to [`.zenodo.json`](../.zenodo.json) related identifiers and to the README “Cite this repository” section.
-6. Commit and push those citation updates on a follow-up commit (after the Release is public).
+- **DOI:** [https://doi.org/10.5281/zenodo.21448693](https://doi.org/10.5281/zenodo.21448693)
+- **Identifier:** `10.5281/zenodo.21448693`
 
-Release hygiene checklist: [`release_checklist.md`](release_checklist.md).
+Citation metadata lives in [`CITATION.cff`](../CITATION.cff), [`.zenodo.json`](../.zenodo.json), and the README “Cite this repository” section.
+
+For later versions: create a new GitHub Release with Zenodo–GitHub still enabled; Zenodo mints a version DOI while the concept DOI stays stable. Do **not** invent DOIs. Release hygiene: [`release_checklist.md`](release_checklist.md).
 
 ## Paper vs software
 
