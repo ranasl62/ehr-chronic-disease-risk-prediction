@@ -4,7 +4,7 @@ scikit-learn
 xgboost
 fastapi
 uvicorn
-python-multipart>=0.0.9
+python-multipart>=0.0.32
 shap
 matplotlib
 seaborn
