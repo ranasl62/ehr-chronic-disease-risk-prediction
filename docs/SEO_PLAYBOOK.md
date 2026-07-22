@@ -1,8 +1,8 @@
 # SEO playbook — EHR Risk Framework
 
 Canonical docs site: **https://ehr.larucare.com/**  
-Live demo (workbench): **https://ehr-demo.larucare.com/**  
-Live API: **https://ehr-risk-framework.larucare.com/**  
+Live demo (workbench): **https://ehr-risk-framework.larucare.com/**  
+Live API: **https://ehr-api.larucare.com/**  
 GitHub: https://github.com/ranasl62/ehr-chronic-disease-risk-prediction  
 
 Catchphrase (use as tagline / anchor text):  
@@ -17,7 +17,7 @@ Research / education only — not a medical device. Do not invent clinical perfo
 - Social card: `docs/assets/og-card.png` (also use as GitHub repo social preview)
 - Blog + compare + alternatives + listicle pages under `docs/`
 - README catchphrase, problem statement, alternatives, website + live demo links
-- Docs home CTA → live demo at `ehr-demo.larucare.com`
+- Docs home CTA → live demo at `ehr-risk-framework.larucare.com`
 
 ## GitHub settings (manual)
 

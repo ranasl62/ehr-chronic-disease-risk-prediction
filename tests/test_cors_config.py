@@ -13,11 +13,11 @@ def test_cors_defaults_when_unset_or_empty():
 def test_cors_from_comma_separated_env(monkeypatch):
     monkeypatch.setenv(
         "CORS_ORIGINS",
-        "https://ehr-demo.larucare.com, http://localhost:8080/",
+        "https://ehr-risk-framework.larucare.com, http://localhost:8080/",
     )
     origins = parse_cors_origins()
     assert origins == [
-        "https://ehr-demo.larucare.com",
+        "https://ehr-risk-framework.larucare.com",
         "http://localhost:8080/",
     ]
 

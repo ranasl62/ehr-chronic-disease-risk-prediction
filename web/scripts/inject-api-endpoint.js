@@ -3,8 +3,8 @@
  * Bake API_ENDPOINT into the Angular production build (optional).
  *
  * - Unset / empty → BUILD_API_ENDPOINT = '' (same-origin / nginx / ng serve proxy)
- * - Set → absolute API base, e.g. https://ehr-risk-framework.larucare.com
- *   (hosted UI at https://ehr-demo.larucare.com should set CORS_ORIGINS to that origin)
+ * - Set → absolute API base, e.g. https://ehr-api.larucare.com
+ *   (hosted UI at https://ehr-risk-framework.larucare.com should set CORS_ORIGINS to that origin)
  *
  * Used by: npm run build, web/Dockerfile (ARG/ENV), Vercel/Render build env.
  */

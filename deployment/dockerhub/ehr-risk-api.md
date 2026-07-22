@@ -51,7 +51,7 @@ Override: `IMAGE_API=ranasl62/ehr-risk-api:latest` in `.env`.
 ```bash
 # Example: UI on a separate host talking to this API
 docker run --rm -p 8000:8000 \
-  -e CORS_ORIGINS=https://ehr-demo.larucare.com \
+  -e CORS_ORIGINS=https://ehr-risk-framework.larucare.com \
   ranasl62/ehr-risk-api:latest
 ```
 
