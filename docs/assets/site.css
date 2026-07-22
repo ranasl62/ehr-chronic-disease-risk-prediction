@@ -781,13 +781,13 @@ pre code { background: transparent; padding: 0; color: inherit; }
   flex-direction: column;
   align-items: stretch;
   gap: 0;
-  width: min(75vw, 100%);
-  max-width: 52rem;
+  width: 100%;
+  max-width: none;
   margin: 0 auto;
 }
 .viz-pipe .viz-node { max-width: none; width: 100%; }
 .viz-pipe-body {
-  min-width: 0;
+  min-width: 75vw;
   width: 100%;
 }
 .viz-pipe-step {
