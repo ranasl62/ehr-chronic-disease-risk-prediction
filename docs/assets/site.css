@@ -781,10 +781,15 @@ pre code { background: transparent; padding: 0; color: inherit; }
   flex-direction: column;
   align-items: stretch;
   gap: 0;
-  max-width: 36rem;
+  width: min(75vw, 100%);
+  max-width: 52rem;
   margin: 0 auto;
 }
 .viz-pipe .viz-node { max-width: none; width: 100%; }
+.viz-pipe-body {
+  min-width: 0;
+  width: 100%;
+}
 .viz-pipe-step {
   display: grid;
   grid-template-columns: 2.1rem 1fr;
@@ -887,7 +892,16 @@ pre code { background: transparent; padding: 0; color: inherit; }
   color: #fff;
   font-weight: 700;
 }
-.viz-topo-root code { color: #e4f2ed; font-weight: 600; }
+/* Global code uses accent-soft (#e4f2ed); that matches old text color and hid the command. */
+.viz-topo-root code {
+  color: #fff;
+  background: transparent;
+  padding: 0;
+  font-weight: 600;
+}
+.viz-topo + .viz-caption {
+  margin-top: 1.35rem;
+}
 .viz-topo-services {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
