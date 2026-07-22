@@ -18,7 +18,7 @@ def parse_cors_origins(raw: str | None = None) -> list[str]:
     Resolve CORS origins from ``CORS_ORIGINS`` or an explicit string.
 
     Empty / unset → local workbench defaults. Comma-separated list otherwise,
-    e.g. ``https://ehr-risk-framework-demo.onrender.com,http://localhost:8080``.
+    e.g. ``https://ehr-demo.larucare.com,http://localhost:8080``.
     """
     if raw is None:
         raw = os.environ.get("CORS_ORIGINS", "")

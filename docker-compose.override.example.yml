@@ -12,7 +12,7 @@ services:
     # Uncomment to override here instead:
     # environment:
     #   API_KEY: change-me-before-exposing
-    #   CORS_ORIGINS: https://ehr-risk-framework-demo.onrender.com
+    #   CORS_ORIGINS: https://ehr-demo.larucare.com
 
     # NVIDIA GPU (requires nvidia-container-toolkit / Docker Desktop GPU support).
     # Useful for heavier XGBoost / future GPU models; default CPU demos do not need this.

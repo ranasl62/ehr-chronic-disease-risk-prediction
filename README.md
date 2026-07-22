@@ -5,6 +5,7 @@
 [![Version](https://img.shields.io/badge/version-1.0.0-informational.svg)](CHANGELOG.md)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21448693.svg)](https://doi.org/10.5281/zenodo.21448693)
 [![Docs](https://img.shields.io/badge/docs-ehr.larucare.com-2a6b5a)](https://ehr.larucare.com/)
+[![Live demo](https://img.shields.io/badge/demo-ehr--demo.larucare.com-2a6b5a)](https://ehr-demo.larucare.com/)
 
 **An open-source framework for leakage-safe, calibrated, and explainable EHR risk prediction.**
 
@@ -14,7 +15,7 @@ Package `openhealth` · CLI `ehr-ai`.
 
 > **For research and education only.** Outputs are not clinical recommendations and are not intended for patient care.
 
-**Website:** [https://ehr.larucare.com/](https://ehr.larucare.com/) · **Maintainer:** Md Rana Hossain · **Contact:** [support@larucare.com](mailto:support@larucare.com) · [LinkedIn](https://www.linkedin.com/in/mdranahossain/)
+**Website:** [https://ehr.larucare.com/](https://ehr.larucare.com/) · **Live demo:** [https://ehr-demo.larucare.com/](https://ehr-demo.larucare.com/) · **Maintainer:** Md Rana Hossain · **Contact:** [support@larucare.com](mailto:support@larucare.com) · [LinkedIn](https://www.linkedin.com/in/mdranahossain/)
 
 ## What problem does this solve?
 
@@ -23,6 +24,7 @@ Ad-hoc notebooks often skip index-time integrity, calibration, and reproducible 
 | Doc | Link |
 |-----|------|
 | **Documentation website** | [ehr.larucare.com](https://ehr.larucare.com/) (source [`docs/`](docs/)) |
+| **Live demo (workbench)** | [ehr-demo.larucare.com](https://ehr-demo.larucare.com/) |
 | Blog / tutorials | [Prevent data leakage](https://ehr.larucare.com/blog/prevent-data-leakage-clinical-ai/) · [Risk model quickstart](https://ehr.larucare.com/blog/ehr-risk-prediction-quickstart/) |
 | Compare / alternatives | [vs notebooks](https://ehr.larucare.com/compare/vs-ad-hoc-notebooks/) · [vs opaque AutoML](https://ehr.larucare.com/alternatives/opaque-clinical-automl/) |
 | Architecture | [`ARCHITECTURE.md`](ARCHITECTURE.md) |
@@ -86,6 +88,7 @@ Optional: `cp .env.example .env` (set `API_KEY`, ports). GPU / overrides: `cp do
 | API + OpenAPI | http://127.0.0.1:8000/docs (also http://127.0.0.1:8080/api-docs) | `ehr-risk-api:local` | `ranasl62/ehr-risk-api` |
 | Results ZIP | http://127.0.0.1:8000/v1/reports/download.zip | — | — |
 | **Docs website** | [ehr.larucare.com](https://ehr.larucare.com/) ([`docs/`](docs/)) | — | — |
+| **Live demo** | [ehr-demo.larucare.com](https://ehr-demo.larucare.com/) | — | — |
 
 **First loop:** Datasets (bundled teaching demos + health) → Train → Results / Analytics → Predict.
 Teaching fixtures are `data/demo/ehr_data.csv` (default longitudinal Train path) and `data/demo/sample_ehr.csv`; legacy `data/raw/` references resolve as compatibility fallbacks.

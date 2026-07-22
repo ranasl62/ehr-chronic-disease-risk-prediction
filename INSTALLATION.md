@@ -156,7 +156,7 @@ Copy [`.env.example`](.env.example) → `.env` (never commit secrets):
 - `UI_PORT` / `API_PORT` — host ports (default 8080 / 8000)
 - `IMAGE_API` / `IMAGE_WEB` — image refs (defaults: local tags; Docker Hub with `docker-compose.publish.yml`)
 - `API_ENDPOINT` — optional; bake absolute API base into the web image/build (leave empty for same-origin `/v1` via nginx or `ng serve` proxy)
-- `CORS_ORIGINS` — optional; comma-separated browser origins for the API (`api` service / `docker run -e` / host env). Empty → local `:8080` / `:4200`. Set to the UI origin when the SPA uses a remote `API_ENDPOINT`
+- `CORS_ORIGINS` — optional; comma-separated browser origins for the API (`api` service / `docker run -e` / host env). Empty → local `:8080` / `:4200`. For the hosted UI set `CORS_ORIGINS=https://ehr-demo.larucare.com` when the SPA uses a remote `API_ENDPOINT`
 - `MODEL_PATH` — artifact path (default `model.pkl`)
 - `FORCE_TRAIN` — `1` to retrain on every Compose up
 
