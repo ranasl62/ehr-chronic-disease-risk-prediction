@@ -2,6 +2,7 @@
 
 Canonical docs site: **https://ehr.larucare.com/**  
 Live demo (workbench): **https://ehr-demo.larucare.com/**  
+Live API: **https://ehr-risk-framework.larucare.com/**  
 GitHub: https://github.com/ranasl62/ehr-chronic-disease-risk-prediction  
 
 Catchphrase (use as tagline / anchor text):  

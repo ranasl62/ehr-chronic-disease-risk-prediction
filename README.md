@@ -25,6 +25,7 @@ Ad-hoc notebooks often skip index-time integrity, calibration, and reproducible 
 |-----|------|
 | **Documentation website** | [ehr.larucare.com](https://ehr.larucare.com/) (source [`docs/`](docs/)) |
 | **Live demo (workbench)** | [ehr-demo.larucare.com](https://ehr-demo.larucare.com/) |
+| **Live API** | [ehr-risk-framework.larucare.com](https://ehr-risk-framework.larucare.com/) |
 | Blog / tutorials | [Prevent data leakage](https://ehr.larucare.com/blog/prevent-data-leakage-clinical-ai/) · [Risk model quickstart](https://ehr.larucare.com/blog/ehr-risk-prediction-quickstart/) |
 | Compare / alternatives | [vs notebooks](https://ehr.larucare.com/compare/vs-ad-hoc-notebooks/) · [vs opaque AutoML](https://ehr.larucare.com/alternatives/opaque-clinical-automl/) |
 | Architecture | [`ARCHITECTURE.md`](ARCHITECTURE.md) |
@@ -89,6 +90,7 @@ Optional: `cp .env.example .env` (set `API_KEY`, ports). GPU / overrides: `cp do
 | Results ZIP | http://127.0.0.1:8000/v1/reports/download.zip | — | — |
 | **Docs website** | [ehr.larucare.com](https://ehr.larucare.com/) ([`docs/`](docs/)) | — | — |
 | **Live demo** | [ehr-demo.larucare.com](https://ehr-demo.larucare.com/) | — | — |
+| **Live API** | [ehr-risk-framework.larucare.com](https://ehr-risk-framework.larucare.com/) | — | — |
 
 **First loop:** Datasets (bundled teaching demos + health) → Train → Results / Analytics → Predict.
 Teaching fixtures are `data/demo/ehr_data.csv` (default longitudinal Train path) and `data/demo/sample_ehr.csv`; legacy `data/raw/` references resolve as compatibility fallbacks.

@@ -3,7 +3,7 @@
 # Docker Hub: ranasl62/ehr-risk-web
 #
 # Optional remote API (bake at image build):
-#   docker build --build-arg API_ENDPOINT=https://ehr-risk-framework.onrender.com -t ehr-risk-web ./web
+#   docker build --build-arg API_ENDPOINT=https://ehr-risk-framework.larucare.com -t ehr-risk-web ./web
 # Leave unset for same-origin nginx → Compose `api`.
 
 FROM node:22-alpine AS build
