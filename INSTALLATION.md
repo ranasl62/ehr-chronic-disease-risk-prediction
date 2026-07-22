@@ -155,7 +155,8 @@ Copy [`.env.example`](.env.example) → `.env` (never commit secrets):
 - `API_KEY` — optional; when set, send `X-API-Key` (UI Config or curl)
 - `UI_PORT` / `API_PORT` — host ports (default 8080 / 8000)
 - `IMAGE_API` / `IMAGE_WEB` — image refs (defaults: local tags; Docker Hub with `docker-compose.publish.yml`)
-- `CORS_ORIGINS` — browser origins
+- `API_ENDPOINT` — optional; bake absolute API base into the web image/build (leave empty for same-origin `/v1` via nginx or `ng serve` proxy)
+- `CORS_ORIGINS` — browser origins (required on the API when the UI is hosted on a different origin and uses `API_ENDPOINT`)
 - `MODEL_PATH` — artifact path (default `model.pkl`)
 - `FORCE_TRAIN` — `1` to retrain on every Compose up
 

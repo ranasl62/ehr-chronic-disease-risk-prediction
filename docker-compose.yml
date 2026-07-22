@@ -81,6 +81,9 @@ services:
     build:
       context: ./web
       dockerfile: Dockerfile
+      args:
+        # Empty → SPA uses same-origin /v1 (nginx → api). Set to a remote API URL to bake it in.
+        API_ENDPOINT: ${API_ENDPOINT:-}
     ports:
       - "${UI_PORT:-8080}:80"
     depends_on:

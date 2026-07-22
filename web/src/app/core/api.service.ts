@@ -2,11 +2,12 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { resolveApiUrl } from '../../environments/resolve-api-url';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private readonly http = inject(HttpClient);
-  private readonly base = environment.apiUrl;
+  private readonly base = resolveApiUrl(environment.apiUrl);
 
   health(): Observable<unknown> {
     return this.http.get(`${this.base}/health`);

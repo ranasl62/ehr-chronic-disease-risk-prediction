@@ -11,8 +11,8 @@ authors:
     email: support@larucare.com
     orcid: "https://orcid.org/0009-0005-5996-719X"
     affiliation: "Maharishi International University"
+url: "https://ehr.larucare.com/"
 repository-code: "https://github.com/ranasl62/ehr-chronic-disease-risk-prediction"
-url: "https://github.com/ranasl62/ehr-chronic-disease-risk-prediction"
 license: MIT
 version: "1.0.0"
 date-released: "2026-07-19"
@@ -25,13 +25,18 @@ abstract: >
   not a medical device; not for patient care.
 keywords:
   - electronic health records
+  - EHR risk prediction
+  - clinical machine learning
   - chronic disease risk prediction
   - temporal leakage
+  - leakage-safe AI
   - calibration
   - explainable AI
+  - SHAP
   - fairness
   - reproducibility
   - research software
+  - health informatics
 identifiers:
   - type: doi
     value: "10.5281/zenodo.21448693"

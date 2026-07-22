@@ -3,6 +3,7 @@
     { href: "/", label: "Home", group: "start" },
     { href: "/why", label: "Why it matters", group: "start" },
     { href: "/features", label: "Features", group: "start" },
+    { href: "/blog", label: "Blog", group: "start" },
     { href: "/workbench", label: "Workbench", group: "guide" },
     { href: "/quickstart", label: "Quickstart", group: "guide" },
     { href: "/docker-images", label: "Docker images", group: "guide" },
@@ -12,6 +13,7 @@
     { href: "/architecture", label: "Architecture", group: "deep" },
     { href: "/data", label: "Data", group: "deep" },
     { href: "/api", label: "API", group: "deep" },
+    { href: "/compare/vs-ad-hoc-notebooks", label: "Compare", group: "meta" },
     { href: "/limits", label: "Limits", group: "meta" },
     { href: "/help", label: "Help library", group: "meta" },
     { href: "/sitemap", label: "Sitemap", group: "meta" },
@@ -31,9 +33,10 @@
   ];
 
   var BLURBS = {
-    "/": "Overview, U.S. research context, and docs map",
+    "/": "Leakage-safe EHR risk prediction overview",
     "/why": "Problems, audiences, and U.S. research context",
     "/features": "Capability catalog from ingest to serve",
+    "/blog": "Tutorials on leakage-safe clinical ML",
     "/workbench": "Hub for every UI page with screenshots",
     "/quickstart": "Docker → first train → predict",
     "/docker-images": "Pull Hub images: api + web",
@@ -43,6 +46,7 @@
     "/architecture": "Components, jobs, config surfaces",
     "/data": "Columns, BYO CSV, index/horizon rules",
     "/api": "Predict, jobs, schema endpoints",
+    "/compare/vs-ad-hoc-notebooks": "Workbench vs ad-hoc notebooks",
     "/limits": "Honest non-goals and model card",
     "/help": "Full guide library, examples, intended use",
     "/sitemap": "Full map of every documentation page",
@@ -59,9 +63,30 @@
   };
 
   var RELATED = {
-    "/": ["/why", "/workbench", "/quickstart", "/diagrams"],
-    "/why": ["/features", "/workbench", "/limits", "/cite"],
+    "/": ["/why", "/blog", "/quickstart", "/workbench"],
+    "/why": ["/features", "/blog/prevent-data-leakage-clinical-ai", "/limits", "/cite"],
     "/features": ["/workbench", "/diagrams", "/fine-tuning", "/limits"],
+    "/blog": [
+      "/blog/prevent-data-leakage-clinical-ai",
+      "/blog/ehr-risk-prediction-quickstart",
+      "/compare/vs-ad-hoc-notebooks",
+      "/quickstart",
+    ],
+    "/blog/prevent-data-leakage-clinical-ai": ["/data", "/diagrams", "/blog", "/limits"],
+    "/blog/ehr-risk-prediction-quickstart": ["/quickstart", "/workbench", "/blog", "/ui-train"],
+    "/compare/vs-ad-hoc-notebooks": ["/alternatives/opaque-clinical-automl", "/features", "/why", "/blog"],
+    "/alternatives/opaque-clinical-automl": [
+      "/compare/vs-ad-hoc-notebooks",
+      "/listicles/open-source-clinical-risk-tools",
+      "/features",
+      "/limits",
+    ],
+    "/listicles/open-source-clinical-risk-tools": [
+      "/alternatives/opaque-clinical-automl",
+      "/features",
+      "/cite",
+      "/blog",
+    ],
     "/workbench": ["/ui-home", "/ui-train", "/ui-predict", "/quickstart"],
     "/quickstart": ["/docker-images", "/workbench", "/commands", "/data"],
     "/docker-images": ["/quickstart", "/commands", "/architecture", "/limits"],
@@ -73,7 +98,7 @@
     "/api": ["/ui-openapi", "/commands", "/ui-predict", "/features"],
     "/limits": ["/help", "/features", "/cite", "/sitemap"],
     "/help": ["/cite", "/quickstart", "/why", "/limits"],
-    "/sitemap": ["/", "/help", "/workbench", "/limits"],
+    "/sitemap": ["/", "/help", "/blog", "/workbench"],
     "/cite": ["/help", "/why", "/limits", "/"],
     "/ui-home": ["/ui-datasets", "/ui-train", "/ui-results", "/workbench"],
     "/ui-datasets": ["/ui-train", "/data", "/ui-config", "/workbench"],
@@ -193,5 +218,18 @@
     } else {
       footerInner.appendChild(map);
     }
+  }
+
+  // Load on-page SEO (canonical, Open Graph, JSON-LD, keyword titles)
+  if (!document.getElementById("ehr-seo-script")) {
+    var css = document.querySelector('link[rel="stylesheet"][href*="site.css"]');
+    var seoSrc = css
+      ? css.getAttribute("href").replace(/site\.css(\?.*)?$/i, "seo.js$1")
+      : "/assets/seo.js";
+    var seo = document.createElement("script");
+    seo.id = "ehr-seo-script";
+    seo.src = seoSrc;
+    seo.defer = true;
+    document.head.appendChild(seo);
   }
 })();

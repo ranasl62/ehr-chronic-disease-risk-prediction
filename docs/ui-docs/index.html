@@ -20,21 +20,22 @@
   <main id="main" data-ui-page="ui-docs">
     <p class="muted crumb"><a href="/workbench">Workbench hub</a> · UI route <code>/docs</code></p>
     <h1 class="page-title">Docs, help &amp; feedback (in-app)</h1>
-    <p class="page-lead">Screenshot of the Angular Docs page. Full clickable library: <a href="/help">Help library</a>.</p>
+    <p class="page-lead">Screenshot of the Angular Docs page. In-app links open this documentation website (not raw GitHub <code>.md</code> files). Full library: <a href="/help">Help library</a>.</p>
     <p class="banner">Demo screenshots only — never capture PHI. Contact: <a href="mailto:support@larucare.com">support@larucare.com</a>.</p>
 
     <figure class="shot">
       <img src="../media/09_ui_docs.png" alt="In-app Docs page" width="1200" height="750" />
-      <figcaption>In-app Docs — contact, guide list, examples, intended use</figcaption>
+      <figcaption>In-app Docs — CTAs and guides point at GitHub Pages</figcaption>
     </figure>
 
     <section class="section">
       <h2>What the page includes</h2>
       <ul>
         <li>Contact: <a href="mailto:support@larucare.com">support@larucare.com</a> (no personal Gmail / MIU addresses)</li>
-        <li>Feedback prompt + <code>docs/HOW_IT_HELPS.md</code></li>
-        <li>Links: Architecture, Quickstart, Install, Why, Limitations, Data, Schema, MIMIC lock, Model card, Cite, OpenAPI</li>
-        <li>Examples: diabetes task, BYO CSV, compare → promote</li>
+        <li>Primary CTAs: docs home, help library, UI tour, sitemap</li>
+        <li>Guide list → published pages (<code>/architecture/</code>, <code>/quickstart/</code>, <code>/limits/</code>, <code>/data/</code>, …)</li>
+        <li>Local OpenAPI still via <code>:8000/docs</code> / workbench <code>/api-docs</code></li>
+        <li>Examples: diabetes task, BYO CSV, compare → promote (with UI deep links)</li>
         <li>Intended use: research and education only — not a medical device</li>
       </ul>
       <p><a class="btn btn-primary" href="/help">Open full documentation library</a></p>

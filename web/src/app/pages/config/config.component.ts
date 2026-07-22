@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { resolveApiUrl } from '../../../environments/resolve-api-url';
 import { UiPrefs, UiPrefsService } from '../../core/ui-prefs.service';
 import { DataTableColumn, DataTableComponent } from '../../shared/data-table.component';
 
@@ -17,7 +18,7 @@ const MODEL_OPTS = ['logreg', 'random_forest', 'xgboost', 'lightgbm'] as const;
 })
 export class ConfigComponent implements OnInit {
   private readonly http = inject(HttpClient);
-  private readonly base = environment.apiUrl;
+  private readonly base = resolveApiUrl(environment.apiUrl);
   readonly ui = inject(UiPrefsService);
 
   cfg: Record<string, unknown> = {};

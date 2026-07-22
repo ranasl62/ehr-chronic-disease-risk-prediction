@@ -16,8 +16,19 @@ npm start
 ## Production build
 
 ```bash
+# Same-origin (Docker nginx → api, or reverse proxy):
 npm ci && npm run build
+
+# Remote API (Vercel / Render UI talking to a separate API host):
+API_ENDPOINT=https://ehr-risk-framework.onrender.com npm ci && npm run build
 # output: dist/web/browser
 ```
 
-Docker: built by root `docker compose` service `web` on port **8080**.
+Docker Compose uses empty `API_ENDPOINT` by default. To bake a remote API into the web image:
+
+```bash
+API_ENDPOINT=https://ehr-risk-framework.onrender.com docker compose build web
+# or: docker build --build-arg API_ENDPOINT=https://… -t ehr-risk-web ./web
+```
+
+On the API host, set `CORS_ORIGINS` to your UI origin when `API_ENDPOINT` is absolute.

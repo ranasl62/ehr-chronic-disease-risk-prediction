@@ -101,6 +101,9 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          # Optional: vars.API_ENDPOINT bakes a remote API into the web image only.
+          build-args: |
+            API_ENDPOINT=${{ matrix.name == 'web' && vars.API_ENDPOINT || '' }}
           cache-from: type=gha,scope=${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}
 

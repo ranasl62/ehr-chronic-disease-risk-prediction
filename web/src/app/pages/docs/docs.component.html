@@ -1,6 +1,17 @@
 <section class="panel">
   <h1>Docs, help &amp; feedback</h1>
-  <p class="lede">Framework documentation lives in the repository and on the public docs site. Questions welcome.</p>
+  <p class="lede">
+    Framework documentation is published on the
+    <a [href]="docsUrl('/')" target="_blank" rel="noopener">documentation website</a>.
+    Use the links below — they open the site, not raw GitHub Markdown.
+  </p>
+
+  <p class="docs-cta">
+    <a class="btn primary" [href]="docsUrl('/')" target="_blank" rel="noopener">Open docs site</a>
+    <a class="btn" [href]="docsUrl('/help/')" target="_blank" rel="noopener">Help library</a>
+    <a class="btn" [href]="docsUrl('/workbench/')" target="_blank" rel="noopener">UI tour</a>
+    <a class="btn" [href]="docsUrl('/sitemap/')" target="_blank" rel="noopener">Sitemap</a>
+  </p>
 
   <h2>Contact</h2>
   <p>
@@ -10,61 +21,54 @@
   <p class="muted">
     Tell us if you used the framework and how it helped — bugs, install friction, or feature ideas.
     Do not send PHI. Details:
-    <a href="https://github.com/ranasl62/ehr-chronic-disease-risk-prediction/blob/main/docs/HOW_IT_HELPS.md" target="_blank" rel="noopener">docs/HOW_IT_HELPS.md</a>.
+    <a [href]="docsUrl('/cite/')" target="_blank" rel="noopener">Cite &amp; feedback</a>.
   </p>
 
+  <h2>Guides on the documentation website</h2>
   <ul class="links">
-    <li><strong>Documentation website</strong> —
-      <a href="https://ranasl62.github.io/ehr-chronic-disease-risk-prediction/" target="_blank" rel="noopener">GitHub Pages</a>
-      ·
-      <a href="https://ranasl62.github.io/ehr-chronic-disease-risk-prediction/help.html" target="_blank" rel="noopener">Help library</a>
-      (source <code>docs/</code>)
-    </li>
-    <li><strong>How it helps / feedback</strong> —
-      <a href="https://github.com/ranasl62/ehr-chronic-disease-risk-prediction/blob/main/docs/HOW_IT_HELPS.md" target="_blank" rel="noopener">docs/HOW_IT_HELPS.md</a>
-    </li>
-    <li><strong>Architecture</strong> —
-      <a href="https://github.com/ranasl62/ehr-chronic-disease-risk-prediction/blob/main/ARCHITECTURE.md" target="_blank" rel="noopener">ARCHITECTURE.md</a>
-    </li>
-    <li><strong>Quickstart</strong> —
-      <a href="https://github.com/ranasl62/ehr-chronic-disease-risk-prediction/blob/main/docs/researcher_quickstart.md" target="_blank" rel="noopener">docs/researcher_quickstart.md</a>
-    </li>
-    <li><strong>Install</strong> —
-      <a href="https://github.com/ranasl62/ehr-chronic-disease-risk-prediction/blob/main/INSTALLATION.md" target="_blank" rel="noopener">INSTALLATION.md</a>
-    </li>
-    <li><strong>Why this framework</strong> —
-      <a href="https://github.com/ranasl62/ehr-chronic-disease-risk-prediction/blob/main/WHY_THIS_FRAMEWORK.md" target="_blank" rel="noopener">WHY_THIS_FRAMEWORK.md</a>
-    </li>
-    <li><strong>Limitations</strong> —
-      <a href="https://github.com/ranasl62/ehr-chronic-disease-risk-prediction/blob/main/LIMITATIONS.md" target="_blank" rel="noopener">LIMITATIONS.md</a>
-    </li>
-    <li><strong>Data guide</strong> —
-      <a href="https://github.com/ranasl62/ehr-chronic-disease-risk-prediction/blob/main/DATA_GUIDE.md" target="_blank" rel="noopener">DATA_GUIDE.md</a>
-    </li>
-    <li><strong>Data schema</strong> —
-      <a href="https://github.com/ranasl62/ehr-chronic-disease-risk-prediction/blob/main/docs/data_sources_and_schema.md" target="_blank" rel="noopener">docs/data_sources_and_schema.md</a>
-    </li>
-    <li><strong>MIMIC lock</strong> —
-      <a href="https://github.com/ranasl62/ehr-chronic-disease-risk-prediction/blob/main/docs/mimic_lock_checklist.md" target="_blank" rel="noopener">docs/mimic_lock_checklist.md</a>
-    </li>
-    <li><strong>Model card</strong> —
-      <a href="https://github.com/ranasl62/ehr-chronic-disease-risk-prediction/blob/main/docs/model_card.md" target="_blank" rel="noopener">docs/model_card.md</a>
-    </li>
-    <li><strong>Cite</strong> —
-      <a href="https://github.com/ranasl62/ehr-chronic-disease-risk-prediction/blob/main/CITATION.cff" target="_blank" rel="noopener">CITATION.cff</a>
-    </li>
-    <li><strong>API OpenAPI</strong> —
+    @for (g of guides; track g.path + g.label) {
+      <li>
+        <strong>{{ g.label }}</strong> —
+        <a [href]="docsUrl(g.path)" target="_blank" rel="noopener">{{ g.path === '/' ? 'Home' : g.path }}</a>
+        <span class="muted"> — {{ g.blurb }}</span>
+      </li>
+    }
+  </ul>
+
+  <h2>Local API docs</h2>
+  <ul class="links">
+    <li>
+      <strong>OpenAPI (running API)</strong> —
       <a href="http://127.0.0.1:8000/docs" target="_blank" rel="noopener">:8000/docs</a>
       ·
       <a href="/api-docs" target="_blank" rel="noopener">/api-docs</a> (via workbench proxy)
+    </li>
+    <li>
+      <strong>API overview (website)</strong> —
+      <a [href]="docsUrl('/api/')" target="_blank" rel="noopener">/api/</a>
+      ·
+      <a [href]="docsUrl('/ui-openapi/')" target="_blank" rel="noopener">/ui-openapi/</a>
     </li>
   </ul>
 
   <h2>Examples</h2>
   <ol>
-    <li>Synthetic diabetes task — Config → task <code>diabetes</code> → Train</li>
-    <li>BYO CSV — Datasets map columns → health → Train</li>
-    <li>Compare models — Train → Compare → Results → promote</li>
+    <li>
+      Synthetic diabetes task — Config → task <code>diabetes</code> → Train
+      (<a [href]="docsUrl('/ui-train/')" target="_blank" rel="noopener">Train UI</a>)
+    </li>
+    <li>
+      BYO CSV — Datasets map columns → health → Train
+      (<a [href]="docsUrl('/ui-datasets/')" target="_blank" rel="noopener">Datasets</a>
+      ·
+      <a [href]="docsUrl('/data/')" target="_blank" rel="noopener">Data</a>)
+    </li>
+    <li>
+      Compare models — Train → Compare → Results → promote
+      (<a [href]="docsUrl('/ui-results/')" target="_blank" rel="noopener">Results</a>
+      ·
+      <a [href]="docsUrl('/fine-tuning/')" target="_blank" rel="noopener">Fine-tuning</a>)
+    </li>
   </ol>
 
   <h2>Intended use</h2>
@@ -73,6 +77,6 @@
     It is not FDA-cleared or CE-marked, is not a medical device, and must not guide
     diagnosis or treatment without institutional validation and qualified human oversight.
     See
-    <a href="https://github.com/ranasl62/ehr-chronic-disease-risk-prediction/blob/main/LIMITATIONS.md" target="_blank" rel="noopener">LIMITATIONS.md</a>.
+    <a [href]="docsUrl('/limits/')" target="_blank" rel="noopener">Limitations &amp; model card</a>.
   </p>
 </section>

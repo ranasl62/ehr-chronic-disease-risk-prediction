@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EHR Risk Framework vs Ad-Hoc Clinical ML Notebooks</title>
+  <meta name="description" content="Compare a leakage-aware open workbench to one-off notebooks for EHR risk prediction research and teaching." />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/site.css" />
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="/"><img class="brand-logo" src="../../assets/logo.svg" width="28" height="28" alt="" />EHR Risk <span>Framework</span></a>
+      <nav class="nav" aria-label="Primary"></nav>
+    </div>
+  </header>
+  <main id="main">
+    <h1 class="page-title">EHR Risk Framework vs ad-hoc clinical ML notebooks</h1>
+    <p class="page-lead">
+      Notebooks are excellent for exploration. A leakage-safe <strong>EHR risk prediction</strong> workbench
+      helps when you need shared tasks, audits, calibration, and a reproducible train→explain→serve loop.
+    </p>
+
+    <section class="section">
+      <table class="data">
+        <thead><tr><th>Need</th><th>Ad-hoc notebook</th><th>EHR Risk Framework</th></tr></thead>
+        <tbody>
+          <tr><td>Index / horizon integrity</td><td>Easy to skip</td><td>Task YAML + leakage audit jobs</td></tr>
+          <tr><td>Calibration (Brier / ECE)</td><td>Often omitted</td><td>First-class reports &amp; plots</td></tr>
+          <tr><td>Explainability</td><td>One-off SHAP cells</td><td>Integrated SHAP artifacts</td></tr>
+          <tr><td>Sharing with students/labs</td><td>Environment drift</td><td>Docker Compose + Hub images</td></tr>
+          <tr><td>Clinical deployment</td><td>Out of scope</td><td>Also out of scope (research only)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>When to keep the notebook</h2>
+      <p>Exploratory EDA, one-off plots, and paper-specific analyses still belong in notebooks—export cohorts from the workbench and continue there.</p>
+      <h2>When to use the framework</h2>
+      <p>Teaching a full loop, comparing models under a fixed task, or documenting leakage and calibration for methods sections.</p>
+      <p class="muted">Also see: <a href="/alternatives/opaque-clinical-automl">Alternatives to opaque clinical AutoML</a> · <a href="/features">Features</a></p>
+    </section>
+  </main>
+  <footer class="site-footer"><div class="inner"><p class="fine">Research / education only · <a href="mailto:support@larucare.com">support@larucare.com</a></p></div></footer>
+  <script src="../../assets/site.js"></script>
+</body>
+</html>

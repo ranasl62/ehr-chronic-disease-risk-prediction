@@ -4,6 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "prebuild": "node scripts/inject-api-endpoint.js",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",

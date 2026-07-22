@@ -3,3 +3,32 @@
 .links { line-height: 1.75; padding-left: 1.25rem; }
 .links code { font-size: 0.9em; }
 h2 { margin-top: 1.25rem; }
+
+.docs-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  margin: 0.75rem 0 1.25rem;
+}
+
+.docs-cta .btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.85rem;
+  border-radius: 6px;
+  border: 1px solid var(--border, #c5d4ce);
+  background: var(--surface, #fff);
+  color: inherit;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.docs-cta .btn.primary {
+  background: var(--accent, #2a6b5a);
+  border-color: var(--accent, #2a6b5a);
+  color: #fff;
+}
+
+.docs-cta .btn:hover {
+  filter: brightness(0.97);
+}

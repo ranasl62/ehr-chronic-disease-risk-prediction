@@ -1,12 +1,20 @@
 # Angular workbench → nginx (proxies /v1 and /health to Compose service `api`).
 # Local:      docker compose up --build  → ehr-risk-web:local
 # Docker Hub: ranasl62/ehr-risk-web
+#
+# Optional remote API (bake at image build):
+#   docker build --build-arg API_ENDPOINT=https://ehr-risk-framework.onrender.com -t ehr-risk-web ./web
+# Leave unset for same-origin nginx → Compose `api`.
 
 FROM node:22-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
+
+ARG API_ENDPOINT=
+ENV API_ENDPOINT=$API_ENDPOINT
+
 RUN npm run build -- --configuration production
 
 FROM nginx:1.27-alpine

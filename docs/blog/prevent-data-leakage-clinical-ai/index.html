@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How to Prevent Data Leakage in Clinical AI (EHR Risk Models)</title>
+  <meta name="description" content="Practical guide to index-time integrity, temporal splits, and leakage audits for EHR risk prediction research." />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/site.css" />
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="/"><img class="brand-logo" src="../../assets/logo.svg" width="28" height="28" alt="" />EHR Risk <span>Framework</span></a>
+      <nav class="nav" aria-label="Primary"></nav>
+    </div>
+  </header>
+  <main id="main">
+    <p class="muted crumb"><a href="/blog">Blog</a> · Clinical machine learning</p>
+    <h1 class="page-title">How to prevent data leakage in clinical AI</h1>
+    <p class="page-lead">
+      Leakage is one of the fastest ways an <strong>EHR risk prediction</strong> study looks strong in a notebook
+      and fails under honest temporal evaluation. This guide is for research and teaching—not bedside care.
+    </p>
+    <p class="banner"><strong>Research and education only.</strong> Not a medical device. Do not use outputs for diagnosis or treatment.</p>
+
+    <section class="section">
+      <h2>What “leakage-safe AI” means for EHR data</h2>
+      <p>
+        In longitudinal electronic health records, features must respect an <strong>index time</strong>
+        (when the prediction is made) and a <strong>horizon</strong> (what you are predicting afterward).
+        Using labs, notes, or codes from after the index time inflates AUROC and destroys external validity.
+      </p>
+    </section>
+
+    <section class="section">
+      <h2>Practical checklist</h2>
+      <ol class="steps">
+        <li><strong>Define index and horizon</strong> in a task spec before feature engineering.</li>
+        <li><strong>Use patient-level or temporal splits</strong> — never random row splits on longitudinal tables.</li>
+        <li><strong>Run a leakage audit</strong> that checks post-index features and split integrity.</li>
+        <li><strong>Report calibration</strong> (Brier, ECE), not only discrimination.</li>
+        <li><strong>Document limitations</strong> — synthetic demos ≠ clinical performance.</li>
+      </ol>
+    </section>
+
+    <section class="section">
+      <h2>How the EHR Risk Framework helps</h2>
+      <p>
+        The open-source <em>EHR Risk Framework</em> is a workbench for leakage-aware, calibrated, explainable
+        EHR risk modeling: task YAML, Docker UI, leakage-audit jobs, isotonic calibration, and SHAP.
+        Start with the <a href="/quickstart">quickstart</a> or the
+        <a href="/blog/ehr-risk-prediction-quickstart">risk model tutorial</a>.
+      </p>
+      <p class="muted">Next: <a href="/data">Data guide</a> · <a href="/diagrams">Temporal diagrams</a> · <a href="/limits">Limits</a></p>
+    </section>
+  </main>
+  <footer class="site-footer"><div class="inner"><p class="fine">Research / education only · <a href="mailto:support@larucare.com">support@larucare.com</a></p></div></footer>
+  <script src="../../assets/site.js"></script>
+</body>
+</html>

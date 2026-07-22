@@ -4,28 +4,37 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.0.0-informational.svg)](CHANGELOG.md)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21448693.svg)](https://doi.org/10.5281/zenodo.21448693)
+[![Docs](https://img.shields.io/badge/docs-ehr.larucare.com-2a6b5a)](https://ehr.larucare.com/)
 
-**Leakage-aware, calibrated, explainable** EHR risk modeling for research and education.  
+**An open-source framework for leakage-safe, calibrated, and explainable EHR risk prediction.**
+
+Leakage-aware **clinical machine learning** workbench for research and education: temporal splits, leakage audits, Brier/ECE calibration, SHAP, FastAPI + Angular + Docker.  
 Default demos cover chronic-disease-style horizons; any binary outcome with an index time and horizon can use the same pipeline (see `tasks/`).  
-Package `openhealth` · CLI `ehr-ai` · Angular workbench · FastAPI.
+Package `openhealth` · CLI `ehr-ai`.
 
 > **For research and education only.** Outputs are not clinical recommendations and are not intended for patient care.
 
-**Maintainer:** Md Rana Hossain  
-**Contact:** [support@larucare.com](mailto:support@larucare.com) · [LinkedIn](https://www.linkedin.com/in/mdranahossain/)  
-**Feedback & how it helps:** [`docs/HOW_IT_HELPS.md`](docs/HOW_IT_HELPS.md)
+**Website:** [https://ehr.larucare.com/](https://ehr.larucare.com/) · **Maintainer:** Md Rana Hossain · **Contact:** [support@larucare.com](mailto:support@larucare.com) · [LinkedIn](https://www.linkedin.com/in/mdranahossain/)
+
+## What problem does this solve?
+
+Ad-hoc notebooks often skip index-time integrity, calibration, and reproducible audits—so EHR risk models look strong until honest temporal evaluation. This framework gives labs and courses a **shared, leakage-aware loop**: ingest → train → audit → calibrate → explain → serve (research API).
 
 | Doc | Link |
 |-----|------|
-| **Documentation website** | [`docs/`](docs/) → [GitHub Pages](https://ranasl62.github.io/ehr-chronic-disease-risk-prediction/) (enable Actions source in Settings → Pages) |
+| **Documentation website** | [ehr.larucare.com](https://ehr.larucare.com/) (source [`docs/`](docs/)) |
+| Blog / tutorials | [Prevent data leakage](https://ehr.larucare.com/blog/prevent-data-leakage-clinical-ai/) · [Risk model quickstart](https://ehr.larucare.com/blog/ehr-risk-prediction-quickstart/) |
+| Compare / alternatives | [vs notebooks](https://ehr.larucare.com/compare/vs-ad-hoc-notebooks/) · [vs opaque AutoML](https://ehr.larucare.com/alternatives/opaque-clinical-automl/) |
 | Architecture | [`ARCHITECTURE.md`](ARCHITECTURE.md) |
 | Install | [`INSTALLATION.md`](INSTALLATION.md) |
-| Data | [`DATA_GUIDE.md`](DATA_GUIDE.md) |
+| Data | [`DATA_GUIDE.md`](DATA_GUIDE.md) · teaching fixtures in `data/demo/` |
 | Why / limits | [`WHY_THIS_FRAMEWORK.md`](WHY_THIS_FRAMEWORK.md) · [`LIMITATIONS.md`](LIMITATIONS.md) |
-| Quickstart | [`docs/researcher_quickstart.md`](docs/researcher_quickstart.md) · [`docs/quickstart/`](docs/quickstart/) |
-| Docker Hub images | [`docs/docker-images/`](docs/docker-images/) — `ranasl62/ehr-risk-api` · `ranasl62/ehr-risk-web` |
-| Model card | [`docs/model_card.md`](docs/model_card.md) |
+| SEO checklist | [`docs/SEO_PLAYBOOK.md`](docs/SEO_PLAYBOOK.md) |
 | Cite | [`CITATION.cff`](CITATION.cff) · [`docs/citing_and_doi.md`](docs/citing_and_doi.md) |
+
+### Alternatives (short)
+
+Prefer this workbench when you need shared tasks, leakage audits, and calibration reports. Prefer raw notebooks for one-off EDA. Prefer credentialed hospital systems—not this repo—for patient care. See [compare](https://ehr.larucare.com/compare/vs-ad-hoc-notebooks/) and [limits](https://ehr.larucare.com/limits/).
 
 ---
 
@@ -76,7 +85,7 @@ Optional: `cp .env.example .env` (set `API_KEY`, ports). GPU / overrides: `cp do
 | Angular workbench | http://127.0.0.1:8080 | `ehr-risk-web:local` | `ranasl62/ehr-risk-web` |
 | API + OpenAPI | http://127.0.0.1:8000/docs (also http://127.0.0.1:8080/api-docs) | `ehr-risk-api:local` | `ranasl62/ehr-risk-api` |
 | Results ZIP | http://127.0.0.1:8000/v1/reports/download.zip | — | — |
-| **Docs website** | [`docs/`](docs/) → [GitHub Pages](https://ranasl62.github.io/ehr-chronic-disease-risk-prediction/) | — | — |
+| **Docs website** | [ehr.larucare.com](https://ehr.larucare.com/) ([`docs/`](docs/)) | — | — |
 
 **First loop:** Datasets (bundled teaching demos + health) → Train → Results / Analytics → Predict.
 Teaching fixtures are `data/demo/ehr_data.csv` (default longitudinal Train path) and `data/demo/sample_ehr.csv`; legacy `data/raw/` references resolve as compatibility fallbacks.

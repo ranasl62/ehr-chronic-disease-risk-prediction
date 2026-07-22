@@ -73,6 +73,15 @@ a:hover { color: var(--accent); }
   display: block;
 }
 .brand span { color: var(--accent); }
+.brand-tagline {
+  flex: 1 1 100%;
+  margin: 0;
+  padding: 0 0 0.65rem;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: var(--muted);
+  max-width: 42rem;
+}
 .nav {
   display: flex; flex-wrap: wrap; gap: 0.15rem 0.85rem;
   margin-left: auto; align-items: center;
@@ -138,8 +147,16 @@ main { max-width: var(--max); margin: 0 auto; padding: 1.75rem 1.25rem 3rem; }
   font-family: var(--display);
   font-size: clamp(1.75rem, 3.5vw, 2.35rem);
   line-height: 1.2;
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.5rem;
   font-weight: 600;
+}
+.hero .tagline {
+  margin: 0 0 0.75rem;
+  font-size: 1.12rem;
+  font-weight: 600;
+  color: var(--accent);
+  line-height: 1.35;
+  max-width: 38rem;
 }
 .hero .lede {
   font-size: 1.08rem;
