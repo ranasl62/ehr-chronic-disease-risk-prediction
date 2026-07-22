@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Blog — Clinical Machine Learning &amp; Leakage-Safe EHR Risk</title>
-  <meta name="description" content="Tutorials on preventing data leakage in clinical AI, EHR risk prediction quickstarts, and open research tooling." />
+  <meta name="description" content="Tutorials and validated explainers on leakage, calibration, FDA/ONC/HHS context, and open tooling for EHR risk prediction research." />
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../assets/site.css" />
   <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
@@ -20,12 +20,13 @@
   <main id="main">
     <h1 class="page-title">Blog</h1>
     <p class="page-lead">
-      Practical articles on <strong>EHR risk prediction</strong>, <strong>clinical machine learning</strong>,
-      and <strong>leakage-safe AI</strong> for research and education.
-      Software is not a medical device and must not guide patient care.
+      Practical articles on <strong>EHR risk prediction</strong>, <strong>clinical machine learning methods</strong>,
+      and U.S. research/policy context. Software is not a medical device and must not guide patient care.
+      Statistics are cited from public sources—verify primary literature before reuse.
     </p>
 
     <section class="section">
+      <h2>Start here (tutorials)</h2>
       <div class="grid-2">
         <a class="card continue-card" href="/blog/prevent-data-leakage-clinical-ai">
           <h2>How to prevent data leakage in clinical AI</h2>
@@ -35,13 +36,65 @@
           <h2>How to build an EHR risk prediction model</h2>
           <p class="muted">Docker quickstart with teaching data, calibration, and SHAP.</p>
         </a>
-        <a class="card continue-card" href="/compare/vs-ad-hoc-notebooks">
-          <h2>EHR Risk Framework vs ad-hoc notebooks</h2>
-          <p class="muted">When a workbench beats a one-off clinical ML notebook.</p>
+        <a class="card continue-card" href="/guide">
+          <h2>How it works A–Z</h2>
+          <p class="muted">Full workbench walkthrough with screenshots.</p>
         </a>
-        <a class="card continue-card" href="/listicles/open-source-clinical-risk-tools">
-          <h2>Open-source tools for clinical risk research</h2>
-          <p class="muted">A short, honest list for labs and courses.</p>
+        <a class="card continue-card" href="/compare/vs-ad-hoc-notebooks">
+          <h2>Workbench vs ad-hoc notebooks</h2>
+          <p class="muted">When a shared leakage-aware loop beats a one-off notebook.</p>
+        </a>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Methods crisis &amp; chronic disease</h2>
+      <div class="grid-2">
+        <a class="card continue-card" href="/blog/why-clinical-ai-label-leakage">
+          <h2>Label leakage &amp; ICD codes (JAMA 2025)</h2>
+          <p class="muted">40.2% of reviewed MIMIC same-admission studies used post-discharge ICD features.</p>
+        </a>
+        <a class="card continue-card" href="/blog/calibration-gap-brier-ece">
+          <h2>The calibration gap (Brier &amp; ECE)</h2>
+          <p class="muted">Why ranking metrics are not enough for trustworthy risk scores.</p>
+        </a>
+        <a class="card continue-card" href="/blog/chronic-disease-trustworthy-risk-ai">
+          <h2>Chronic disease burden &amp; honest risk models</h2>
+          <p class="muted">CDC chronic disease context + leakage-safe methods.</p>
+        </a>
+        <a class="card continue-card" href="/blog/healthcare-ai-market-quality-gap">
+          <h2>Market growth vs methods quality</h2>
+          <p class="muted">Spending surges; pilot-to-production still fails without hygiene.</p>
+        </a>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>U.S. policy &amp; research ecosystem</h2>
+      <div class="grid-2">
+        <a class="card continue-card" href="/blog/onc-safer-guides-2025-ai">
+          <h2>ONC SAFER Guides 2025 &amp; AI transparency</h2>
+          <p class="muted">Inventory, oversight, monitoring—methods alignment for teaching.</p>
+        </a>
+        <a class="card continue-card" href="/blog/fda-ai-devices-2025">
+          <h2>FDA AI/ML device clearances in 2025</h2>
+          <p class="muted">Record clearances; research software is not a device pathway.</p>
+        </a>
+        <a class="card continue-card" href="/blog/hhs-ai-strategy-2025">
+          <h2>HHS AI Strategic Plan (Jan 2025)</h2>
+          <p class="muted">Trust, access, workforce—and reproducible research tooling.</p>
+        </a>
+        <a class="card continue-card" href="/blog/ahrq-patient-safety-ai">
+          <h2>AHRQ digital healthcare &amp; AI safety research</h2>
+          <p class="muted">Evidence-based AI methods for safety-relevant evaluation.</p>
+        </a>
+        <a class="card continue-card" href="/blog/pcori-ai-methods-infrastructure">
+          <h2>PCORI AI/ML methods for CER</h2>
+          <p class="muted">Funding advances science; open infrastructure helps labs execute.</p>
+        </a>
+        <a class="card continue-card" href="/blog/nih-all-of-us-reproducible-ai">
+          <h2>NIH All of Us &amp; reproducible ML</h2>
+          <p class="muted">Large linked data still needs leakage-safe, reproducible methods.</p>
         </a>
       </div>
     </section>

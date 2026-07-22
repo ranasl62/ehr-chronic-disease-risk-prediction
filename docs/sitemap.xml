@@ -6,12 +6,23 @@
   <url><loc>https://ehr.larucare.com/blog/</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://ehr.larucare.com/blog/prevent-data-leakage-clinical-ai/</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
   <url><loc>https://ehr.larucare.com/blog/ehr-risk-prediction-quickstart/</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://ehr.larucare.com/blog/why-clinical-ai-label-leakage/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://ehr.larucare.com/blog/onc-safer-guides-2025-ai/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://ehr.larucare.com/blog/fda-ai-devices-2025/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://ehr.larucare.com/blog/healthcare-ai-market-quality-gap/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://ehr.larucare.com/blog/nih-all-of-us-reproducible-ai/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://ehr.larucare.com/blog/calibration-gap-brier-ece/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://ehr.larucare.com/blog/hhs-ai-strategy-2025/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://ehr.larucare.com/blog/ahrq-patient-safety-ai/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://ehr.larucare.com/blog/pcori-ai-methods-infrastructure/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://ehr.larucare.com/blog/chronic-disease-trustworthy-risk-ai/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://ehr.larucare.com/compare/vs-ad-hoc-notebooks/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://ehr.larucare.com/alternatives/opaque-clinical-automl/</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
   <url><loc>https://ehr.larucare.com/listicles/open-source-clinical-risk-tools/</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
   <url><loc>https://ehr.larucare.com/workbench/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://ehr.larucare.com/guide/</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
   <url><loc>https://ehr.larucare.com/quickstart/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://ehr.larucare.com/docker-for-beginners/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://ehr.larucare.com/docker-images/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://ehr.larucare.com/commands/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://ehr.larucare.com/diagrams/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>

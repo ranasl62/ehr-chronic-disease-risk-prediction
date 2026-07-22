@@ -7,6 +7,7 @@
     { href: "/workbench", label: "Workbench", group: "guide" },
     { href: "/guide", label: "How it works", group: "guide" },
     { href: "/quickstart", label: "Quickstart", group: "guide" },
+    { href: "/docker-for-beginners", label: "Docker for beginners", group: "guide" },
     { href: "/docker-images", label: "Docker images", group: "guide" },
     { href: "/commands", label: "Commands", group: "guide" },
     { href: "/diagrams", label: "Diagrams", group: "deep" },
@@ -41,6 +42,7 @@
     "/workbench": "Hub for every UI page with screenshots",
     "/guide": "A–Z walkthrough with screenshots",
     "/quickstart": "Docker → first train → predict",
+    "/docker-for-beginners": "Install Docker and run the stack",
     "/docker-images": "Pull Hub images: api + web",
     "/commands": "Make, curl, tests, docs recipes",
     "/diagrams": "SVG architecture and temporal design",
@@ -62,6 +64,29 @@
     "/ui-config": "Persona, defaults, UI prefs",
     "/ui-docs": "In-app help and intended use",
     "/ui-openapi": "Interactive Swagger API docs",
+    "/blog/why-clinical-ai-label-leakage": "What 37 of 92 MIMIC studies reveal about leakage",
+    "/blog/onc-safer-guides-2025-ai": "AI transparency themes in ONC's 2025 SAFER Guides",
+    "/blog/fda-ai-devices-2025": "FDA AI/ML device context for research teams",
+    "/blog/healthcare-ai-market-quality-gap": "Why methods quality determines whether pilots scale",
+    "/blog/nih-all-of-us-reproducible-ai": "Reproducible methods for large research datasets",
+    "/blog/calibration-gap-brier-ece": "Why probability calibration belongs beside AUROC",
+    "/blog/hhs-ai-strategy-2025": "HHS's 2025 health AI strategy and research practice",
+    "/blog/ahrq-patient-safety-ai": "Evidence-based AI methods and patient-safety research",
+    "/blog/pcori-ai-methods-infrastructure": "Shared infrastructure for AI/ML methods in CER",
+    "/blog/chronic-disease-trustworthy-risk-ai": "Chronic-disease research needs honest risk models",
+  };
+
+  var PAGE_LABELS = {
+    "/blog/why-clinical-ai-label-leakage": "Label leakage in clinical AI",
+    "/blog/onc-safer-guides-2025-ai": "ONC SAFER Guides and AI",
+    "/blog/fda-ai-devices-2025": "FDA AI/ML devices in 2025",
+    "/blog/healthcare-ai-market-quality-gap": "Healthcare AI's quality gap",
+    "/blog/nih-all-of-us-reproducible-ai": "All of Us and reproducible AI",
+    "/blog/calibration-gap-brier-ece": "The calibration gap",
+    "/blog/hhs-ai-strategy-2025": "HHS AI strategy in 2025",
+    "/blog/ahrq-patient-safety-ai": "AHRQ and patient-safety AI",
+    "/blog/pcori-ai-methods-infrastructure": "PCORI AI/ML methods infrastructure",
+    "/blog/chronic-disease-trustworthy-risk-ai": "Trustworthy chronic-disease risk AI",
   };
 
   var RELATED = {
@@ -69,10 +94,40 @@
     "/why": ["/features", "/blog/prevent-data-leakage-clinical-ai", "/limits", "/cite"],
     "/features": ["/workbench", "/guide", "/fine-tuning", "/limits"],
     "/blog": [
+      "/blog/why-clinical-ai-label-leakage",
+      "/blog/calibration-gap-brier-ece",
       "/blog/prevent-data-leakage-clinical-ai",
-      "/blog/ehr-risk-prediction-quickstart",
-      "/compare/vs-ad-hoc-notebooks",
       "/guide",
+    ],
+    "/blog/why-clinical-ai-label-leakage": [
+      "/blog/prevent-data-leakage-clinical-ai", "/blog/calibration-gap-brier-ece", "/data", "/limits",
+    ],
+    "/blog/onc-safer-guides-2025-ai": [
+      "/blog/ahrq-patient-safety-ai", "/blog/fda-ai-devices-2025", "/limits", "/guide",
+    ],
+    "/blog/fda-ai-devices-2025": [
+      "/blog/onc-safer-guides-2025-ai", "/blog/hhs-ai-strategy-2025", "/limits", "/fine-tuning",
+    ],
+    "/blog/healthcare-ai-market-quality-gap": [
+      "/blog/why-clinical-ai-label-leakage", "/blog/calibration-gap-brier-ece", "/fine-tuning", "/guide",
+    ],
+    "/blog/nih-all-of-us-reproducible-ai": [
+      "/blog/why-clinical-ai-label-leakage", "/blog/pcori-ai-methods-infrastructure", "/data", "/quickstart",
+    ],
+    "/blog/calibration-gap-brier-ece": [
+      "/blog/why-clinical-ai-label-leakage", "/blog/healthcare-ai-market-quality-gap", "/fine-tuning", "/limits",
+    ],
+    "/blog/hhs-ai-strategy-2025": [
+      "/blog/onc-safer-guides-2025-ai", "/blog/ahrq-patient-safety-ai", "/guide", "/limits",
+    ],
+    "/blog/ahrq-patient-safety-ai": [
+      "/blog/onc-safer-guides-2025-ai", "/blog/hhs-ai-strategy-2025", "/limits", "/data",
+    ],
+    "/blog/pcori-ai-methods-infrastructure": [
+      "/blog/nih-all-of-us-reproducible-ai", "/blog/ahrq-patient-safety-ai", "/data", "/fine-tuning",
+    ],
+    "/blog/chronic-disease-trustworthy-risk-ai": [
+      "/blog/why-clinical-ai-label-leakage", "/blog/calibration-gap-brier-ece", "/guide", "/data",
     ],
     "/blog/prevent-data-leakage-clinical-ai": ["/data", "/diagrams", "/blog", "/limits"],
     "/blog/ehr-risk-prediction-quickstart": ["/guide", "/quickstart", "/workbench", "/ui-train"],
@@ -91,8 +146,9 @@
     ],
     "/workbench": ["/guide", "/ui-home", "/ui-train", "/ui-predict"],
     "/guide": ["/workbench", "/quickstart", "/ui-train", "/limits"],
-    "/quickstart": ["/guide", "/docker-images", "/workbench", "/data"],
-    "/docker-images": ["/quickstart", "/commands", "/architecture", "/limits"],
+    "/quickstart": ["/docker-for-beginners", "/guide", "/docker-images", "/workbench"],
+    "/docker-for-beginners": ["/quickstart", "/docker-images", "/workbench", "/limits"],
+    "/docker-images": ["/docker-for-beginners", "/quickstart", "/commands", "/architecture"],
     "/commands": ["/quickstart", "/docker-images", "/fine-tuning", "/api"],
     "/diagrams": ["/fine-tuning", "/architecture", "/data", "/features"],
     "/fine-tuning": ["/ui-train", "/commands", "/diagrams", "/limits"],
@@ -129,7 +185,7 @@
     var p = PAGES.find(function (x) { return x.href === key; });
     if (p) return p.label;
     var u = UI_PAGES.find(function (x) { return x.href === key; });
-    return u ? u.label : href;
+    return u ? u.label : PAGE_LABELS[key] || href;
   }
 
   function blurbFor(href) {

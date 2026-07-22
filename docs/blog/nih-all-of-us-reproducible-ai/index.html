@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NIH All of Us Needs Reproducible, Leakage-Safe Methods — Not Just Bigger Models</title>
+  <meta name="description" content="All of Us integrates EHR, genomics, and surveys for large-scale research. Predictive ML on such data still needs index-time integrity and reproducible tooling." />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/site.css" />
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="/"><img class="brand-logo" src="../../assets/logo.svg" width="28" height="28" alt="" />EHR Risk <span>Framework</span></a>
+      <nav class="nav" aria-label="Primary"></nav>
+    </div>
+  </header>
+  <main id="main">
+    <p class="muted crumb"><a href="/blog">Blog</a> · NIH & research</p>
+    <h1 class="page-title">NIH All of Us needs reproducible, leakage-safe methods — not just bigger models</h1>
+    <p class="page-lead">All of Us is a landmark U.S. research platform. As ML papers proliferate on its data, methodological hygiene—leakage, calibration, reproducibility—matters as much as model capacity.</p>
+    <p class="banner"><strong>Research and education only.</strong> The EHR Risk Framework is not a medical device, is not FDA-cleared, and must not guide patient care. Posts summarize public sources for methods teaching—verify primary literature before citing.</p>
+
+    <section class="section">
+      <h2>What All of Us is</h2>
+      <p>
+        The NIH <strong>All of Us Research Program</strong> aims to enroll one million or more participants and provide researchers
+        with linked EHR, genomic, and survey data for discovery science.
+        Program home: <a href="https://allofus.nih.gov/" target="_blank" rel="noopener">allofus.nih.gov</a>.
+      </p>
+      <p>
+        Published case studies describe ML workflows on the Researcher Workbench for diverse prediction and phenotyping tasks—
+        always under All of Us data-use and privacy rules.
+      </p>
+    </section>
+    <section class="section">
+      <h2>Why reproducible tooling matters here</h2>
+      <ul>
+        <li>Large, multi-modal data increases the chance of subtle leakage if index times are fuzzy</li>
+        <li>Multi-site heterogeneity makes calibration and subgroup reporting essential</li>
+        <li>Shared open methods help labs compare results without reinventing pipelines</li>
+      </ul>
+    </section>
+    <section class="section">
+      <h2>How the EHR Risk Framework helps</h2>
+      <p>
+        Use the workbench as a <strong>methods teaching / local research</strong> stack for leakage-aware binary risk tasks
+        (task YAML, audits, calibration, Docker reproducibility). It does not replace All of Us access controls or IRB requirements—
+        and must not process unauthorized PHI.
+      </p>
+    </section>
+    <section class="section">
+      <h2>Sources</h2>
+      <ul>
+        <li>NIH All of Us Research Program. <a href="https://allofus.nih.gov/">allofus.nih.gov</a></li>
+        <li>PubMed literature on ML case studies using the All of Us Researcher Workbench (search current reviews).</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>Try the workbench</h2>
+      <p>
+        <a class="btn btn-primary" href="/guide">How it works A–Z</a>
+        <a class="btn" href="https://ehr-risk-framework.larucare.com/" target="_blank" rel="noopener">Live demo</a>
+        <a class="btn" href="/quickstart">Quickstart</a>
+        <a class="btn" href="https://github.com/ranasl62/ehr-chronic-disease-risk-prediction" target="_blank" rel="noopener">GitHub</a>
+      </p>
+      <p class="muted">Feedback: <a href="mailto:support@larucare.com">support@larucare.com</a> · Cite: <a href="/cite">DOI &amp; CITATION.cff</a></p>
+    </section>
+  </main>
+  <footer class="site-footer"><div class="inner"><p class="fine">Research / education only · <a href="mailto:support@larucare.com">support@larucare.com</a></p></div></footer>
+  <script src="../../assets/site.js"></script>
+</body>
+</html>

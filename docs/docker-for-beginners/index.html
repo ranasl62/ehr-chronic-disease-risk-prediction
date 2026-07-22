@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Docker for beginners — EHR Risk Framework</title>
+  <meta name="description" content="Install Docker and run the EHR Risk Framework API and web workbench without setting up Python or Node by hand." />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/site.css" />
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="/"><img class="brand-logo" src="../assets/logo.svg" width="28" height="28" alt="" />EHR Risk <span>Framework</span></a>
+      <nav class="nav" aria-label="Primary"></nav>
+    </div>
+  </header>
+  <main id="main">
+    <h1 class="page-title">Docker for beginners</h1>
+    <p class="page-lead">Install Docker once, then run this project’s web workbench and API with one command.</p>
+    <p class="banner"><strong>Research and education only.</strong> This software is not a medical device and must not guide patient care. Use demo or synthetic data only.</p>
+
+    <section class="section">
+      <h2>What Docker means here</h2>
+      <p>Docker packages an application and its dependencies into a <strong>container</strong>: an isolated, ready-to-run environment. Instead of installing this project’s Python packages, Node packages, and web server by hand, Docker starts the same prepared stack for everyone.</p>
+      <p>For this framework, Compose starts a preparation step, the FastAPI research API, and the Angular web workbench. Your project folder stays on your computer, so generated data, reports, and <code>model.pkl</code> persist after a restart.</p>
+    </section>
+
+    <section class="section">
+      <h2>1. Install Docker</h2>
+      <p>Use the official installer for your operating system: <a href="https://docs.docker.com/get-docker/">Get Docker</a>.</p>
+      <ul>
+        <li><strong>Windows:</strong> install <a href="https://www.docker.com/products/docker-desktop/">Docker Desktop</a>. It normally uses WSL 2; accept the WSL 2 setup prompt if shown.</li>
+        <li><strong>macOS:</strong> install <a href="https://www.docker.com/products/docker-desktop/">Docker Desktop</a> and choose the installer for your Mac.</li>
+        <li><strong>Linux:</strong> install Docker Engine and the Compose plugin using the distribution-specific instructions on <a href="https://docs.docker.com/get-docker/">Get Docker</a>. Docker Desktop is optional on Linux.</li>
+      </ul>
+      <p>After installation, open Docker Desktop on Windows or macOS and wait until it says Docker is running. On Linux, ensure the Docker service is running before continuing.</p>
+    </section>
+
+    <section class="section">
+      <h2>2. Check that Docker works</h2>
+      <p>Open Terminal (macOS/Linux) or PowerShell (Windows) and run:</p>
+<pre><code>docker --version
+docker compose version</code></pre>
+      <p class="muted">Both commands should print version information. This guide uses the current Compose command, <code>docker compose</code> (with a space), not the older <code>docker-compose</code> command.</p>
+    </section>
+
+    <section class="section">
+      <h2>3. Get and run the project</h2>
+      <p>Download the source code, enter its folder, then build and start the stack:</p>
+<pre><code>git clone https://github.com/ranasl62/ehr-chronic-disease-risk-prediction.git
+cd ehr-chronic-disease-risk-prediction
+docker compose up --build</code></pre>
+      <p>Leave this terminal open while the stack runs. The first start can take longer because Docker downloads base images and builds the project. When the services are ready, open:</p>
+      <ul>
+        <li><strong>Workbench:</strong> <a href="http://127.0.0.1:8080">http://127.0.0.1:8080</a></li>
+        <li><strong>API documentation:</strong> <a href="http://127.0.0.1:8000/docs">http://127.0.0.1:8000/docs</a></li>
+      </ul>
+      <p>To stop the stack, return to that terminal and press <kbd>Ctrl</kbd> + <kbd>C</kbd>, then run <code>docker compose down</code>.</p>
+    </section>
+
+    <section class="section">
+      <h2>Use published images instead</h2>
+      <p>If you do not need a local build, Compose can pull the public API and web images from Docker Hub. You still clone the repository because Compose keeps your data and reports in that folder.</p>
+<pre><code>git clone https://github.com/ranasl62/ehr-chronic-disease-risk-prediction.git
+cd ehr-chronic-disease-risk-prediction
+docker compose -f docker-compose.yml -f docker-compose.publish.yml pull
+docker compose -f docker-compose.yml -f docker-compose.publish.yml up</code></pre>
+      <p class="muted">See <a href="/docker-images">Docker Hub images</a> for image tags and pinning a release. See <a href="/quickstart">Quickstart</a> for the first training workflow.</p>
+    </section>
+
+    <section class="section">
+      <h2>Common problems</h2>
+      <ul>
+        <li><strong>“Cannot connect to the Docker daemon”:</strong> start Docker Desktop and wait until it is running; on Linux, start the Docker service.</li>
+        <li><strong>Port 8080 or 8000 is already in use:</strong> stop the other application, or set <code>UI_PORT</code> and <code>API_PORT</code> in a <code>.env</code> file before starting Compose.</li>
+        <li><strong><code>docker compose</code> is unknown:</strong> update Docker Desktop or install Docker Engine’s Compose plugin. Avoid switching to old <code>docker-compose</code> commands unless your installation specifically requires them.</li>
+        <li><strong>Windows setup fails:</strong> Docker Desktop requires WSL 2 for its default Linux-container setup. Follow its WSL 2 prompt, then restart Docker Desktop.</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>Try it without installing</h2>
+      <p>To explore the interface only, open the hosted <a href="https://ehr-risk-framework.larucare.com/" target="_blank" rel="noopener">live demo</a>. Do not upload patient data.</p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="inner"><p class="fine">Research and education only · not a medical device · <a href="mailto:support@larucare.com">support@larucare.com</a></p></div>
+  </footer>
+  <script src="../assets/site.js"></script>
+</body>
+</html>

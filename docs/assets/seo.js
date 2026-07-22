@@ -42,6 +42,11 @@
       description:
         "Docker Compose quickstart for leakage-aware EHR risk prediction—train, audit, and review calibrated metrics on synthetic teaching data.",
     },
+    "/docker-for-beginners": {
+      title: "Docker for Beginners — Run the EHR Risk Framework",
+      description:
+        "Plain-language Docker installation and Docker Compose guide for running the EHR Risk Framework API and web workbench.",
+    },
     "/docker-images": {
       title: "Docker Hub Images for EHR Risk Prediction — API & Web",
       description:
@@ -105,6 +110,56 @@
       title: "How to Prevent Data Leakage in Clinical AI (EHR Risk Models)",
       description:
         "Practical guide to index-time integrity, temporal splits, and leakage audits for EHR risk prediction research.",
+    },
+    "/blog/why-clinical-ai-label-leakage": {
+      title: "Why Many Same-Admission AI Models Look Strong — Label Leakage (JAMA 2025)",
+      description:
+        "JAMA Network Open found 40.2% of reviewed MIMIC same-admission studies used post-discharge ICD codes as features. Leakage-aware research methods.",
+    },
+    "/blog/onc-safer-guides-2025-ai": {
+      title: "2025 ONC SAFER Guides and AI Transparency — Research Methods Notes",
+      description:
+        "ONC SAFER Guides emphasize AI inventory, human oversight, and monitoring. How research tooling supports transparency practice.",
+    },
+    "/blog/fda-ai-devices-2025": {
+      title: "FDA AI/ML Device Clearances in 2025 — What Research Teams Should Learn",
+      description:
+        "Record AI/ML device clearances in 2025. Research software is not an FDA pathway; methods hygiene still matters.",
+    },
+    "/blog/healthcare-ai-market-quality-gap": {
+      title: "Healthcare AI Market Growth vs Methods Quality Gap",
+      description:
+        "Market forecasts surge while pilots fail to scale. Leakage, calibration, and explainability remain bottlenecks.",
+    },
+    "/blog/nih-all-of-us-reproducible-ai": {
+      title: "NIH All of Us and Reproducible Leakage-Safe ML Methods",
+      description:
+        "All of Us enables large-scale EHR research; predictive ML still needs index-time integrity and reproducible tooling.",
+    },
+    "/blog/calibration-gap-brier-ece": {
+      title: "Calibration Gap — Brier Score and ECE for EHR Risk Models",
+      description:
+        "Why AUROC is not enough. Brier, ECE, and isotonic calibration for honest probability reporting.",
+    },
+    "/blog/hhs-ai-strategy-2025": {
+      title: "HHS 2025 AI Strategic Plan — Trustworthy Reproducible Health AI",
+      description:
+        "HHS AI plan goals: innovation, trust, access, workforce. Aligning open research workbenches with trustworthy methods.",
+    },
+    "/blog/ahrq-patient-safety-ai": {
+      title: "AHRQ Digital Healthcare Research and Evidence-Based AI Methods",
+      description:
+        "AHRQ digital healthcare research and AI safety questions—methods infrastructure for honest evaluation.",
+    },
+    "/blog/pcori-ai-methods-infrastructure": {
+      title: "PCORI AI/ML Methods for CER — Shared Open Infrastructure",
+      description:
+        "PCORI funds AI/ML methods for patient-centered CER; open leakage-safe tooling helps labs execute.",
+    },
+    "/blog/chronic-disease-trustworthy-risk-ai": {
+      title: "Chronic Disease Burden and Trustworthy Risk Prediction Research",
+      description:
+        "CDC chronic disease burden meets leakage-safe, calibrated, explainable EHR risk modeling for research.",
     },
     "/blog/ehr-risk-prediction-quickstart": {
       title: "How to Build an EHR Risk Prediction Model (Open-Source Quickstart)",

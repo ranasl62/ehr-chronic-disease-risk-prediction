@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Why Many Same-Admission AI Models Look Strong — Until You Check for Label Leakage</title>
+  <meta name="description" content="JAMA Network Open (2025): 40.2% of reviewed MIMIC same-admission prediction studies used post-discharge ICD codes as features—label leakage that inflates AUROC." />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/site.css" />
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="/"><img class="brand-logo" src="../../assets/logo.svg" width="28" height="28" alt="" />EHR Risk <span>Framework</span></a>
+      <nav class="nav" aria-label="Primary"></nav>
+    </div>
+  </header>
+  <main id="main">
+    <p class="muted crumb"><a href="/blog">Blog</a> · Leakage & methods</p>
+    <h1 class="page-title">Why many same-admission AI models look strong — until you check for label leakage</h1>
+    <p class="page-lead">A 2025 <em>JAMA Network Open</em> study quantified a pervasive methods flaw: using discharge ICD codes as features for same-admission outcomes. Here is what the paper actually found, why it matters for EHR risk research, and how leakage-aware tooling helps labs and courses.</p>
+    <p class="banner"><strong>Research and education only.</strong> The EHR Risk Framework is not a medical device, is not FDA-cleared, and must not guide patient care. Posts summarize public sources for methods teaching—verify primary literature before citing.</p>
+
+    <section class="section">
+      <h2>What the study measured (precision matters)</h2>
+      <p>
+        The headline number is often shortened to “40% of clinical AI models.” The paper is more specific:
+        among <strong>92 MIMIC-based studies</strong> that predicted <strong>same-admission</strong> outcomes,
+        <strong>37 (40.2%)</strong> included ICD diagnostic codes as input features—even though MIMIC documentation
+        states ICD codes are derived <em>after discharge</em> and are not available for real-time prediction during the stay.
+      </p>
+      <p>
+        Source:
+        <a href="https://doi.org/10.1001/jamanetworkopen.2025.50454" target="_blank" rel="noopener">Ramadan et al., JAMA Network Open (2025)</a>
+        ·
+        <a href="https://jamanetwork.com/journals/jamanetworkopen/fullarticle/2843179" target="_blank" rel="noopener">Full text</a>
+        ·
+        <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12743287/" target="_blank" rel="noopener">PMC</a>.
+      </p>
+    </section>
+    <section class="section">
+      <h2>Why this is “label leakage,” not clever feature engineering</h2>
+      <p>
+        ICD codes entered or finalized after the clinical event (or after discharge) can encode information about the outcome itself—
+        palliative-care encounters, brain death, cardiac arrest coding, and related labels. Models trained on those codes can report
+        very high discrimination (the paper’s ICD-based mortality models reached AUROCs around 0.97) while being
+        <strong>unusable for prospective prediction</strong>, because those codes would not be available at the decision time.
+      </p>
+      <p>
+        That is the research crisis: notebooks and papers look excellent; honest index-time evaluation collapses.
+      </p>
+    </section>
+    <section class="section">
+      <h2>What “fix it” means for methods work</h2>
+      <ol class="steps">
+        <li><strong>Define index time and horizon</strong> before feature engineering—what can the model see when the prediction is made?</li>
+        <li><strong>Ban post-index / post-discharge fields</strong> from feature matrices for same-admission targets (ICD finalized at discharge is a classic trap).</li>
+        <li><strong>Prefer temporal or patient-level splits</strong> over random row splits on longitudinal EHR.</li>
+        <li><strong>Run a leakage audit</strong> and report calibration (Brier / ECE), not only AUROC.</li>
+        <li><strong>Document limitations</strong>—synthetic demos ≠ clinical performance.</li>
+      </ol>
+      <p class="muted">Related: <a href="/blog/prevent-data-leakage-clinical-ai">Prevent data leakage guide</a> · <a href="/diagrams">Temporal diagrams</a></p>
+    </section>
+    <section class="section">
+      <h2>How the EHR Risk Framework helps (research / teaching)</h2>
+      <p>
+        The open-source workbench is built around leakage-aware tasks (index + horizon), dataset health, train jobs,
+        and an explicit <strong>leakage-audit</strong> path—so students and labs practice honest evaluation instead of
+        chasing inflated AUROCs. It is <strong>not</strong> a clinical product and does not claim to “fix” published literature;
+        it gives a shared loop: ingest → health → train → audit → calibrate → explain → serve (research API).
+      </p>
+      <ul>
+        <li>Task YAML and Train UI force an explicit prediction setup</li>
+        <li>Leakage audit job against trained artifacts</li>
+        <li>Calibration metrics and optional isotonic calibration</li>
+        <li>SHAP jobs for inspectable drivers (when generated)</li>
+      </ul>
+    </section>
+    <section class="section">
+      <h2>Sources</h2>
+      <ul>
+        <li>Ramadan B, et al. Diagnostic Codes in AI Prediction Models and Label Leakage of Same-Admission Clinical Outcomes. <em>JAMA Netw Open</em>. 2025. <a href="https://doi.org/10.1001/jamanetworkopen.2025.50454">doi:10.1001/jamanetworkopen.2025.50454</a></li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>Try the workbench</h2>
+      <p>
+        <a class="btn btn-primary" href="/guide">How it works A–Z</a>
+        <a class="btn" href="https://ehr-risk-framework.larucare.com/" target="_blank" rel="noopener">Live demo</a>
+        <a class="btn" href="/quickstart">Quickstart</a>
+        <a class="btn" href="https://github.com/ranasl62/ehr-chronic-disease-risk-prediction" target="_blank" rel="noopener">GitHub</a>
+      </p>
+      <p class="muted">Feedback: <a href="mailto:support@larucare.com">support@larucare.com</a> · Cite: <a href="/cite">DOI &amp; CITATION.cff</a></p>
+    </section>
+  </main>
+  <footer class="site-footer"><div class="inner"><p class="fine">Research / education only · <a href="mailto:support@larucare.com">support@larucare.com</a></p></div></footer>
+  <script src="../../assets/site.js"></script>
+</body>
+</html>

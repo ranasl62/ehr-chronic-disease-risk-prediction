@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Healthcare AI Spending Is Surging — Methods Quality Still Decides Who Scales</title>
+  <meta name="description" content="Market forecasts cite rapid U.S. healthcare AI growth; industry analyses also report high pilot failure rates. Leakage, calibration, and explainability remain the practical bottlenecks." />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/site.css" />
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="/"><img class="brand-logo" src="../../assets/logo.svg" width="28" height="28" alt="" />EHR Risk <span>Framework</span></a>
+      <nav class="nav" aria-label="Primary"></nav>
+    </div>
+  </header>
+  <main id="main">
+    <p class="muted crumb"><a href="/blog">Blog</a> · Market & methods</p>
+    <h1 class="page-title">Healthcare AI spending is surging — methods quality still decides who scales</h1>
+    <p class="page-lead">Vendor forecasts put U.S. healthcare AI on a steep growth curve. Parallel industry reporting describes stubborn pilot-to-production failure. The gap is often methodological—not a lack of GPUs.</p>
+    <p class="banner"><strong>Research and education only.</strong> The EHR Risk Framework is not a medical device, is not FDA-cleared, and must not guide patient care. Posts summarize public sources for methods teaching—verify primary literature before citing.</p>
+
+    <section class="section">
+      <h2>Market growth (treat as forecast, not gospel)</h2>
+      <p>
+        Commercial market reports (e.g., Research and Markets and peers) have projected U.S. AI-in-healthcare revenue
+        on the order of <strong>tens of billions by the early 2030s</strong>, with high double-digit CAGRs from mid-2020s baselines.
+        Exact dollar figures vary by definition of “AI in healthcare.” Cite the primary report you use and note the scope.
+      </p>
+      <p class="muted">Example report family: Research and Markets — United States AI in Healthcare Market (search current edition on researchandmarkets.com).</p>
+    </section>
+    <section class="section">
+      <h2>The quality / scaling gap</h2>
+      <p>
+        Industry analyses commonly report that a large share of healthcare AI pilots never reach sustained production
+        (figures like “~90% fail to scale” appear in vendor/consulting pieces—verify the methodology of whichever source you cite).
+        Separately, widely discussed MIT-associated coverage of enterprise <em>generative</em> AI pilots reported very high rates of
+        projects without measurable ROI—that finding is about genAI pilots broadly, not EHR risk models specifically.
+      </p>
+      <p>Common technical failure modes for predictive clinical ML:</p>
+      <ul>
+        <li><strong>Leakage</strong> — post-index features or ICD-after-discharge style label leakage</li>
+        <li><strong>Miscalibration</strong> — rankings look fine; probabilities mislead thresholds</li>
+        <li><strong>Opaque models</strong> — no inspectable drivers for scientific critique</li>
+        <li><strong>Brittle evaluation</strong> — random splits on longitudinal data</li>
+      </ul>
+    </section>
+    <section class="section">
+      <h2>How the EHR Risk Framework helps</h2>
+      <ul>
+        <li>Leakage-audit oriented research loop</li>
+        <li>Brier / ECE + optional isotonic calibration</li>
+        <li>SHAP jobs for explanation practice</li>
+        <li>Open Docker workbench so courses share one honest pipeline</li>
+      </ul>
+    </section>
+    <section class="section">
+      <h2>Sources</h2>
+      <ul>
+        <li>Research and Markets (and similar) U.S. AI in Healthcare market reports — verify edition/year.</li>
+        <li>Industry analyses on healthcare AI pilot scaling (attribute specific publishers when you cite percentages).</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>Try the workbench</h2>
+      <p>
+        <a class="btn btn-primary" href="/guide">How it works A–Z</a>
+        <a class="btn" href="https://ehr-risk-framework.larucare.com/" target="_blank" rel="noopener">Live demo</a>
+        <a class="btn" href="/quickstart">Quickstart</a>
+        <a class="btn" href="https://github.com/ranasl62/ehr-chronic-disease-risk-prediction" target="_blank" rel="noopener">GitHub</a>
+      </p>
+      <p class="muted">Feedback: <a href="mailto:support@larucare.com">support@larucare.com</a> · Cite: <a href="/cite">DOI &amp; CITATION.cff</a></p>
+    </section>
+  </main>
+  <footer class="site-footer"><div class="inner"><p class="fine">Research / education only · <a href="mailto:support@larucare.com">support@larucare.com</a></p></div></footer>
+  <script src="../../assets/site.js"></script>
+</body>
+</html>
