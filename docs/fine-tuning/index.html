@@ -75,41 +75,28 @@
 
     <section class="section" id="loop">
       <h2>2. The iteration loop (diagram)</h2>
-<pre><code>                 ┌──────────────────────────────┐
-                 │  A. Define prediction task   │
-                 │  (horizon H, index strategy) │
-                 └──────────────┬───────────────┘
-                                ▼
-                 ┌──────────────────────────────┐
-                 │  B. Data health OK?          │
-                 │  fix blockers / warnings     │
-                 └──────────────┬───────────────┘
-                                ▼
-                 ┌──────────────────────────────┐
-                 │  C. Train baseline (logreg)  │
-                 │  record AUROC / PR / Brier   │
-                 └──────────────┬───────────────┘
-                                ▼
-                 ┌──────────────────────────────┐
-                 │  D. Trust jobs               │
-                 │  leakage audit + SHAP        │
-                 └──────────────┬───────────────┘
-                        ┌───────┴────────┐
-                        ▼                ▼
-              metrics honest?      leakage clean?
-                        │                │
-            no ◀────────┤                ├────────▶ no: fix features / index
-                        ▼                ▼
-                 ┌──────────────────────────────┐
-                 │  E. Compare families         │
-                 │  (+ calibrate on/off)        │
-                 └──────────────┬───────────────┘
-                                ▼
-                 ┌──────────────────────────────┐
-                 │  F. Promote best → Predict   │
-                 │  document limitations        │
-                 └──────────────────────────────┘
-</code></pre>
+      <div class="viz" role="img" aria-label="Model iteration loop from task to promote">
+        <div class="viz-col" style="width:100%">
+          <div class="viz-node soft wide"><strong>A. Define prediction task</strong><span>Horizon H · index strategy · windows</span></div>
+          <div class="viz-arrow-down" aria-hidden="true">↓</div>
+          <div class="viz-node wide"><strong>B. Data health OK?</strong><span>Fix blockers / warnings on Datasets</span></div>
+          <div class="viz-arrow-down" aria-hidden="true">↓</div>
+          <div class="viz-node wide"><strong>C. Train baseline (logreg)</strong><span>Record AUROC · PR-AUC · Brier · ECE</span></div>
+          <div class="viz-arrow-down" aria-hidden="true">↓</div>
+          <div class="viz-node wide"><strong>D. Trust jobs</strong><span>Leakage audit + SHAP (+ fairness optional)</span></div>
+          <div class="viz-arrow-down" aria-hidden="true">↓</div>
+          <div class="viz-fork">
+            <div class="viz-node decision"><strong>Metrics honest?</strong><small>No → revisit task / data / calibrate</small></div>
+            <div class="viz-node decision"><strong>Leakage clean?</strong><small>No → fix index / features / split</small></div>
+          </div>
+          <div class="viz-arrow-down" aria-hidden="true">↓</div>
+          <div class="viz-node wide"><strong>E. Compare families</strong><span>Multi-model · calibrate on/off · light HPO optional</span></div>
+          <div class="viz-arrow-down" aria-hidden="true">↓</div>
+          <div class="viz-node accent wide"><strong>F. Promote best → Predict</strong><span>Active <code>model.pkl</code> · document limitations</span></div>
+          <div class="viz-arrow-down loop" aria-hidden="true">↻</div>
+          <p class="viz-caption" style="margin:0;text-align:center">Iterate until metrics and audits look honest — then stop and write limits.</p>
+        </div>
+      </div>
     </section>
 
     <section class="section" id="ui">
@@ -189,22 +176,24 @@ curl -sS -X POST http://127.0.0.1:8000/v1/jobs/compare \
 
     <section class="section" id="compare">
       <h2>6. Compare → promote (data flow)</h2>
-<pre><code>POST /v1/jobs/compare
-        │
-        ▼
-for each model in compare_models (or request.models):
-    train hold-out → metrics
-        │
-        ▼
-rank by ROC-AUC (research default)
-        │
-        ├─ write reports/model_comparison.json
-        └─ if promote_best: copy winner → model.pkl
-                │
-                ▼
-         Predict / schema / SHAP use the promoted artifact
-</code></pre>
-      <p class="muted">Named runs also land under <code>reports/runs/&lt;id&gt;/</code> for reproducibility.</p>
+      <div class="viz" role="img" aria-label="Compare models then promote best artifact">
+        <div class="viz-col" style="width:100%">
+          <div class="viz-node soft wide"><strong><code>POST /v1/jobs/compare</code></strong><span>Models from Config <code>compare_models</code> or request body</span></div>
+          <div class="viz-arrow-down" aria-hidden="true">↓</div>
+          <div class="viz-node wide"><strong>For each model</strong><span>Train hold-out → metrics (same split / task)</span></div>
+          <div class="viz-arrow-down" aria-hidden="true">↓</div>
+          <div class="viz-node wide"><strong>Rank by ROC-AUC</strong><span>Research default ranking (report PR / Brier too)</span></div>
+          <div class="viz-arrow-down" aria-hidden="true">↓</div>
+          <div class="viz-row" style="width:100%">
+            <div class="viz-node"><strong>Write comparison</strong><span><code>reports/model_comparison.json</code></span></div>
+            <div class="viz-arrow" aria-hidden="true">→</div>
+            <div class="viz-node accent"><strong>If <code>promote_best</code></strong><span>Winner → active <code>model.pkl</code></span></div>
+          </div>
+          <div class="viz-arrow-down" aria-hidden="true">↓</div>
+          <div class="viz-node soft wide"><strong>Predict · schema · SHAP</strong><span>Use the promoted artifact · named runs under <code>reports/runs/&lt;id&gt;/</code></span></div>
+        </div>
+        <p class="viz-caption">Workbench: Train → Compare, or Results experiment browser → promote. CLI/API: <code>promote_best: true</code>.</p>
+      </div>
     </section>
 
     <section class="section" id="checklist">

@@ -14,21 +14,7 @@
   <header class="site-header">
     <div class="inner">
       <a class="brand" href="/"><img class="brand-logo" src="../assets/logo.svg" width="28" height="28" alt="" />EHR Risk <span>Framework</span></a>
-      <nav class="nav" aria-label="Primary">
-        <a href="/">Home</a>
-        <a href="/why">Why it matters</a>
-        <a href="/features">Features</a>
-        <a href="/workbench">Workbench</a>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/commands">Commands</a>
-        <a href="/diagrams">Diagrams</a>
-        <a href="/fine-tuning">Fine-tuning</a>
-        <a href="/architecture">Architecture</a>
-        <a href="/api">API</a>
-        <a href="/data">Data</a>
-        <a href="/cite">Cite &amp; feedback</a>
-        <a class="btn btn-primary" href="https://github.com/ranasl62/ehr-chronic-disease-risk-prediction">GitHub</a>
-      </nav>
+      <nav class="nav" aria-label="Primary"></nav>
     </div>
   </header>
   <main id="main">
@@ -113,20 +99,29 @@
         <div class="flow-arrow">→</div>
         <div class="flow-step"><span>7</span><strong>Serve</strong><p><code>POST /v1/predict</code> + Predict UI</p></div>
       </div>
-<pre><code>┌─────────┐   ┌─────────┐   ┌─────────┐   ┌──────────────┐
-│  raw    │──▶│ health  │──▶│ task /  │──▶│  feature     │
-│  EHR    │   │  gate   │   │ config  │   │  table       │
-│  rows   │   └─────────┘   └─────────┘   │  (patient ×  │
-└─────────┘                               │   windows)   │
-                                          └──────┬───────┘
-                                                 │
-         ┌───────────────────────────────────────┘
-         ▼
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│ train / compare │───▶│ reports/ + runs/ │───▶│ predict / explain│
-│ (split + fit)   │    │ metrics · plots  │    │ schema features │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-</code></pre>
+
+      <div class="viz" role="img" aria-label="End-to-end application data flow">
+        <div class="viz-row">
+          <div class="viz-node soft"><strong>Raw EHR rows</strong><span>Demo / upload / SQL CSV</span></div>
+          <div class="viz-arrow" aria-hidden="true">→</div>
+          <div class="viz-node"><strong>Health gate</strong><span><code>GET /v1/datasets/health</code></span></div>
+          <div class="viz-arrow" aria-hidden="true">→</div>
+          <div class="viz-node"><strong>Task / config</strong><span>Horizon · windows · split</span></div>
+          <div class="viz-arrow" aria-hidden="true">→</div>
+          <div class="viz-node accent"><strong>Feature table</strong><span>Patient × windows (index-safe)</span></div>
+        </div>
+        <div class="viz-col" style="margin-top:0.35rem">
+          <div class="viz-arrow-down" aria-hidden="true">↓</div>
+        </div>
+        <div class="viz-row">
+          <div class="viz-node"><strong>Train / compare</strong><span>Split + fit ± calibrate</span></div>
+          <div class="viz-arrow" aria-hidden="true">→</div>
+          <div class="viz-node"><strong>reports/ + runs/</strong><span>Metrics · plots · manifests</span></div>
+          <div class="viz-arrow" aria-hidden="true">→</div>
+          <div class="viz-node accent"><strong>Predict / explain</strong><span>Schema features · SHAP</span></div>
+        </div>
+        <p class="viz-caption">Ingest → health → task → features → train → trust artifacts → serve. Labels use post-index events only.</p>
+      </div>
     </section>
 
     <!-- 3 -->
@@ -166,22 +161,56 @@ Prediction form uses THESE names — not raw EHR column names.
     <!-- 4 -->
     <section class="section" id="request">
       <h2>4. HTTP request path (UI → API → ML)</h2>
-      <p>Example: user clicks <strong>Predict</strong> in the Angular workbench.</p>
-<pre><code>Browser (:8080)
-  │  POST /v1/predict  { features, include_explanation }
-  │  (nginx proxies /v1/* → api:8000)
-  ▼
-FastAPI api/main.py
-  │  optional X-API-Key
-  │  load artifact (model.pkl)
-  ▼
-inference.predict / explainability
-  │  align vector to feature_columns
-  │  predict_proba → risk_probability + risk_level
-  │  optional SHAP drivers
-  ▼
-JSON response → Predict page charts
-</code></pre>
+      <p>Example: user clicks <strong>Predict</strong> in the Angular workbench (Compose: nginx proxies <code>/v1/*</code> → <code>api:8000</code>; hosted demo calls <code>ehr-api.larucare.com</code> via baked <code>API_ENDPOINT</code>).</p>
+
+      <div class="viz" role="img" aria-label="HTTP request path from browser to ML">
+        <div class="viz-lane">
+          <div class="viz-lane-item">
+            <div class="viz-lane-label">Browser<br />UI</div>
+            <div class="viz-lane-body">
+              <strong>Angular workbench</strong>
+              <p><code>POST /v1/predict</code> with <code>{ features, include_explanation }</code></p>
+              <ul>
+                <li>Local Compose: same-origin via nginx on <code>:8080</code></li>
+                <li>Split deploy: absolute <code>API_ENDPOINT</code> (CORS required)</li>
+              </ul>
+            </div>
+          </div>
+          <div class="viz-lane-join" aria-hidden="true">↓</div>
+          <div class="viz-lane-item">
+            <div class="viz-lane-label">FastAPI</div>
+            <div class="viz-lane-body">
+              <strong><code>api/main.py</code> · researcher routes</strong>
+              <ul>
+                <li>Optional <code>X-API-Key</code> when <code>API_KEY</code> is set</li>
+                <li>Load active artifact <code>model.pkl</code></li>
+              </ul>
+            </div>
+          </div>
+          <div class="viz-lane-join" aria-hidden="true">↓</div>
+          <div class="viz-lane-item">
+            <div class="viz-lane-label">ML core</div>
+            <div class="viz-lane-body">
+              <strong><code>inference.predict</code> · explainability</strong>
+              <ul>
+                <li>Align vector to <code>feature_columns</code></li>
+                <li><code>predict_proba</code> → <code>risk_probability</code> + <code>risk_level</code></li>
+                <li>Optional SHAP drivers when requested / available</li>
+              </ul>
+            </div>
+          </div>
+          <div class="viz-lane-join" aria-hidden="true">↓</div>
+          <div class="viz-lane-item">
+            <div class="viz-lane-label">Response</div>
+            <div class="viz-lane-body">
+              <strong>JSON → Predict page charts</strong>
+              <p>Research score only — not clinical advice.</p>
+            </div>
+          </div>
+        </div>
+        <p class="viz-caption">Same stack serves train / audit / shap as background jobs (<code>POST /v1/jobs/*</code> → poll <code>GET /v1/jobs/{id}</code>).</p>
+      </div>
+
       <div class="grid-2">
         <article class="card">
           <h3>Train path</h3>
@@ -197,28 +226,69 @@ JSON response → Predict page charts
     <!-- 5 -->
     <section class="section" id="train-pipe">
       <h2>5. Training pipeline internals</h2>
-<pre><code>data_path CSV
-    │
-    ├─▶ build feature matrix (longitudinal multi-window OR tabular)
-    │
-    ├─▶ split
-    │     • split_by_patient  (group-aware, preferred for EHR)
-    │     • temporal_split    (time-aware hold-out)
-    │
-    ├─▶ fit estimator
-    │     logreg | random_forest | xgboost | lightgbm
-    │
-    ├─▶ optional isotonic calibration  (--calibrate / UI checkbox)
-    │
-    ├─▶ evaluate hold-out → AUROC, PR-AUC, Brier, ECE
-    │
-    └─▶ write artifacts
-          model.pkl (if promote)
-          reports/evaluation_report.json
-          reports/feature_importance.json
-          reports/calibration_holdout.png
-          reports/runs/&lt;run_id&gt;/
-</code></pre>
+      <div class="viz" role="img" aria-label="Training pipeline from CSV to artifacts">
+        <div class="viz-pipe">
+          <div class="viz-pipe-step">
+            <span class="viz-pipe-num">1</span>
+            <div class="viz-pipe-body">
+              <strong>data_path CSV</strong>
+              <p>Longitudinal demo / BYO upload / processed extract (local).</p>
+            </div>
+          </div>
+          <div class="viz-pipe-step">
+            <span class="viz-pipe-num">2</span>
+            <div class="viz-pipe-body">
+              <strong>Build feature matrix</strong>
+              <p>Longitudinal multi-window (<code>w7d_</code> / <code>w30d_</code> / <code>w180d_</code>) or tabular schema.</p>
+            </div>
+          </div>
+          <div class="viz-pipe-step">
+            <span class="viz-pipe-num">3</span>
+            <div class="viz-pipe-body">
+              <strong>Split</strong>
+              <ul>
+                <li><code>split_by_patient</code> — group-aware (preferred for EHR)</li>
+                <li><code>temporal_split</code> — time-aware hold-out</li>
+              </ul>
+            </div>
+          </div>
+          <div class="viz-pipe-step">
+            <span class="viz-pipe-num">4</span>
+            <div class="viz-pipe-body">
+              <strong>Fit estimator</strong>
+              <p><code>logreg</code> · <code>random_forest</code> · <code>xgboost</code> · <code>lightgbm</code></p>
+            </div>
+          </div>
+          <div class="viz-pipe-step">
+            <span class="viz-pipe-num">5</span>
+            <div class="viz-pipe-body">
+              <strong>Optional isotonic calibration</strong>
+              <p>CLI <code>--calibrate</code> / Train UI checkbox — improves Brier / ECE.</p>
+            </div>
+          </div>
+          <div class="viz-pipe-step">
+            <span class="viz-pipe-num">6</span>
+            <div class="viz-pipe-body">
+              <strong>Evaluate hold-out</strong>
+              <p>AUROC · PR-AUC · Brier · ECE (report honestly with split type).</p>
+            </div>
+          </div>
+          <div class="viz-pipe-step">
+            <span class="viz-pipe-num">7</span>
+            <div class="viz-pipe-body">
+              <strong>Write artifacts</strong>
+              <ul>
+                <li><code>model.pkl</code> when promoted / single train promote</li>
+                <li><code>reports/evaluation_report.json</code></li>
+                <li><code>reports/feature_importance.json</code></li>
+                <li><code>reports/calibration_holdout.png</code></li>
+                <li><code>reports/runs/&lt;run_id&gt;/</code></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <p class="viz-caption">Training never uses post-index features; promote copies the chosen artifact to the active path for Predict.</p>
+      </div>
     </section>
 
     <!-- 6 -->
@@ -273,18 +343,41 @@ JSON response → Predict page charts
     <!-- 7 -->
     <section class="section" id="docker">
       <h2>7. Runtime topology (Docker)</h2>
-<pre><code>docker compose up --build
-        │
-        ├─ prepare   one-shot: train model.pkl if missing
-        ├─ api       :8000  FastAPI (ehr-risk-api:local, repo mounted)
-        └─ web       :8080  Angular + nginx (ehr-risk-web:local)
-                              │
-                              ├─ SPA   /  /datasets /train /results /analytics
-                              │        /predict /config /docs
-                              ├─ API   /v1/*  → api:8000
-                              ├─ health /health
-                              └─ Swagger /api-docs → :8000/docs
-</code></pre>
+      <div class="viz" role="img" aria-label="Docker Compose runtime topology">
+        <div class="viz-topo">
+          <div class="viz-topo-root"><code>docker compose up --build</code></div>
+          <div class="viz-topo-services">
+            <article class="viz-topo-svc">
+              <strong>prepare</strong>
+              <span class="port">one-shot</span>
+              <ul>
+                <li>Train <code>model.pkl</code> if missing</li>
+                <li>Exits when ready</li>
+              </ul>
+            </article>
+            <article class="viz-topo-svc">
+              <strong>api</strong>
+              <span class="port">:8000</span>
+              <ul>
+                <li>FastAPI · <code>ehr-risk-api</code></li>
+                <li>Repo mounted for <code>data/</code> · <code>reports/</code></li>
+                <li>OpenAPI at <code>/docs</code></li>
+              </ul>
+            </article>
+            <article class="viz-topo-svc web">
+              <strong>web</strong>
+              <span class="port">:8080</span>
+              <ul>
+                <li>Angular SPA + nginx</li>
+                <li>Routes: <code>/</code> Datasets Train Results Analytics Predict Config Docs</li>
+                <li><code>/v1/*</code> → <code>api:8000</code></li>
+                <li><code>/health</code> · <code>/api-docs</code> → Swagger</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+        <p class="viz-caption">Hosted split deploy: UI at <code>ehr-risk-framework.larucare.com</code>, API at <code>ehr-api.larucare.com</code> (bake <code>API_ENDPOINT</code> + set <code>CORS_ORIGINS</code>).</p>
+      </div>
     </section>
 
     <!-- 8 -->

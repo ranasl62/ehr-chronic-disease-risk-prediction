@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How it works A–Z — EHR Risk Workbench Guide with Screenshots</title>
+  <meta name="description" content="Complete A–Z walkthrough of the EHR Risk Framework workbench: Docker start, datasets, train, leakage audit, results, SHAP, predict — with screenshots." />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/site.css" />
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="/"><img class="brand-logo" src="../assets/logo.svg" width="28" height="28" alt="" />EHR Risk <span>Framework</span></a>
+      <nav class="nav" aria-label="Primary"></nav>
+    </div>
+  </header>
+  <main id="main">
+    <h1 class="page-title">How it works — A to Z</h1>
+    <p class="page-lead">
+      End-to-end guide to the researcher workbench: start the stack, pick data, train with leakage-aware settings,
+      audit, review metrics and SHAP, then predict. Screenshots use synthetic teaching data only.
+    </p>
+    <p class="banner">
+      <strong>Research and education only.</strong> Not a medical device. Do not upload PHI.
+      Live demo: <a href="https://ehr-risk-framework.larucare.com/" target="_blank" rel="noopener">ehr-risk-framework.larucare.com</a>
+      · API: <a href="https://ehr-api.larucare.com/docs" target="_blank" rel="noopener">ehr-api.larucare.com</a>
+    </p>
+
+    <nav class="toc" aria-label="Guide contents">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#a-scope">A. Scope &amp; what you get</a></li>
+        <li><a href="#b-start">B. Start the stack</a></li>
+        <li><a href="#c-home">C. Home — checklist</a></li>
+        <li><a href="#d-config">D. Config Center</a></li>
+        <li><a href="#e-datasets">E. Datasets &amp; health</a></li>
+        <li><a href="#f-train">F. Train &amp; compare</a></li>
+        <li><a href="#g-audit">G. Leakage audit</a></li>
+        <li><a href="#h-results">H. Results, HPO &amp; SHAP</a></li>
+        <li><a href="#i-analytics">I. Analytics</a></li>
+        <li><a href="#j-predict">J. Predict &amp; explain</a></li>
+        <li><a href="#k-api">K. OpenAPI &amp; in-app Docs</a></li>
+        <li><a href="#l-zip">L. Download results ZIP</a></li>
+        <li><a href="#m-hosted">M. Hosted / split deploy</a></li>
+        <li><a href="#n-limits">N. Limits &amp; next steps</a></li>
+      </ol>
+    </nav>
+
+    <section class="section" id="a-scope">
+      <h2>A. Scope &amp; what you get</h2>
+      <p>
+        The framework is a <strong>leakage-aware clinical ML workbench</strong> for research and teaching:
+        task YAML (index time + horizon), temporal / patient splits, calibration (Brier / ECE),
+        leakage audits, optional SHAP, FastAPI jobs, and an Angular UI.
+      </p>
+      <ul>
+        <li><strong>UI</strong> — Angular researcher workbench (local <code>:8080</code> or live demo)</li>
+        <li><strong>API</strong> — FastAPI train / audit / predict jobs (local <code>:8000</code> or hosted API)</li>
+        <li><strong>Data</strong> — teaching fixtures under <code>data/demo/</code> (never PHI)</li>
+      </ul>
+      <p class="muted">Deep dive: <a href="/why">Why it matters</a> · <a href="/features">Features</a> · <a href="/architecture">Architecture</a></p>
+    </section>
+
+    <section class="section" id="b-start">
+      <h2>B. Start the stack</h2>
+      <p>Local one-command start (recommended for courses and labs):</p>
+      <pre><code>git clone https://github.com/ranasl62/ehr-chronic-disease-risk-prediction.git
+cd ehr-chronic-disease-risk-prediction
+docker compose up --build
+# UI  http://127.0.0.1:8080
+# API http://127.0.0.1:8000/docs</code></pre>
+      <p>
+        Or open the hosted workbench without installing anything:
+        <a href="https://ehr-risk-framework.larucare.com/" target="_blank" rel="noopener">https://ehr-risk-framework.larucare.com/</a>
+      </p>
+      <p class="muted">Also: <a href="/quickstart">Quickstart</a> · <a href="/docker-images">Docker Hub images</a></p>
+    </section>
+
+    <section class="section" id="c-home">
+      <h2>C. Home — researcher checklist</h2>
+      <p>
+        Route <code>/</code>. After the API is up, Home answers: is the API healthy, is demo data present,
+        is <code>model.pkl</code> trained, and which trust artifacts (metrics, leakage audit, SHAP) exist?
+      </p>
+      <figure class="shot">
+        <img src="../media/01_home_checklist.png" alt="Home page with setup checklist and metrics" width="1200" height="750" />
+        <figcaption>Figure C — Home checklist and latest hold-out metrics summary</figcaption>
+      </figure>
+      <ol class="steps">
+        <li>Open the workbench URL and wait for status to leave “Checking workspace…”.</li>
+        <li>Confirm green checks for API, demo data, and model (first boot may train via <code>prepare</code>).</li>
+        <li>Use <strong>Run demo</strong> to jump into Train with the bundled longitudinal CSV, or <strong>Import / pick data</strong> for Datasets.</li>
+        <li>Failed items show a <strong>Fix</strong> link to Datasets, Train, or Results.</li>
+      </ol>
+      <p class="muted">Detail page: <a href="/ui-home">Home UI tour</a></p>
+    </section>
+
+    <section class="section" id="d-config">
+      <h2>D. Config Center</h2>
+      <p>
+        Route <code>/config</code>. Set research persona defaults (task, model family, windows), optional API key,
+        and UI theme / density before a serious train loop.
+      </p>
+      <figure class="shot">
+        <img src="../media/03_config_center.png" alt="Config Center with task and model defaults" width="1200" height="750" />
+        <figcaption>Figure D — Config Center (workspace defaults and preferences)</figcaption>
+      </figure>
+      <ol class="steps">
+        <li>Choose a task preset (e.g. diabetes / custom) and model options to compare later.</li>
+        <li>Set window days and split preferences that Train will inherit.</li>
+        <li>If the API requires <code>API_KEY</code>, paste it here so jobs send <code>X-API-Key</code>.</li>
+        <li>Save — values persist in workspace config for the session / volume.</li>
+      </ol>
+      <p class="muted">Detail page: <a href="/ui-config">Config UI tour</a></p>
+    </section>
+
+    <section class="section" id="e-datasets">
+      <h2>E. Datasets &amp; health</h2>
+      <p>
+        Route <code>/datasets</code>. Browse bundled demos under <code>data/demo/</code>, upload BYO CSV to
+        <code>data/uploads/</code>, map columns, and run dataset health before Train.
+      </p>
+      <figure class="shot">
+        <img src="../media/02_datasets_health.png" alt="Datasets page with demo list and health" width="1200" height="750" />
+        <figcaption>Figure E — Datasets: demos, selection, and health gate</figcaption>
+      </figure>
+      <ol class="steps">
+        <li>Leave <strong>Show bundled demo datasets</strong> on for teaching fixtures.</li>
+        <li>Select <code>ehr_data.csv</code> (tiny longitudinal) or a larger synthetic cohort.</li>
+        <li>Run <strong>Dataset health</strong> — fix schema / integrity issues before training.</li>
+        <li>For your own CSV: File upload → map columns → health → Continue to train.</li>
+      </ol>
+      <p class="muted">Detail: <a href="/ui-datasets">Datasets UI</a> · <a href="/data">Data guide</a></p>
+    </section>
+
+    <section class="section" id="f-train">
+      <h2>F. Train &amp; compare</h2>
+      <p>
+        Route <code>/train</code>. Pick format (longitudinal vs tabular), task, model(s), calibration,
+        and optional multi-model compare. Training writes <code>model.pkl</code>, evaluation reports, and run metadata.
+      </p>
+      <figure class="shot">
+        <img src="../media/04_train_compare.png" alt="Train page with model compare options" width="1200" height="750" />
+        <figcaption>Figure F — Train: task, calibrate, compare models</figcaption>
+      </figure>
+      <ol class="steps">
+        <li>Confirm data path (demo longitudinal CSV is the default teaching path).</li>
+        <li>Select model(s): logreg, random forest, xgboost, lightgbm (as available).</li>
+        <li>Enable isotonic calibration when you care about probability quality (Brier / ECE).</li>
+        <li>Start training — wait for job completion, then open Results.</li>
+      </ol>
+      <p class="muted">Detail: <a href="/ui-train">Train UI</a> · <a href="/fine-tuning">Fine-tuning</a></p>
+    </section>
+
+    <section class="section" id="g-audit">
+      <h2>G. Leakage audit</h2>
+      <p>
+        From Train (or Results jobs), run the <strong>leakage audit</strong> against the trained artifact.
+        It checks post-index features and split integrity so inflated AUROCs from future information are caught early.
+      </p>
+      <ol class="steps">
+        <li>After a successful train, start the leakage-audit job from the Train / Results job panel.</li>
+        <li>Wait until Home shows <strong>Leakage audit present</strong>.</li>
+        <li>Read the audit JSON / report in Results or the reports ZIP — treat failures as blockers for “honest” metrics.</li>
+      </ol>
+      <p class="muted">Concept guide: <a href="/blog/prevent-data-leakage-clinical-ai">Prevent data leakage in clinical AI</a> · <a href="/diagrams">Temporal diagrams</a></p>
+    </section>
+
+    <section class="section" id="h-results">
+      <h2>H. Results, light HPO &amp; SHAP</h2>
+      <p>
+        Route <code>/results</code>. Review hold-out metrics, calibration plots, optional light HPO trials,
+        fairness jobs, SHAP summaries, and downloadable figures.
+      </p>
+      <figure class="shot">
+        <img src="../media/05_results_zip.png" alt="Results page with metrics and download" width="1200" height="750" />
+        <figcaption>Figure H1 — Results: metrics, figures, ZIP entry points</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="../media/05_results_hpo.png" alt="Results light HPO best trial card" width="1200" height="750" />
+        <figcaption>Figure H2 — Light HPO: best-trial card and trial table (research / teaching only)</figcaption>
+      </figure>
+      <ol class="steps">
+        <li>Open Results after train — check ROC / PR when available, Brier, ECE, accuracy family metrics.</li>
+        <li>Optionally run light HPO — inspect best trial (not clinical AutoML).</li>
+        <li>Generate SHAP when supported; Home checklist updates when the summary exists.</li>
+        <li>Promote a named run when you want that artifact as the active model.</li>
+      </ol>
+      <p class="muted">Detail: <a href="/ui-results">Results UI</a></p>
+    </section>
+
+    <section class="section" id="i-analytics">
+      <h2>I. Analytics</h2>
+      <p>
+        Route <code>/analytics</code>. Cohort charts and tables for the selected dataset / split —
+        useful for teaching EDA before or after training.
+      </p>
+      <figure class="shot">
+        <img src="../media/08_analytics_dashboard.png" alt="Analytics dashboard with cohort charts" width="1200" height="750" />
+        <figcaption>Figure I — Analytics cohort dashboard</figcaption>
+      </figure>
+      <ol class="steps">
+        <li>Select the dataset you trained on (or another demo).</li>
+        <li>Explore filters and charts — confirm class balance and feature distributions look sane.</li>
+        <li>Use findings to adjust windows / task config, then retrain if needed.</li>
+      </ol>
+      <p class="muted">Detail: <a href="/ui-analytics">Analytics UI</a></p>
+    </section>
+
+    <section class="section" id="j-predict">
+      <h2>J. Predict &amp; explain</h2>
+      <p>
+        Route <code>/predict</code>. Submit schema-aligned features to <code>POST /v1/predict</code>,
+        view risk output, and inspect SHAP / vs-median explanations when available.
+      </p>
+      <figure class="shot">
+        <img src="../media/06_predict_banner.png" alt="Predict page with risk and explanation" width="1200" height="750" />
+        <figcaption>Figure J — Predict: disclaimer banner, form, and explanation</figcaption>
+      </figure>
+      <ol class="steps">
+        <li>Confirm a trained model is active (Home: Model trained).</li>
+        <li>Fill the feature form (or paste JSON aligned to the training schema).</li>
+        <li>Submit — read probability / label as <em>research output only</em>.</li>
+        <li>Review local explanations; do not use them for clinical decisions.</li>
+      </ol>
+      <p class="muted">Detail: <a href="/ui-predict">Predict UI</a> · <a href="/api">API overview</a></p>
+    </section>
+
+    <section class="section" id="k-api">
+      <h2>K. OpenAPI &amp; in-app Docs</h2>
+      <p>
+        Interactive Swagger lives at the API <code>/docs</code> (local <code>:8000/docs</code> or
+        <a href="https://ehr-api.larucare.com/docs" target="_blank" rel="noopener">hosted API docs</a>).
+        The workbench <code>/docs</code> route links to this documentation website (not raw GitHub Markdown).
+      </p>
+      <figure class="shot">
+        <img src="../media/07_api_docs.png" alt="FastAPI OpenAPI Swagger UI" width="1200" height="750" />
+        <figcaption>Figure K1 — OpenAPI: try health, datasets, train jobs, predict</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="../media/09_ui_docs.png" alt="In-app Docs page with guide links" width="1200" height="750" />
+        <figcaption>Figure K2 — In-app Docs: named links to this site (Help, Quickstart, limits)</figcaption>
+      </figure>
+      <p class="muted">Detail: <a href="/ui-openapi">OpenAPI tour</a> · <a href="/ui-docs">In-app Docs tour</a> · <a href="/help">Help library</a></p>
+    </section>
+
+    <section class="section" id="l-zip">
+      <h2>L. Download results ZIP</h2>
+      <p>
+        From Home or Results, download the methods pack:
+        metrics JSON, figures, audit artifacts, and run metadata for reproducibility write-ups.
+      </p>
+      <ol class="steps">
+        <li>Complete at least one train (+ optional audit / SHAP).</li>
+        <li>Click <strong>Download results ZIP</strong> (or hit <code>/v1/reports/download.zip</code> on the API).</li>
+        <li>Archive the ZIP with your paper / homework submission — still no PHI.</li>
+      </ol>
+    </section>
+
+    <section class="section" id="m-hosted">
+      <h2>M. Hosted / split deploy</h2>
+      <p>
+        The public demo UI and API can run on separate hosts. The web image bakes
+        <code>API_ENDPOINT=https://ehr-api.larucare.com</code> at build time; the API allows the UI origin via
+        <code>CORS_ORIGINS=https://ehr-risk-framework.larucare.com</code>.
+      </p>
+      <ul>
+        <li>Local Compose: leave <code>API_ENDPOINT</code> empty — nginx proxies <code>/v1</code> to <code>api</code>.</li>
+        <li>Split deploy: set both env vars as above; same-origin <code>/v1</code> on the UI host alone will not work.</li>
+      </ul>
+      <p class="muted"><a href="/docker-images">Docker images</a> · <a href="https://github.com/ranasl62/ehr-chronic-disease-risk-prediction/blob/main/INSTALLATION.md">INSTALLATION.md</a></p>
+    </section>
+
+    <section class="section" id="n-limits">
+      <h2>N. Limits &amp; next steps</h2>
+      <p>
+        Synthetic and teaching metrics are <strong>not</strong> clinical performance.
+        Prefer credentialed hospital systems for care; use this stack for methods teaching and reproducible research software.
+      </p>
+      <ul>
+        <li><a href="/limits">Limitations &amp; model card</a></li>
+        <li><a href="/workbench">Workbench hub</a> (every screen as a short page)</li>
+        <li><a href="/blog/ehr-risk-prediction-quickstart">Tutorial: build a risk model</a></li>
+        <li><a href="/cite">Cite &amp; feedback</a> — <a href="mailto:support@larucare.com">support@larucare.com</a></li>
+      </ul>
+      <div class="path-band" style="margin-top:1.25rem">
+        <a href="/ui-home"><strong>Home</strong><span>C</span></a>
+        <span class="path-sep">→</span>
+        <a href="/ui-datasets"><strong>Datasets</strong><span>E</span></a>
+        <span class="path-sep">→</span>
+        <a href="/ui-train"><strong>Train</strong><span>F–G</span></a>
+        <span class="path-sep">→</span>
+        <a href="/ui-results"><strong>Results</strong><span>H</span></a>
+        <span class="path-sep">→</span>
+        <a href="/ui-analytics"><strong>Analytics</strong><span>I</span></a>
+        <span class="path-sep">→</span>
+        <a href="/ui-predict"><strong>Predict</strong><span>J</span></a>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="inner">
+      <p class="fine">
+        Demo screenshots only · Research / education only ·
+        <a href="mailto:support@larucare.com">support@larucare.com</a>
+      </p>
+    </div>
+  </footer>
+  <script src="../assets/site.js"></script>
+</body>
+</html>

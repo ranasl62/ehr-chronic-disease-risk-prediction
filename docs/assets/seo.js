@@ -32,6 +32,11 @@
       description:
         "Tour the Angular researcher workbench for EHR risk prediction: datasets, train, results, predict, config, and OpenAPI.",
     },
+    "/guide": {
+      title: "How it Works A–Z — EHR Risk Workbench Guide with Screenshots",
+      description:
+        "Complete A–Z walkthrough: Docker start, datasets, train, leakage audit, results, SHAP, predict — with screenshots. Research/education only.",
+    },
     "/quickstart": {
       title: "Quickstart: Train an EHR Risk Model in Minutes (Docker)",
       description:

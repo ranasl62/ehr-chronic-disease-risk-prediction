@@ -17,6 +17,12 @@ describe('DocsComponent', () => {
     expect(fixture.nativeElement.textContent.length).toBeGreaterThan(20);
   });
 
+  it('highlights the A–Z guide on the documentation website', () => {
+    const html: string = fixture.nativeElement.innerHTML;
+    expect(html).toContain(`${DOCS_SITE}/guide/`);
+    expect(fixture.nativeElement.textContent).toContain('How it works A–Z');
+  });
+
   it('uses guide labels as link text instead of raw paths', () => {
     const root: HTMLElement = fixture.nativeElement;
     const helpLinks = Array.from(root.querySelectorAll('a')).filter(

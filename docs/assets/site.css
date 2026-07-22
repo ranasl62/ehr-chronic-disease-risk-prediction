@@ -674,3 +674,265 @@ pre code { background: transparent; padding: 0; color: inherit; }
   .flow-arrow { display: none; }
   .path-sep { display: none; }
 }
+
+/* —— Professional flow visualizations (diagrams / fine-tuning) —— */
+.viz {
+  margin: 1.15rem 0 1.5rem;
+  padding: 1.15rem 1.1rem 1.25rem;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 55%, #fff) 0%, var(--surface) 42%);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow-x: auto;
+}
+.viz-caption {
+  margin: 0.85rem 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.viz-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0.45rem 0.35rem;
+}
+.viz-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+.viz-node {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 7.5rem;
+  max-width: 14rem;
+  padding: 0.7rem 0.85rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--ink) 4%, transparent);
+  text-align: left;
+}
+.viz-node strong {
+  font-size: 0.9rem;
+  color: var(--ink);
+  line-height: 1.25;
+}
+.viz-node span,
+.viz-node small {
+  font-size: 0.75rem;
+  color: var(--muted);
+  line-height: 1.35;
+}
+.viz-node code {
+  font-size: 0.72rem;
+}
+.viz-node.accent {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.viz-node.accent strong { color: #fff; }
+.viz-node.accent span,
+.viz-node.accent small { color: color-mix(in srgb, #fff 82%, transparent); }
+.viz-node.soft {
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--line));
+}
+.viz-node.wide { max-width: 22rem; width: 100%; }
+.viz-node.decision {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+  background: #fffef8;
+  text-align: center;
+  align-items: center;
+}
+.viz-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 0 0.15rem;
+  flex: 0 0 auto;
+  align-self: center;
+}
+.viz-arrow-down {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.35rem;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 1rem;
+}
+.viz-arrow-down.loop {
+  color: #8c6a3d;
+}
+.viz-pipe {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  max-width: 36rem;
+  margin: 0 auto;
+}
+.viz-pipe .viz-node { max-width: none; width: 100%; }
+.viz-pipe-step {
+  display: grid;
+  grid-template-columns: 2.1rem 1fr;
+  gap: 0.65rem;
+  align-items: start;
+  padding: 0.65rem 0;
+  border-left: 2px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+  margin-left: 0.85rem;
+  padding-left: 1rem;
+  position: relative;
+}
+.viz-pipe-step:last-child { border-left-color: transparent; }
+.viz-pipe-num {
+  position: absolute;
+  left: -0.95rem;
+  top: 0.7rem;
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.viz-pipe-body strong { display: block; font-size: 0.95rem; margin-bottom: 0.2rem; }
+.viz-pipe-body p {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+.viz-pipe-body ul {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.viz-lane {
+  display: grid;
+  gap: 0.55rem;
+  max-width: 40rem;
+  margin: 0 auto;
+}
+.viz-lane-item {
+  display: grid;
+  grid-template-columns: 7.5rem 1fr;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+.viz-lane-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.55rem 0.4rem;
+  border-radius: 8px;
+  background: var(--ink);
+  color: #f4f7f5;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.viz-lane-body {
+  padding: 0.65rem 0.8rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.viz-lane-body strong { display: block; font-size: 0.9rem; margin-bottom: 0.2rem; }
+.viz-lane-body p,
+.viz-lane-body ul {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.viz-lane-body ul { padding-left: 1.1rem; margin-top: 0.25rem; }
+.viz-lane-join {
+  text-align: center;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin: -0.15rem 0;
+  padding-left: 7.5rem;
+}
+.viz-topo {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 44rem;
+  margin: 0 auto;
+}
+.viz-topo-root {
+  text-align: center;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+.viz-topo-root code { color: #e4f2ed; font-weight: 600; }
+.viz-topo-services {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+.viz-topo-svc {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.75rem 0.8rem;
+  min-height: 100%;
+}
+.viz-topo-svc strong { display: block; font-size: 0.92rem; margin-bottom: 0.25rem; }
+.viz-topo-svc .port {
+  display: inline-block;
+  margin-bottom: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  padding: 0.12rem 0.5rem;
+}
+.viz-topo-svc ul {
+  margin: 0.35rem 0 0;
+  padding-left: 1rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.viz-topo-svc.web {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+  background: color-mix(in srgb, var(--accent-soft) 40%, #fff);
+}
+.viz-fork {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+  width: 100%;
+  max-width: 28rem;
+}
+.viz-fork .viz-node { max-width: none; width: 100%; }
+@media (max-width: 800px) {
+  .viz-topo-services { grid-template-columns: 1fr; }
+  .viz-lane-item { grid-template-columns: 1fr; }
+  .viz-lane-join { padding-left: 0; }
+  .viz-fork { grid-template-columns: 1fr; }
+}

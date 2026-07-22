@@ -24,6 +24,7 @@ Ad-hoc notebooks often skip index-time integrity, calibration, and reproducible 
 | Doc | Link |
 |-----|------|
 | **Documentation website** | [ehr.larucare.com](https://ehr.larucare.com/) (source [`docs/`](docs/)) |
+| **How it works (A–Z)** | [Guide with screenshots](https://ehr.larucare.com/guide/) |
 | **Live demo (workbench)** | [ehr-risk-framework.larucare.com](https://ehr-risk-framework.larucare.com/) |
 | **Live API** | [ehr-api.larucare.com](https://ehr-api.larucare.com/) |
 | Blog / tutorials | [Prevent data leakage](https://ehr.larucare.com/blog/prevent-data-leakage-clinical-ai/) · [Risk model quickstart](https://ehr.larucare.com/blog/ehr-risk-prediction-quickstart/) |

@@ -18,8 +18,8 @@ export class DocsComponent {
 
   /** Primary shortcuts shown as buttons (labels only — no raw paths). */
   readonly shortcuts: ReadonlyArray<DocsGuide> = [
+    { label: 'How it works A–Z', path: '/guide/', blurb: 'Full walkthrough with screenshots' },
     { label: 'Docs home', path: '/', blurb: 'Overview and getting started' },
-    { label: 'Help', path: '/help/', blurb: 'Full documentation library' },
     { label: 'Quickstart', path: '/quickstart/', blurb: 'First successful train loop' },
     { label: 'UI tour', path: '/workbench/', blurb: 'Screenshots of every route' },
   ];
@@ -29,6 +29,11 @@ export class DocsComponent {
     {
       title: 'Get started',
       items: [
+        {
+          label: 'How it works A–Z',
+          path: '/guide/',
+          blurb: 'Detailed walkthrough with every screenshot — start here',
+        },
         { label: 'Quickstart', path: '/quickstart/', blurb: 'Docker → first train → predict' },
         { label: 'Install & Docker images', path: '/docker-images/', blurb: 'Compose and Hub pulls' },
         { label: 'Commands', path: '/commands/', blurb: 'Make, curl, and CLI recipes' },
