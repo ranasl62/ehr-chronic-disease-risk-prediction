@@ -49,7 +49,7 @@ a:hover { color: var(--accent); }
 }
 .site-header .inner {
   max-width: var(--max);
-  margin: 0 auto;
+  margin: 8px auto 0;
   padding: 0 1.25rem;
   min-height: var(--nav-h);
   display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
