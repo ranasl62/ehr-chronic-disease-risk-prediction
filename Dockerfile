@@ -18,6 +18,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONPATH=/app \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PIP_NO_CACHE_DIR=1
+# Runtime (override with -e / Compose / platform env): API_KEY, CORS_ORIGINS, MODEL_PATH, …
 
 COPY requirements.txt setup.py ./
 RUN pip install --no-cache-dir -r requirements.txt

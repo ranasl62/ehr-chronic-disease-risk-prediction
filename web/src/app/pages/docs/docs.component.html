@@ -1,82 +1,109 @@
-<section class="panel">
-  <h1>Docs, help &amp; feedback</h1>
-  <p class="lede">
-    Framework documentation is published on the
-    <a [href]="docsUrl('/')" target="_blank" rel="noopener">documentation website</a>.
-    Use the links below — they open the site, not raw GitHub Markdown.
-  </p>
+<section class="panel docs-page">
+  <header class="docs-header">
+    <h1>Documentation &amp; help</h1>
+    <p class="lede">
+      Guides live on the
+      <a [href]="docsUrl('/')" target="_blank" rel="noopener">EHR Risk Framework documentation site</a>.
+      Links below open that site in a new tab — not GitHub Markdown files.
+    </p>
+  </header>
 
-  <p class="docs-cta">
-    <a class="btn primary" [href]="docsUrl('/')" target="_blank" rel="noopener">Open docs site</a>
-    <a class="btn" [href]="docsUrl('/help/')" target="_blank" rel="noopener">Help library</a>
-    <a class="btn" [href]="docsUrl('/workbench/')" target="_blank" rel="noopener">UI tour</a>
-    <a class="btn" [href]="docsUrl('/sitemap/')" target="_blank" rel="noopener">Sitemap</a>
-  </p>
-
-  <h2>Contact</h2>
-  <p>
-    <strong>Md Rana Hossain</strong><br />
-    <a href="mailto:support&#64;larucare.com?subject=%5Behr-risk-framework%5D%20feedback">support&#64;larucare.com</a>
-  </p>
-  <p class="muted">
-    Tell us if you used the framework and how it helped — bugs, install friction, or feature ideas.
-    Do not send PHI. Details:
-    <a [href]="docsUrl('/cite/')" target="_blank" rel="noopener">Cite &amp; feedback</a>.
-  </p>
-
-  <h2>Guides on the documentation website</h2>
-  <ul class="links">
-    @for (g of guides; track g.path + g.label) {
-      <li>
-        <strong>{{ g.label }}</strong> —
-        <a [href]="docsUrl(g.path)" target="_blank" rel="noopener">{{ g.path === '/' ? 'Home' : g.path }}</a>
-        <span class="muted"> — {{ g.blurb }}</span>
-      </li>
+  <nav class="docs-cta" aria-label="Documentation shortcuts">
+    @for (s of shortcuts; track s.path) {
+      <a
+        class="btn"
+        [class.primary]="s.path === '/'"
+        [href]="docsUrl(s.path)"
+        target="_blank"
+        rel="noopener"
+        [title]="s.blurb"
+      >{{ s.label }}</a>
     }
-  </ul>
+  </nav>
 
-  <h2>Local API docs</h2>
-  <ul class="links">
-    <li>
-      <strong>OpenAPI (running API)</strong> —
-      <a href="http://127.0.0.1:8000/docs" target="_blank" rel="noopener">:8000/docs</a>
-      ·
-      <a href="/api-docs" target="_blank" rel="noopener">/api-docs</a> (via workbench proxy)
-    </li>
-    <li>
-      <strong>API overview (website)</strong> —
-      <a [href]="docsUrl('/api/')" target="_blank" rel="noopener">/api/</a>
-      ·
-      <a [href]="docsUrl('/ui-openapi/')" target="_blank" rel="noopener">/ui-openapi/</a>
-    </li>
-  </ul>
+  <section class="docs-block" aria-labelledby="docs-contact">
+    <h2 id="docs-contact">Contact</h2>
+    <p class="contact-name"><strong>Md Rana Hossain</strong></p>
+    <p>
+      <a href="mailto:support&#64;larucare.com?subject=%5Behr-risk-framework%5D%20feedback">support&#64;larucare.com</a>
+    </p>
+    <p class="muted">
+      Bugs, install friction, and feature ideas are welcome. Do not send PHI.
+      See
+      <a [href]="docsUrl('/cite/')" target="_blank" rel="noopener">Cite &amp; feedback</a>
+      for citation and longer notes.
+    </p>
+  </section>
 
-  <h2>Examples</h2>
-  <ol>
-    <li>
-      Synthetic diabetes task — Config → task <code>diabetes</code> → Train
-      (<a [href]="docsUrl('/ui-train/')" target="_blank" rel="noopener">Train UI</a>)
-    </li>
-    <li>
-      BYO CSV — Datasets map columns → health → Train
-      (<a [href]="docsUrl('/ui-datasets/')" target="_blank" rel="noopener">Datasets</a>
-      ·
-      <a [href]="docsUrl('/data/')" target="_blank" rel="noopener">Data</a>)
-    </li>
-    <li>
-      Compare models — Train → Compare → Results → promote
-      (<a [href]="docsUrl('/ui-results/')" target="_blank" rel="noopener">Results</a>
-      ·
-      <a [href]="docsUrl('/fine-tuning/')" target="_blank" rel="noopener">Fine-tuning</a>)
-    </li>
-  </ol>
+  <section class="docs-block" aria-labelledby="docs-guides">
+    <h2 id="docs-guides">Guides</h2>
+    @for (group of guideGroups; track group.title) {
+      <div class="guide-group">
+        <h3>{{ group.title }}</h3>
+        <ul class="guide-list">
+          @for (g of group.items; track g.path + g.label) {
+            <li>
+              <a class="guide-link" [href]="docsUrl(g.path)" target="_blank" rel="noopener">{{ g.label }}</a>
+              <span class="muted">{{ g.blurb }}</span>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </section>
 
-  <h2>Intended use</h2>
-  <p>
-    This software supports <strong>research and education</strong> in EHR risk modeling.
-    It is not FDA-cleared or CE-marked, is not a medical device, and must not guide
-    diagnosis or treatment without institutional validation and qualified human oversight.
-    See
-    <a [href]="docsUrl('/limits/')" target="_blank" rel="noopener">Limitations &amp; model card</a>.
-  </p>
+  <section class="docs-block" aria-labelledby="docs-api">
+    <h2 id="docs-api">API documentation</h2>
+    <ul class="guide-list">
+      <li>
+        <a class="guide-link" href="http://127.0.0.1:8000/docs" target="_blank" rel="noopener">OpenAPI (local API)</a>
+        <span class="muted">http://127.0.0.1:8000/docs when the API is running</span>
+      </li>
+      <li>
+        <a class="guide-link" href="/api-docs" target="_blank" rel="noopener">OpenAPI (workbench proxy)</a>
+        <span class="muted">Same docs via this UI origin</span>
+      </li>
+      <li>
+        <a class="guide-link" [href]="docsUrl('/api/')" target="_blank" rel="noopener">API overview</a>
+        <span class="muted">Researcher endpoints on the docs site</span>
+      </li>
+      <li>
+        <a class="guide-link" [href]="docsUrl('/ui-openapi/')" target="_blank" rel="noopener">OpenAPI UI tour</a>
+        <span class="muted">How the workbench surfaces Swagger</span>
+      </li>
+    </ul>
+  </section>
+
+  <section class="docs-block" aria-labelledby="docs-examples">
+    <h2 id="docs-examples">Examples</h2>
+    <ol class="example-list">
+      <li>
+        Synthetic diabetes task — Config → task <code>diabetes</code> → Train
+        (<a [href]="docsUrl('/ui-train/')" target="_blank" rel="noopener">Train UI</a>)
+      </li>
+      <li>
+        BYO CSV — Datasets map columns → health → Train
+        (<a [href]="docsUrl('/ui-datasets/')" target="_blank" rel="noopener">Datasets</a>
+        ·
+        <a [href]="docsUrl('/data/')" target="_blank" rel="noopener">Data guide</a>)
+      </li>
+      <li>
+        Compare models — Train → Compare → Results → promote
+        (<a [href]="docsUrl('/ui-results/')" target="_blank" rel="noopener">Results</a>
+        ·
+        <a [href]="docsUrl('/fine-tuning/')" target="_blank" rel="noopener">Fine-tuning</a>)
+      </li>
+    </ol>
+  </section>
+
+  <section class="docs-block docs-intended" aria-labelledby="docs-intended">
+    <h2 id="docs-intended">Intended use</h2>
+    <p>
+      This software supports <strong>research and education</strong> in EHR risk modeling.
+      It is not FDA-cleared or CE-marked, is not a medical device, and must not guide
+      diagnosis or treatment without institutional validation and qualified human oversight.
+      Read the
+      <a [href]="docsUrl('/limits/')" target="_blank" rel="noopener">limitations &amp; model card</a>.
+    </p>
+  </section>
 </section>

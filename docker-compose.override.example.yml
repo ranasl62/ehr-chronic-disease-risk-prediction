@@ -8,9 +8,11 @@
 
 services:
   api:
-    # Uncomment to require X-API-Key (or set API_KEY in `.env` instead):
+    # Prefer `.env` for API_KEY / CORS_ORIGINS (see `.env.example`).
+    # Uncomment to override here instead:
     # environment:
     #   API_KEY: change-me-before-exposing
+    #   CORS_ORIGINS: https://ehr-risk-framework-demo.onrender.com
 
     # NVIDIA GPU (requires nvidia-container-toolkit / Docker Desktop GPU support).
     # Useful for heavier XGBoost / future GPU models; default CPU demos do not need this.

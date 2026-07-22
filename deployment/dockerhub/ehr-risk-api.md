@@ -46,6 +46,16 @@ Override: `IMAGE_API=ranasl62/ehr-risk-api:latest` in `.env`.
 - REST API: train / compare / predict, health, leakage audit, SHAP, fairness jobs  
 - OpenAPI at `/docs`  
 - Optional `API_KEY` auth  
+- Optional `CORS_ORIGINS` (comma-separated UI origins; empty → localhost :8080/:4200)
+
+```bash
+# Example: UI on a separate host talking to this API
+docker run --rm -p 8000:8000 \
+  -e CORS_ORIGINS=https://ehr-risk-framework-demo.onrender.com \
+  ranasl62/ehr-risk-api:latest
+```
+
+Compose / `.env`: set `CORS_ORIGINS=` (see `.env.example`). Render/Vercel: set the same runtime env on the API service.
 
 ## Links
 

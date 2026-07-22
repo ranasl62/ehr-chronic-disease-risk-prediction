@@ -17,6 +17,7 @@ from utils.config import MODEL_PATH
 from utils.eval_report import evaluation_aligned_with_manifest, load_evaluation_report_safe
 from utils.json_safe import json_safe
 
+from api.cors_config import parse_cors_origins
 from api.middleware import RequestContextMiddleware, configure_api_logging
 from api.production_middleware import BodySizeLimitMiddleware, RateLimitMiddleware
 from api.researcher_routes import router as researcher_router
@@ -35,6 +36,7 @@ async def lifespan(app: FastAPI):
         log.warning("API_KEY is set; prediction routes require X-API-Key header.")
     else:
         log.info("API_KEY unset; prediction routes are open (development mode).")
+    log.info("CORS allow_origins=%s", parse_cors_origins())
     yield
 
 
@@ -45,15 +47,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Default CORS for local Angular (override with CORS_ORIGINS)
-_origins = [o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()]
-if not _origins:
-    _origins = [
-        "http://localhost:4200",
-        "http://127.0.0.1:4200",
-        "http://localhost:8080",
-        "http://127.0.0.1:8080",
-    ]
+# Runtime env ``CORS_ORIGINS`` (comma-separated). Empty → local :8080 / :4200 defaults.
+_origins = parse_cors_origins()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_origins,

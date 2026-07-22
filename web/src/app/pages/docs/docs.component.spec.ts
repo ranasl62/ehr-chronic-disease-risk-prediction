@@ -17,6 +17,19 @@ describe('DocsComponent', () => {
     expect(fixture.nativeElement.textContent.length).toBeGreaterThan(20);
   });
 
+  it('uses guide labels as link text instead of raw paths', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    const helpLinks = Array.from(root.querySelectorAll('a')).filter(
+      (a) => (a as HTMLAnchorElement).getAttribute('href') === `${DOCS_SITE}/help/`,
+    );
+    expect(helpLinks.length).toBeGreaterThan(0);
+    for (const a of helpLinks) {
+      expect((a.textContent || '').trim()).toBe('Help');
+      expect((a.textContent || '').trim()).not.toContain('/help');
+    }
+    expect(root.textContent).not.toMatch(/—\s*\/help\//);
+  });
+
   it('points guides at the documentation website, not GitHub Markdown blobs', () => {
     const html: string = fixture.nativeElement.innerHTML;
     expect(html).toContain(DOCS_SITE);
