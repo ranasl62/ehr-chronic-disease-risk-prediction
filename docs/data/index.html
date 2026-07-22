@@ -6,12 +6,13 @@
   <title>Data guide — EHR Risk Framework</title>
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../assets/site.css" />
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
   <header class="site-header">
     <div class="inner">
-      <a class="brand" href="/">EHR Risk <span>Framework</span></a>
+      <a class="brand" href="/"><img class="brand-logo" src="../assets/logo.svg" width="28" height="28" alt="" />EHR Risk <span>Framework</span></a>
       <nav class="nav" aria-label="Primary">
         <a href="/">Home</a>
         <a href="/why">Why it matters</a>
@@ -28,18 +29,22 @@
   </header>
   <main id="main">
     <h1 style="font-family:var(--display);font-size:2rem;margin:0 0 0.75rem">Data guide</h1>
-    <p class="banner"><strong>Never commit PHI.</strong> Public repos use demo / synthetic CSVs under <code>data/raw/</code> only.</p>
+    <p class="banner"><strong>Never commit PHI.</strong> Teaching fixtures live in <code>data/demo/</code>; the paper-scale synthetic cohort remains under <code>data/raw/</code>.</p>
 
     <section class="section">
       <h2>Bundled datasets</h2>
       <table class="data">
         <thead><tr><th>ID</th><th>Path</th><th>Use</th></tr></thead>
         <tbody>
-          <tr><td>ehr_data</td><td><code>data/raw/ehr_data.csv</code></td><td>Tiny longitudinal smoke test</td></tr>
+          <tr><td>ehr_data</td><td><code>data/demo/ehr_data.csv</code></td><td>Tiny longitudinal teaching / smoke-test fixture</td></tr>
           <tr><td>paper_synthetic</td><td><code>data/raw/paper_synthetic_cohort.csv</code></td><td>Larger synthetic cohort for demos</td></tr>
-          <tr><td>sample_ehr</td><td><code>data/raw/sample_ehr.csv</code></td><td>Legacy tabular sample</td></tr>
+          <tr><td>sample_ehr</td><td><code>data/demo/sample_ehr.csv</code></td><td>Legacy tabular teaching sample</td></tr>
         </tbody>
       </table>
+    </section>
+    <section class="section">
+      <h2>Workspace catalog</h2>
+      <p>Datasets lists bundled demos by default. Use <strong>Show bundled demo datasets</strong> to hide them, select a row to inspect it, or check multiple rows and delete them together. Repeating a delete for an already removed allowed file is reported as <code>already_absent</code>.</p>
     </section>
 
     <section class="section">

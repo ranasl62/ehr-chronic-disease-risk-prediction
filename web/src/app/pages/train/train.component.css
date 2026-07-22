@@ -18,6 +18,23 @@ pre {
 }
 .err { color: var(--danger); }
 .lede, .muted { color: var(--muted); }
+.demo-banner {
+  margin: 0 0 1rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #b8d4c8;
+  border-radius: 6px;
+  background: #eef6f2;
+  color: #1a3d32;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  max-width: 36rem;
+}
+.demo-banner code {
+  font-size: 0.85em;
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  background: #dff0e8;
+}
 .task-hint {
   padding: 0.65rem 0.75rem; border: 1px solid var(--line); border-radius: 6px;
   background: var(--surface); font-size: 0.88rem;

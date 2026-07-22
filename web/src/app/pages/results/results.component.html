@@ -8,6 +8,7 @@
     <button type="button" class="btn" [disabled]="busy()" (click)="runFairness()">Run fairness</button>
     <button type="button" class="btn" [disabled]="busy()" (click)="loadThresholds()">Threshold table</button>
     <a class="btn" [href]="zipUrl()" download="ehr_risk_results_pack.zip">Download results ZIP</a>
+    <a class="btn" [href]="methodsMdUrl()" download="methods.md">Download methods.md</a>
     <label class="chk inline">
       <input type="checkbox" [ngModel]="showCharts" name="showCharts" (ngModelChange)="onShowCharts($event)" />
       Charts
@@ -29,25 +30,82 @@
   @if (!runs().length) {
     <p class="muted">No named runs yet. Train to create one.</p>
   } @else {
-    <ul class="run-list">
-      @for (r of runs(); track r.run_id) {
-        <li>
-          <label class="chk inline">
-            <input
-              type="checkbox"
-              [checked]="compareRunIds.includes(r.run_id)"
-              (change)="toggleCompareRun(r.run_id, $any($event.target).checked)"
-            />
-          </label>
-          <button type="button" class="linkish" (click)="openRun(r.run_id)">{{ r.run_id }}</button>
-          <span class="muted">{{ r.model_kind || '—' }}</span>
-          @if (r.metrics?.['roc_auc'] != null) {
-            <span>ROC {{ r.metrics?.['roc_auc'] | number: '1.3-3' }}</span>
+    <div class="runs-toolbar">
+      <label class="fig-filter runs-search">Search runs
+        <input
+          type="search"
+          [ngModel]="runFilter"
+          name="runFilter"
+          placeholder="run id, model, kind, status…"
+          (ngModelChange)="onRunFilterChange($event)"
+        />
+      </label>
+      <span class="muted runs-meta">{{ filteredRuns().length }} / {{ runs().length }} runs</span>
+    </div>
+    <div class="runs-scroll">
+      <table class="runs-table">
+        <thead>
+          <tr>
+            <th class="col-cmp">Compare</th>
+            <th>Run</th>
+            <th>Model</th>
+            <th>Kind</th>
+            <th class="num">ROC-AUC</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of pagedRuns(); track r.run_id) {
+            <tr>
+              <td class="col-cmp">
+                <label class="chk inline">
+                  <input
+                    type="checkbox"
+                    [checked]="compareRunIds.includes(r.run_id)"
+                    (change)="toggleCompareRun(r.run_id, $any($event.target).checked)"
+                  />
+                </label>
+              </td>
+              <td>
+                <button type="button" class="linkish" (click)="openRun(r.run_id)">{{ r.run_id }}</button>
+              </td>
+              <td>{{ r.model_kind || '—' }}</td>
+              <td>{{ runKind(r) }}</td>
+              <td class="num">
+                @if (r.metrics?.['roc_auc'] != null) {
+                  {{ r.metrics?.['roc_auc'] | number: '1.3-3' }}
+                } @else {
+                  —
+                }
+              </td>
+              <td>
+                @for (t of runStatusLabels(r); track t) {
+                  <span class="tag">{{ t }}</span>
+                } @empty {
+                  <span class="muted">—</span>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty">No matching runs</td>
+            </tr>
           }
-          @if (r.has_model) { <span class="tag">model</span> }
-        </li>
-      }
-    </ul>
+        </tbody>
+      </table>
+    </div>
+    <div class="runs-pager">
+      <button type="button" class="btn" [disabled]="runPage <= 1" (click)="goRunPage(runPage - 1)">Prev</button>
+      <span>Page {{ runPage }} / {{ runTotalPages() }}</span>
+      <button type="button" class="btn" [disabled]="runPage >= runTotalPages()" (click)="goRunPage(runPage + 1)">Next</button>
+      <label class="page-size">Rows
+        <select [ngModel]="runPageSize" name="runPageSize" (ngModelChange)="onRunPageSize($event)">
+          @for (n of runPageSizeOptions; track n) {
+            <option [ngValue]="n">{{ n }}</option>
+          }
+        </select>
+      </label>
+    </div>
   }
 
   @if (runCompareRows.length) {
@@ -91,6 +149,12 @@
         <div class="card"><canvas #compareChart data-chart="compare"></canvas></div>
         <div class="card"><canvas #metricChart data-chart="metric"></canvas></div>
         <div class="card wide"><canvas #importanceChart data-chart="importance"></canvas></div>
+        @if (hasThresholdChartData()) {
+          <div class="card"><canvas #thresholdChart data-chart="threshold"></canvas></div>
+        }
+        @if (hasFairnessChartData()) {
+          <div class="card"><canvas #fairnessChart data-chart="fairness"></canvas></div>
+        }
       </div>
     }
 
@@ -150,14 +214,70 @@
 
     @if (hpoRows.length) {
       <h2>Light HPO trials</h2>
-      <p class="muted">{{ s.hpo?.note || 'Research-scoped grid.' }} Best: {{ s.hpo?.best | json }}</p>
-      <app-data-table
-        [columns]="hpoCols"
-        [rows]="hpoRows"
-        [pageSize]="prefs.table_page_size"
-        exportName="hpo_trials.csv"
-        (pageSizeChange)="onPageSize($event)"
-      />
+      <p class="muted">{{ s.hpo?.note || 'Research-scoped light grid only; not clinical AutoML.' }}</p>
+      @if (hpoBest; as best) {
+        <section class="hpo-best" aria-label="Best HPO trial">
+          <div class="hpo-best-heading">
+            <span class="hpo-kicker">Best trial</span>
+            <strong>Trial #{{ best.trial ?? 'n/a' }}</strong>
+          </div>
+          <div class="hpo-params" aria-label="Best trial parameters">
+            @for (param of best.params; track param.name) {
+              <span class="hpo-param"><span>{{ param.name }}</span> = {{ param.value }}</span>
+            } @empty {
+              <span class="muted">Default parameters</span>
+            }
+          </div>
+          <dl class="hpo-metrics">
+            <div><dt>ROC-AUC</dt><dd>{{ formatMetric(best.roc_auc) }}</dd></div>
+            <div><dt>PR-AUC</dt><dd>{{ formatMetric(best.pr_auc) }}</dd></div>
+            <div><dt>Brier</dt><dd>{{ formatMetric(best.brier) }}</dd></div>
+            <div><dt>ECE</dt><dd>{{ formatMetric(best.ece) }}</dd></div>
+            <div><dt>F1</dt><dd>{{ formatMetric(best.f1) }}</dd></div>
+          </dl>
+        </section>
+      }
+      @if (hpoRows.length > 1) {
+        <div class="hpo-table-wrap">
+          <table class="hpo-table">
+            <thead>
+              <tr>
+                <th>Trial</th>
+                <th>Parameters</th>
+                <th class="num">ROC-AUC</th>
+                <th class="num">PR-AUC</th>
+                <th class="num">Brier</th>
+                <th class="num">ECE</th>
+                <th class="num">F1</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (trial of hpoRows; track trial.trial) {
+                <tr [class.best]="trial.isBest">
+                  <td>
+                    <span>#{{ trial.trial ?? 'n/a' }}</span>
+                    @if (trial.isBest) { <span class="tag">Best</span> }
+                  </td>
+                  <td>
+                    <div class="hpo-params">
+                      @for (param of trial.params; track param.name) {
+                        <span class="hpo-param"><span>{{ param.name }}</span> = {{ param.value }}</span>
+                      } @empty {
+                        <span class="muted">Default parameters</span>
+                      }
+                    </div>
+                  </td>
+                  <td class="num">{{ formatMetric(trial.roc_auc) }}</td>
+                  <td class="num">{{ formatMetric(trial.pr_auc) }}</td>
+                  <td class="num">{{ formatMetric(trial.brier) }}</td>
+                  <td class="num">{{ formatMetric(trial.ece) }}</td>
+                  <td class="num">{{ formatMetric(trial.f1) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
     }
 
     @if (importanceRows.length) {
@@ -192,18 +312,42 @@
     />
 
     <h2>Figures</h2>
-    <label class="fig-filter">Filter figures
-      <input type="search" [(ngModel)]="figFilter" name="figFilter" placeholder="e.g. shap, calibration" />
-    </label>
-    <div class="figs">
-      @for (f of filteredFigs(); track f.name) {
-        <figure>
-          <figcaption>{{ f.name }}</figcaption>
-          <img [src]="fileUrl(f.name)" [alt]="f.name" />
-        </figure>
-      } @empty {
-        <p class="muted">No PNG figures match the filter.</p>
-      }
-    </div>
+    @if (!hasReportPngs()) {
+      <p class="muted">No PNG figures in reports yet.</p>
+    } @else {
+      <p class="muted">
+        @if (hasCalibrationFigure() && hasShapFigure()) {
+          Calibration and SHAP PNGs are listed first when present. Filter to focus the gallery.
+        } @else if (hasCalibrationFigure()) {
+          Calibration PNGs are listed first when present. Filter to focus the gallery.
+        } @else if (hasShapFigure()) {
+          SHAP PNGs are listed first when present. Filter to focus the gallery.
+        } @else {
+          Filter to focus the gallery.
+        }
+      </p>
+      <div class="fig-quick">
+        <button type="button" class="btn" [class.active]="figFilter === ''" (click)="setFigFilter('')">All</button>
+        @if (hasCalibrationFigure()) {
+          <button type="button" class="btn" [class.active]="figFilter === 'calibration'" (click)="setFigFilter('calibration')">Calibration</button>
+        }
+        @if (hasShapFigure()) {
+          <button type="button" class="btn" [class.active]="figFilter === 'shap'" (click)="setFigFilter('shap')">SHAP</button>
+        }
+      </div>
+      <label class="fig-filter">Filter figures
+        <input type="search" [(ngModel)]="figFilter" name="figFilter" placeholder="e.g. shap, calibration" />
+      </label>
+      <div class="figs">
+        @for (f of filteredFigs(); track f.name) {
+          <figure>
+            <figcaption>{{ f.name }}</figcaption>
+            <img [src]="fileUrl(f.name)" [alt]="f.name" />
+          </figure>
+        } @empty {
+          <p class="muted">No PNG figures match the filter.</p>
+        }
+      </div>
+    }
   }
 </section>

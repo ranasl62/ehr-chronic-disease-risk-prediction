@@ -18,6 +18,8 @@ export interface UiPrefs {
   show_metric_chart: boolean;
   show_importance_chart: boolean;
   show_compare_chart: boolean;
+  /** When false, Datasets browse hides bundled demos (data/demo) and shows uploads only. */
+  show_demo_datasets: boolean;
   label_chart_type: 'doughnut' | 'pie' | 'bar';
   metric_chart_type: 'radar' | 'bar';
   numeric_chart_type: 'bar' | 'line';
@@ -39,6 +41,7 @@ export const DEFAULT_UI_PREFS: UiPrefs = {
   show_metric_chart: true,
   show_importance_chart: true,
   show_compare_chart: true,
+  show_demo_datasets: true,
   label_chart_type: 'doughnut',
   metric_chart_type: 'radar',
   numeric_chart_type: 'bar',
@@ -96,6 +99,7 @@ export class UiPrefsService {
       show_metric_chart: p.show_metric_chart,
       show_importance_chart: p.show_importance_chart,
       show_compare_chart: p.show_compare_chart,
+      show_demo_datasets: p.show_demo_datasets,
     };
   }
 

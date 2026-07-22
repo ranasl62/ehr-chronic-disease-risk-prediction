@@ -1,8 +1,8 @@
 <section class="panel">
   <h1>Datasets &amp; import</h1>
   <p class="lede">
-    Multiple ingest paths — bundled demos, files (CSV/TSV/JSON/XLSX), JSON form rows, SQL, OMOP/FHIR (API).
-    All normalize to CSV under <code>data/uploads/</code>.
+    <strong>Your data</strong> lives in <code>data/uploads/</code> (File / Form / SQL import).
+    Bundled teaching fixtures live in <code>data/demo/</code> and can be hidden below.
   </p>
   <p class="phi">Do not upload PHI. Research / synthetic / de-identified data only. See LIMITATIONS.md.</p>
 
@@ -17,17 +17,97 @@
   @if (message()) { <p class="ok">{{ message() }}</p> }
 
   @if (tab() === 'browse') {
-    <ul class="list">
-      @for (d of datasets(); track d.id) {
-        <li [class.sel]="selected()?.id === d.id" (click)="select(d)">
-          <strong>{{ d.label }}</strong>
-          <span class="meta">{{ d.path }} · {{ d.format }} · {{ d.source_type || '—' }} · {{ d.exists ? 'ready' : 'missing' }}</span>
-        </li>
-      }
-    </ul>
+    <label class="chk demo-toggle">
+      <input
+        type="checkbox"
+        [ngModel]="showDemoDatasets()"
+        (ngModelChange)="toggleShowDemo($event)"
+        name="showDemo"
+      />
+      Show bundled demo datasets (<code>data/demo</code>)
+    </label>
+
+    @if (tableRows().length === 0) {
+      <p class="muted empty-hint">
+        No datasets listed. Use <strong>File upload</strong> to add your CSV, or turn demos on above.
+      </p>
+    } @else {
+      <div class="table-wrap">
+        <table class="ds-table">
+          <thead>
+            <tr>
+              <th class="col-check">
+                <input
+                  type="checkbox"
+                  [checked]="allVisibleChecked()"
+                  (change)="toggleCheckAll($event)"
+                  [attr.aria-label]="'Select all datasets'"
+                />
+              </th>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Path</th>
+              <th>Format</th>
+              <th>Size</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (d of tableRows(); track d.id) {
+              <tr
+                [class.sel]="selected()?.id === d.id"
+                [class.checked]="isChecked(d.id)"
+                (click)="select(d)"
+              >
+                <td class="col-check" (click)="$event.stopPropagation()">
+                  <input
+                    type="checkbox"
+                    [checked]="isChecked(d.id)"
+                    (change)="toggleCheck(d, $event)"
+                    [attr.aria-label]="'Select ' + d.label"
+                  />
+                </td>
+                <td class="name">{{ d.label }}</td>
+                <td>
+                  <span class="badge" [class.user]="!d.bundled" [class.demo]="!!d.bundled">
+                    {{ kindLabel(d) }}
+                  </span>
+                </td>
+                <td class="path"><code>{{ d.path }}</code></td>
+                <td>{{ d.format }}</td>
+                <td>{{ formatBytes(d.bytes) }}</td>
+                <td>{{ d.exists ? 'ready' : 'missing' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="muted hint-row">
+        Click a row to select it for health / train.
+        Check one or more boxes, then <strong>Delete selected</strong>.
+        @if (checkedCount() > 0) {
+          <span> ({{ checkedCount() }} checked)</span>
+        }
+      </p>
+    }
+
     <div class="actions">
       <button type="button" class="btn" [disabled]="!selected()" (click)="runHealth()">Dataset health</button>
       <button type="button" class="btn primary" [disabled]="!canTrain()" (click)="continueTrain()">Continue to train</button>
+      <button
+        type="button"
+        class="btn danger"
+        [disabled]="deleting() || (checkedCount() === 0 && !selected())"
+        (click)="deleteSelected()"
+      >
+        @if (checkedCount() > 1) {
+          Delete selected ({{ checkedCount() }})
+        } @else if (checkedCount() === 1) {
+          Delete selected
+        } @else {
+          Delete dataset
+        }
+      </button>
       <a routerLink="/analytics" class="btn" [class.disabled]="!selected()">Open analytics</a>
       <a routerLink="/docs" class="btn">Schema docs</a>
     </div>
@@ -54,7 +134,7 @@
   }
 
   @if (tab() === 'file') {
-    <p class="hint">Accepted: <code>.csv .tsv .json .xlsx .xls</code> (max 50MB). Excel/JSON converted to CSV.</p>
+    <p class="hint">Accepted: <code>.csv .tsv .json .xlsx .xls</code> (max 50MB). Saved under <code>data/uploads/</code>.</p>
     <label class="btn primary">Choose file
       <input type="file" accept=".csv,.tsv,.json,.xlsx,.xls" (change)="onFile($event)" hidden />
     </label>

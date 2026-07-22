@@ -34,6 +34,7 @@ from preprocessing.ehr_loader import load_data, load_ehr_data
 from training.reproduce_split import load_xy_groups_from_artifact, reproducible_train_test_indices
 from training.splits import temporal_patient_train_test_indices
 from training.train import build_xy_longitudinal, build_xy_tabular
+from utils.config import resolve_training_data_path
 from utils.json_safe import json_safe
 
 
@@ -222,7 +223,7 @@ def audit_from_artifact(artifact_path: Path) -> dict:
         "feature_inclusive": fe.get("feature_inclusive"),
     }
     if fe.get("format") == "longitudinal" and fe.get("data_path"):
-        dp = Path(fe["data_path"])
+        dp = resolve_training_data_path(fe["data_path"])
         if dp.is_file():
             df_c = clean_longitudinal_ehr(load_ehr_data(dp))
             lc = "label" if "label" in df_c.columns else "chronic_disease"

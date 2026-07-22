@@ -6,7 +6,7 @@
 
 | Mode | Examples | Credentials |
 |------|----------|-------------|
-| **Synthetic / demo** | `data/raw/ehr_data.csv`, `paper_synthetic_cohort.csv` | None |
+| **Synthetic / demo** | `data/demo/ehr_data.csv`, `data/demo/sample_ehr.csv`, `data/raw/paper_synthetic_cohort.csv` | None |
 | **Real BYO** | Your CSV/XLSX/JSON via map wizard | Your IRB/DUA |
 | **MIMIC** | Credentialed local extract | PhysioNet |
 | **OMOP / FHIR** | Subset adapters → same CSV schema | Your warehouse |
@@ -35,7 +35,7 @@ Numeric labs/vitals as available. See [`docs/data_sources_and_schema.md`](docs/d
 | SQL (read-only `SELECT`) | Datasets SQL tab |
 | OMOP / FHIR subset | API adapters |
 
-Uploads land under `data/uploads/` (gitignored). **Never commit PHI.**
+Uploads land under `data/uploads/` (gitignored). Bundled teaching fixtures are under `data/demo/`; older `data/raw/ehr_data.csv` references resolve to the demo file. **Never commit PHI.**
 
 ## Failure checklist
 
@@ -48,7 +48,7 @@ Uploads land under `data/uploads/` (gitignored). **Never commit PHI.**
 ## Dataset health
 
 ```bash
-curl 'http://127.0.0.1:8000/v1/datasets/health?path=data/raw/ehr_data.csv'
+curl 'http://127.0.0.1:8000/v1/datasets/health?path=data/demo/ehr_data.csv'
 ```
 
 ## Task YAML

@@ -17,3 +17,15 @@
 .metric .v { font-size: 1.15rem; font-weight: 600; }
 .err { color: var(--danger); }
 .muted { color: var(--muted); }
+.demo-note {
+  max-width: 40rem;
+  margin: -0.75rem 0 1.25rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+.demo-note code {
+  font-size: 0.85em;
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  background: var(--surface-2);
+}

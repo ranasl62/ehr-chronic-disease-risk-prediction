@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { By } from '@angular/platform-browser';
+import { provideRouter, RouterLink } from '@angular/router';
 import { of } from 'rxjs';
 import { HomeComponent } from './home.component';
 import { ApiService } from '../../core/api.service';
@@ -38,5 +39,16 @@ describe('HomeComponent', () => {
     expect(api.workspaceStatus).toHaveBeenCalled();
     expect(fixture.componentInstance.status()?.api_ok).toBeTrue();
     expect(fixture.nativeElement.textContent.length).toBeGreaterThan(10);
+  });
+
+  it('links Run demo to Train with demo=1 queryParams', () => {
+    const links = fixture.debugElement.queryAll(By.directive(RouterLink));
+    const demo = links.find((el) => (el.nativeElement.textContent || '').includes('Run demo'));
+    expect(demo).toBeTruthy();
+    const routerLink = demo!.injector.get(RouterLink) as RouterLink & {
+      queryParams: { demo?: string };
+    };
+    expect(routerLink.queryParams).toEqual({ demo: '1' });
+    expect(fixture.nativeElement.textContent).toContain('bundled longitudinal CSV');
   });
 });

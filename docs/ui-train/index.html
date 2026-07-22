@@ -7,12 +7,13 @@
   <meta name="description" content="Task presets, train, compare, leakage audit" />
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../assets/site.css" />
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
   <header class="site-header">
     <div class="inner">
-      <a class="brand" href="/">EHR Risk <span>Framework</span></a>
+      <a class="brand" href="/"><img class="brand-logo" src="../assets/logo.svg" width="28" height="28" alt="" />EHR Risk <span>Framework</span></a>
       <nav class="nav" aria-label="Primary"></nav>
     </div>
   </header>
@@ -32,7 +33,7 @@
         <thead><tr><th>Control</th><th>What it does</th></tr></thead>
         <tbody>
           <tr><td>Task preset</td><td>Loads YAML from <code>tasks/</code> (horizon, windows, labels)</td></tr>
-          <tr><td>Data path / format</td><td>Longitudinal events or flat tabular CSV</td></tr>
+          <tr><td>Data path / format</td><td>Defaults to <code>data/demo/ehr_data.csv</code> for the teaching longitudinal preset; accepts longitudinal events or flat tabular CSV</td></tr>
           <tr><td>Model</td><td>logreg · random_forest · xgboost · lightgbm (if installed)</td></tr>
           <tr><td>Isotonic calibrate</td><td>Fits calibration; reports Brier / ECE</td></tr>
           <tr><td>Patient-level split</td><td>Same patient never in train and hold-out</td></tr>
@@ -47,6 +48,7 @@
       <ul>
         <li><strong>Start train</strong> — background job → <code>model.pkl</code> + metrics</li>
         <li><strong>Compare models</strong> — ranks by hold-out ROC-AUC; optional promote-best</li>
+        <li><strong>Light HPO</strong> — optional small research grid; Results shows its best trial and individual trials</li>
         <li><strong>Leakage audit</strong> — writes <code>reports/leakage_audit.json</code></li>
       </ul>
       <p>Live job panel shows status, message, and log tail.</p>

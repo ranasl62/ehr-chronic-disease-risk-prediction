@@ -7,12 +7,13 @@
   <meta name="description" content="How to iterate and fine-tune tabular chronic-disease risk models with this framework: tasks, windows, splits, compare, calibrate, promote." />
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../assets/site.css" />
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
   <header class="site-header">
     <div class="inner">
-      <a class="brand" href="/">EHR Risk <span>Framework</span></a>
+      <a class="brand" href="/"><img class="brand-logo" src="../assets/logo.svg" width="28" height="28" alt="" />EHR Risk <span>Framework</span></a>
       <nav class="nav" aria-label="Primary">
         <a href="/">Home</a>
         <a href="/why">Why it matters</a>
@@ -155,7 +156,7 @@ PYTHONPATH=. python -m training.train \
 curl -sS -X POST http://127.0.0.1:8000/v1/jobs/compare \
   -H 'Content-Type: application/json' \
   -d '{
-    "data_path":"data/raw/ehr_data.csv",
+    "data_path":"data/demo/ehr_data.csv",
     "data_format":"longitudinal",
     "split_by_patient":true,
     "windows_days":[7,30,180],

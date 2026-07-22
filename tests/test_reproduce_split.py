@@ -13,6 +13,33 @@ from training.reproduce_split import (
 from utils.config import MODEL_PATH
 
 
+def test_artifact_container_demo_path_resolves_on_host():
+    artifact = {
+        "feature_engineering": {
+            "format": "longitudinal",
+            "data_path": "/stale-container/data/demo/ehr_data.csv",
+            "window_days": 180,
+        }
+    }
+
+    X, y, groups = load_xy_groups_from_artifact(artifact)
+
+    assert len(X) == len(y) == len(groups)
+    assert len(X) > 0
+
+
+def test_artifact_missing_data_path_raises_clear_error(tmp_path: Path):
+    artifact = {
+        "feature_engineering": {
+            "format": "tabular",
+            "data_path": str(tmp_path / "missing.csv"),
+        }
+    }
+
+    with pytest.raises(FileNotFoundError, match="Artifact data_path not found"):
+        load_xy_groups_from_artifact(artifact)
+
+
 @pytest.mark.skipif(not Path(MODEL_PATH).exists(), reason="model.pkl not present")
 def test_artifact_split_roundtrip_rows():
     art = joblib.load(MODEL_PATH)

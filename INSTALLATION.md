@@ -142,7 +142,7 @@ ehr-ai start
 
 ```bash
 PYTHONPATH=. python -m training.train \
-  --format longitudinal --data data/raw/ehr_data.csv \
+  --format longitudinal --data data/demo/ehr_data.csv \
   --model logreg --split-by-patient
 ```
 

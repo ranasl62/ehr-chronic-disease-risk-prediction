@@ -12,6 +12,7 @@ from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field
 
 from api.data_io import (
+    build_methods_markdown,
     build_results_zip,
     import_file_bytes,
     import_form_rows,
@@ -35,6 +36,7 @@ from utils.config import (
     PROJECT_ROOT,
     REPORTS_DIR,
     TRAINING_MANIFEST_PATH,
+    resolve_training_data_path,
 )
 from utils.eval_report import load_evaluation_report_safe
 from utils.json_safe import json_safe
@@ -49,18 +51,20 @@ _BUNDLED = [
     {
         "id": "ehr_data",
         "label": "Tiny longitudinal demo (10 patients)",
-        "path": "data/raw/ehr_data.csv",
+        "path": "data/demo/ehr_data.csv",
         "format": "longitudinal",
         "bundled": True,
         "source_type": "demo",
+        "category": "demo",
     },
     {
         "id": "paper_synthetic",
-        "label": "Paper synthetic cohort (400 patients)",
+        "label": "Paper synthetic cohort (N≈3000 events)",
         "path": "data/raw/paper_synthetic_cohort.csv",
         "format": "longitudinal",
         "bundled": True,
         "source_type": "synthetic",
+        "category": "demo",
         "suggested": {
             "horizon_days": 365,
             "index_strategy": "column",
@@ -71,10 +75,11 @@ _BUNDLED = [
     {
         "id": "sample_ehr",
         "label": "Tabular sample (legacy)",
-        "path": "data/raw/sample_ehr.csv",
+        "path": "data/demo/sample_ehr.csv",
         "format": "tabular",
         "bundled": True,
         "source_type": "demo",
+        "category": "demo",
     },
 ]
 
@@ -242,12 +247,26 @@ def workspace_status(_: bool = AuthDep):
 
 
 @router.get("/datasets")
-def list_datasets(_: bool = AuthDep):
+def list_datasets(
+    include_demo: bool = True,
+    _: bool = AuthDep,
+):
+    """List datasets. Bundled demos live under data/demo/ (+ paper synthetic in data/raw/).
+
+    Set ``include_demo=false`` to show only user imports under ``data/uploads/``.
+    """
     out = []
-    for d in _BUNDLED:
-        p = PROJECT_ROOT / d["path"]
-        item = {**d, "exists": p.is_file(), "bytes": p.stat().st_size if p.is_file() else 0}
-        out.append(item)
+    if include_demo:
+        for d in _BUNDLED:
+            p = PROJECT_ROOT / d["path"]
+            if p.is_file() or p.is_symlink():
+                out.append(
+                    {
+                        **d,
+                        "exists": p.is_file(),
+                        "bytes": p.stat().st_size if p.is_file() else 0,
+                    }
+                )
     UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
     for p in sorted(UPLOADS_DIR.glob("*.csv")):
         out.append(
@@ -258,11 +277,17 @@ def list_datasets(_: bool = AuthDep):
                 "format": "longitudinal",
                 "bundled": False,
                 "source_type": "byo",
+                "category": "user",
                 "exists": True,
                 "bytes": p.stat().st_size,
             }
         )
-    return {"datasets": out}
+    return {
+        "datasets": out,
+        "include_demo": include_demo,
+        "demo_root": "data/demo",
+        "uploads_root": "data/uploads",
+    }
 
 
 @router.get("/tasks")
@@ -307,6 +332,21 @@ async def upload_dataset(file: UploadFile = File(...), _: bool = AuthDep):
         raise HTTPException(status_code=400, detail="File too large (max 50MB)")
     try:
         return import_file_bytes(name, data)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@router.delete("/datasets")
+def delete_dataset(path: str, _: bool = AuthDep):
+    """Delete a demo or uploaded dataset file (CSV under data/demo, data/uploads, or data/raw)."""
+    from api.data_io import delete_dataset_file
+
+    try:
+        return delete_dataset_file(path)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
@@ -394,7 +434,7 @@ def start_train(body: TrainJobBody, _: bool = AuthDep):
         if tp.get("windows_days"):
             params["windows_days"] = tp["windows_days"]
         params["calibrate"] = body.calibrate or tp.get("calibrate", False)
-    path = _resolve_under_project(params["data_path"])
+    path = _resolve_under_project(str(resolve_training_data_path(params["data_path"])))
     if not path.is_file():
         raise HTTPException(status_code=404, detail=f"data not found: {params['data_path']}")
     # Health gate
@@ -463,7 +503,7 @@ def start_compare(body: CompareJobBody, _: bool = AuthDep):
         params.update({k: v for k, v in tp.items() if k != "task_id" and v is not None})
         params["data_path"] = body.data_path or tp["data_path"]
         params["promote_best"] = body.promote_best
-    path = _resolve_under_project(params["data_path"])
+    path = _resolve_under_project(str(resolve_training_data_path(params["data_path"])))
     if not path.is_file():
         raise HTTPException(status_code=404, detail=f"data not found: {params['data_path']}")
     try:
@@ -495,7 +535,9 @@ def start_leakage(body: LeakageJobBody, _: bool = AuthDep):
     if not body.use_artifact:
         if not body.data_path:
             raise HTTPException(status_code=400, detail="data_path required when use_artifact=false")
-        params["data_path"] = str(_resolve_under_project(body.data_path))
+        params["data_path"] = str(
+            _resolve_under_project(str(resolve_training_data_path(body.data_path)))
+        )
     try:
         rec = submit_job("leakage_audit", lambda r: run_leakage_audit_job(r, params))
     except RuntimeError as e:
@@ -530,7 +572,7 @@ def start_hpo(body: HpoJobBody, _: bool = AuthDep):
                 params[k] = v
         if not params.get("model_kind") and tp.get("model_kind"):
             params["model_kind"] = tp["model_kind"]
-    path = _resolve_under_project(params["data_path"])
+    path = _resolve_under_project(str(resolve_training_data_path(params["data_path"])))
     if not path.is_file():
         raise HTTPException(status_code=404, detail=f"data not found: {params['data_path']}")
     try:
@@ -645,6 +687,17 @@ def reports_download_zip(_: bool = AuthDep):
         content=data,
         media_type="application/zip",
         headers={"Content-Disposition": 'attachment; filename="ehr_risk_results_pack.zip"'},
+    )
+
+
+@router.get("/reports/methods.md")
+def reports_methods_md(_: bool = AuthDep):
+    """Short Markdown methods note from active run reports (research honesty tone)."""
+    text = build_methods_markdown()
+    return Response(
+        content=text,
+        media_type="text/markdown; charset=utf-8",
+        headers={"Content-Disposition": 'attachment; filename="methods.md"'},
     )
 
 

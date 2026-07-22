@@ -28,6 +28,22 @@ import { interval, switchMap, takeWhile } from 'rxjs';
 
 Chart.register(...registerables);
 
+interface HpoParam {
+  name: string;
+  value: string;
+}
+
+interface HpoTrialRow {
+  trial: number | null;
+  params: HpoParam[];
+  roc_auc: number | null;
+  pr_auc: number | null;
+  brier: number | null;
+  ece: number | null;
+  f1: number | null;
+  isBest: boolean;
+}
+
 @Component({
   selector: 'app-results',
   standalone: true,
@@ -44,6 +60,8 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('compareChart') compareChartRef?: ElementRef<HTMLCanvasElement>;
   @ViewChild('metricChart') metricChartRef?: ElementRef<HTMLCanvasElement>;
   @ViewChild('importanceChart') importanceChartRef?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('thresholdChart') thresholdChartRef?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('fairnessChart') fairnessChartRef?: ElementRef<HTMLCanvasElement>;
 
   summary = signal<ReportsSummary | null>(null);
   runs = signal<RunSummary[]>([]);
@@ -54,8 +72,14 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
   error = signal<string | null>(null);
   job = signal<JobInfo | null>(null);
   busy = signal(false);
+  /** Empty = show all PNGs, calibration/SHAP first when present. */
   figFilter = '';
   metricFilter = '';
+  /** Client-side filter for Experiment runs table. */
+  runFilter = '';
+  runPage = 1;
+  runPageSize = 10;
+  readonly runPageSizeOptions = [10, 15, 25] as const;
   showCharts = true;
   chartsReady = signal(false);
 
@@ -66,7 +90,8 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
   importanceRows: Record<string, unknown>[] = [];
   fairnessRows: Record<string, unknown>[] = [];
   thresholdRows: Record<string, unknown>[] = [];
-  hpoRows: Record<string, unknown>[] = [];
+  hpoRows: HpoTrialRow[] = [];
+  hpoBest: HpoTrialRow | null = null;
   runCompareRows: Record<string, unknown>[] = [];
 
   compareCols: DataTableColumn[] = [
@@ -112,13 +137,6 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
     { key: 'accuracy', label: 'Accuracy', numeric: true, format: 'number' },
     { key: 'positive_rate', label: 'Pos rate', numeric: true, format: 'number' },
   ];
-  hpoCols: DataTableColumn[] = [
-    { key: 'trial', label: 'Trial', numeric: true, format: 'number', digits: '1.0-0' },
-    { key: 'params', label: 'Params' },
-    { key: 'roc_auc', label: 'ROC-AUC', numeric: true, format: 'number' },
-    { key: 'pr_auc', label: 'PR-AUC', numeric: true, format: 'number' },
-    { key: 'brier', label: 'Brier', numeric: true, format: 'number' },
-  ];
   runCompareCols: DataTableColumn[] = [
     { key: 'run_id', label: 'Run' },
     { key: 'model_kind', label: 'Model' },
@@ -155,18 +173,25 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.summary.set(s);
         this.lastSummary = s;
         this.buildTables(s);
+        if (this.figFilter === 'calibration' && !this.hasCalibrationFigure()) this.figFilter = '';
+        if (this.figFilter === 'shap' && !this.hasShapFigure()) this.figFilter = '';
         this.scheduleRedraw();
       },
       error: (e) => this.error.set(this.fmtErr(e)),
     });
     this.api.runs(40).subscribe({
-      next: (r) => this.runs.set(r.runs || []),
+      next: (r) => {
+        this.runs.set(r.runs || []);
+        this.runPage = 1;
+        this.buildRunCompare();
+      },
       error: () => undefined,
     });
     this.api.fairnessReport().subscribe({
       next: (f) => {
         this.fairness.set(f);
         this.buildFairnessRows(f);
+        this.scheduleRedraw();
       },
       error: () => undefined,
     });
@@ -181,15 +206,120 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
     const s = this.summary();
     if (!s) return [];
     const q = this.figFilter.trim().toLowerCase();
-    return (s.files || []).filter(
+    const pngs = (s.files || []).filter(
       (f) => f.name.endsWith('.png') && (!q || f.name.toLowerCase().includes(q))
     );
+    return [...pngs].sort((a, b) => this.figPriority(a.name) - this.figPriority(b.name));
+  }
+
+  /** True when reports include at least one PNG figure. */
+  hasReportPngs(): boolean {
+    return (this.summary()?.files || []).some((f) => f.name.endsWith('.png'));
+  }
+
+  /** Hide calibration UI when calibration_holdout.png (or any calibration*.png) is absent. */
+  hasCalibrationFigure(): boolean {
+    return (this.summary()?.files || []).some((f) => {
+      const n = f.name.toLowerCase();
+      return n.endsWith('.png') && n.includes('calibration');
+    });
+  }
+
+  hasShapFigure(): boolean {
+    return (this.summary()?.files || []).some((f) => {
+      const n = f.name.toLowerCase();
+      return n.endsWith('.png') && n.includes('shap');
+    });
+  }
+
+  setFigFilter(q: string): void {
+    this.figFilter = q;
+  }
+
+  methodsMdUrl(): string {
+    return this.api.methodsMdUrl();
+  }
+
+  /** Prefer calibration and SHAP figures when listing without a text filter. */
+  private figPriority(name: string): number {
+    const n = name.toLowerCase();
+    if (n.includes('calibration')) return 0;
+    if (n.includes('shap')) return 1;
+    return 2;
   }
 
   filteredMetrics(): Record<string, unknown>[] {
     const q = this.metricFilter.trim().toLowerCase();
     if (!q) return this.metricRows;
     return this.metricRows.filter((r) => String(r['metric'] ?? '').toLowerCase().includes(q));
+  }
+
+  /** Client-side filter over visible run fields (id, model, status, path, meta, metrics). */
+  filteredRuns(): RunSummary[] {
+    const q = this.runFilter.trim().toLowerCase();
+    const all = this.runs();
+    if (!q) return all;
+    return all.filter((r) => this.runSearchText(r).includes(q));
+  }
+
+  pagedRuns(): RunSummary[] {
+    const rows = this.filteredRuns();
+    const start = (this.runPage - 1) * this.runPageSize;
+    return rows.slice(start, start + this.runPageSize);
+  }
+
+  runTotalPages(): number {
+    return Math.max(1, Math.ceil(this.filteredRuns().length / this.runPageSize) || 1);
+  }
+
+  onRunFilterChange(q: string): void {
+    this.runFilter = q;
+    this.runPage = 1;
+  }
+
+  goRunPage(p: number): void {
+    const max = this.runTotalPages();
+    this.runPage = Math.min(Math.max(1, p), max);
+  }
+
+  onRunPageSize(n: number): void {
+    this.runPageSize = n;
+    this.runPage = 1;
+  }
+
+  runKind(r: RunSummary): string {
+    const kind = r.meta?.['kind'];
+    return typeof kind === 'string' && kind ? kind : '—';
+  }
+
+  runStatusLabels(r: RunSummary): string[] {
+    const tags: string[] = [];
+    if (r.has_model) tags.push('model');
+    if (r.has_evaluation) tags.push('eval');
+    if (r.has_manifest) tags.push('manifest');
+    return tags;
+  }
+
+  private runSearchText(r: RunSummary): string {
+    const parts: string[] = [
+      r.run_id,
+      r.path,
+      r.model_kind || '',
+      this.runKind(r),
+      ...this.runStatusLabels(r),
+    ];
+    if (r.metrics) {
+      for (const [k, v] of Object.entries(r.metrics)) {
+        parts.push(k, v == null ? '' : String(v));
+      }
+    }
+    if (r.meta) {
+      for (const [k, v] of Object.entries(r.meta)) {
+        if (v == null) continue;
+        parts.push(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
+      }
+    }
+    return parts.join(' ').toLowerCase();
   }
 
   openRun(runId: string): void {
@@ -254,6 +384,7 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.busy.set(false);
         this.thresholds.set(t);
         this.thresholdRows = (t.points || []).map((p) => ({ ...p }));
+        this.scheduleRedraw();
         this.reload();
       },
       error: (e) => {
@@ -261,6 +392,69 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.error.set(this.fmtErr(e));
       },
     });
+  }
+
+  /** True when threshold points or decision-curve points exist for charting. */
+  hasThresholdChartData(): boolean {
+    return this.thresholdChartPoints().length > 0;
+  }
+
+  hasFairnessChartData(): boolean {
+    return this.fairnessRows.some(
+      (r) =>
+        typeof r['accuracy'] === 'number' ||
+        typeof r['tpr'] === 'number' ||
+        typeof r['fpr'] === 'number'
+    );
+  }
+
+  /**
+   * Operating-point or decision-curve rows already present in reports JSON.
+   * Does not invent net-benefit values.
+   */
+  private thresholdChartPoints(): {
+    threshold: number;
+    precision?: number;
+    recall?: number;
+    f1?: number;
+    net_benefit?: number;
+  }[] {
+    const thr = this.thresholds() || this.summary()?.thresholds || null;
+    const points = thr?.points || [];
+    if (points.length) {
+      return points.map((p) => ({
+        threshold: Number(p.threshold),
+        precision: typeof p.precision === 'number' ? p.precision : undefined,
+        recall: typeof p.recall === 'number' ? p.recall : undefined,
+        f1: typeof p.f1 === 'number' ? p.f1 : undefined,
+        net_benefit:
+          typeof (p as { net_benefit?: number }).net_benefit === 'number'
+            ? (p as { net_benefit: number }).net_benefit
+            : undefined,
+      }));
+    }
+    const dc = thr?.decision_curve;
+    const dcp = dc?.points;
+    if (Array.isArray(dcp) && dcp.length) {
+      const out: {
+        threshold: number;
+        precision?: number;
+        recall?: number;
+        f1?: number;
+        net_benefit?: number;
+      }[] = [];
+      for (const row of dcp) {
+        const r = row as Record<string, unknown>;
+        const threshold = Number(r['threshold']);
+        if (!Number.isFinite(threshold)) continue;
+        out.push({
+          threshold,
+          net_benefit: typeof r['net_benefit'] === 'number' ? r['net_benefit'] : undefined,
+        });
+      }
+      return out;
+    }
+    return [];
   }
 
   private startJob(fn: () => ReturnType<ApiService['shap']>): void {
@@ -303,6 +497,18 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onPageSize(n: number): void {
     this.ui.patch({ table_page_size: n });
+  }
+
+  formatMetric(value: number | null | undefined): string {
+    return typeof value === 'number' && Number.isFinite(value) ? value.toFixed(3) : 'n/a';
+  }
+
+  formatParams(params: unknown): HpoParam[] {
+    if (!params || typeof params !== 'object' || Array.isArray(params)) return [];
+    return Object.entries(params as Record<string, unknown>).map(([name, value]) => ({
+      name,
+      value: this.formatParamValue(value),
+    }));
   }
 
   private fmtErr(e: unknown): string {
@@ -379,13 +585,41 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
       this.thresholds.set(s.thresholds);
       this.thresholdRows = s.thresholds.points.map((p) => ({ ...p }));
     }
-    this.hpoRows = (s.hpo?.trials || []).map((t) => ({
-      trial: t['trial'],
-      params: JSON.stringify(t['params'] ?? {}),
-      roc_auc: t['roc_auc'],
-      pr_auc: t['pr_auc'],
-      brier: t['brier'],
-    }));
+    const best = s.hpo?.best;
+    const bestTrial = best ? this.hpoTrial(best, null, true) : null;
+    this.hpoBest = bestTrial;
+    this.hpoRows = (s.hpo?.trials || []).map((trial, index) =>
+      this.hpoTrial(trial, index, bestTrial?.trial === this.hpoTrialNumber(trial))
+    );
+  }
+
+  private hpoTrial(raw: Record<string, unknown>, fallbackTrial: number | null, isBest: boolean): HpoTrialRow {
+    return {
+      trial: this.hpoTrialNumber(raw) ?? fallbackTrial,
+      params: this.formatParams(raw['params']),
+      roc_auc: this.hpoMetric(raw['roc_auc']),
+      pr_auc: this.hpoMetric(raw['pr_auc']),
+      brier: this.hpoMetric(raw['brier']),
+      ece: this.hpoMetric(raw['ece']),
+      f1: this.hpoMetric(raw['f1']),
+      isBest,
+    };
+  }
+
+  private hpoTrialNumber(raw: Record<string, unknown> | undefined): number | null {
+    const trial = raw?.['trial'];
+    return typeof trial === 'number' && Number.isFinite(trial) ? trial : null;
+  }
+
+  private hpoMetric(value: unknown): number | null {
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+  }
+
+  private formatParamValue(value: unknown): string {
+    if (typeof value === 'number' && Number.isFinite(value)) return String(Number(value.toFixed(4)));
+    if (typeof value === 'string' || typeof value === 'boolean') return String(value);
+    if (value == null) return 'n/a';
+    return JSON.stringify(value);
   }
 
   private flattenAudit(obj: Record<string, unknown>, prefix = ''): Record<string, unknown>[] {
@@ -488,6 +722,101 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
           scales: { x: { beginAtZero: true } },
         },
       });
+    }
+
+    const thrPts = this.thresholdChartPoints();
+    if (thrPts.length) {
+      const labels = thrPts.map((p) => String(p.threshold));
+      const datasets: ChartConfiguration['data']['datasets'] = [];
+      if (thrPts.some((p) => typeof p.precision === 'number')) {
+        datasets.push({
+          label: 'Precision',
+          data: thrPts.map((p) => p.precision ?? null),
+          borderColor: '#2a6b5a',
+          backgroundColor: 'rgba(42,107,90,0.15)',
+          tension: 0.2,
+        });
+      }
+      if (thrPts.some((p) => typeof p.recall === 'number')) {
+        datasets.push({
+          label: 'Recall',
+          data: thrPts.map((p) => p.recall ?? null),
+          borderColor: '#c4a35a',
+          backgroundColor: 'rgba(196,163,90,0.15)',
+          tension: 0.2,
+        });
+      }
+      if (thrPts.some((p) => typeof p.f1 === 'number')) {
+        datasets.push({
+          label: 'F1',
+          data: thrPts.map((p) => p.f1 ?? null),
+          borderColor: '#6b8f9e',
+          backgroundColor: 'rgba(107,143,158,0.15)',
+          tension: 0.2,
+        });
+      }
+      if (thrPts.some((p) => typeof p.net_benefit === 'number')) {
+        datasets.push({
+          label: 'Net benefit',
+          data: thrPts.map((p) => p.net_benefit ?? null),
+          borderColor: '#3d5a80',
+          backgroundColor: 'rgba(61,90,128,0.15)',
+          tension: 0.2,
+        });
+      }
+      if (datasets.length) {
+        this.bar(this.canvas(this.thresholdChartRef, 'threshold'), {
+          type: 'line',
+          data: { labels, datasets },
+          options: {
+            plugins: {
+              title: {
+                display: true,
+                text: thrPts.some((p) => typeof p.net_benefit === 'number' && p.precision == null)
+                  ? 'Decision curve (from report)'
+                  : 'Threshold operating points',
+              },
+            },
+            scales: { y: { beginAtZero: true } },
+          },
+        });
+      }
+    }
+
+    if (this.hasFairnessChartData()) {
+      const labels = this.fairnessRows.map((r) => String(r['group'] ?? '—'));
+      const datasets: ChartConfiguration['data']['datasets'] = [];
+      if (this.fairnessRows.some((r) => typeof r['accuracy'] === 'number')) {
+        datasets.push({
+          label: 'Accuracy',
+          data: this.fairnessRows.map((r) => (typeof r['accuracy'] === 'number' ? r['accuracy'] : null)),
+          backgroundColor: '#2a6b5a',
+        });
+      }
+      if (this.fairnessRows.some((r) => typeof r['tpr'] === 'number')) {
+        datasets.push({
+          label: 'TPR',
+          data: this.fairnessRows.map((r) => (typeof r['tpr'] === 'number' ? r['tpr'] : null)),
+          backgroundColor: '#c4a35a',
+        });
+      }
+      if (this.fairnessRows.some((r) => typeof r['fpr'] === 'number')) {
+        datasets.push({
+          label: 'FPR',
+          data: this.fairnessRows.map((r) => (typeof r['fpr'] === 'number' ? r['fpr'] : null)),
+          backgroundColor: '#6b8f9e',
+        });
+      }
+      if (datasets.length) {
+        this.bar(this.canvas(this.fairnessChartRef, 'fairness'), {
+          type: 'bar',
+          data: { labels, datasets },
+          options: {
+            plugins: { title: { display: true, text: 'Fairness by group' } },
+            scales: { y: { beginAtZero: true, max: 1 } },
+          },
+        });
+      }
     }
     this.chartsReady.set(this.charts.length > 0);
   }

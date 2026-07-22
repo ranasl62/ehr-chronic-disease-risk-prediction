@@ -6,12 +6,13 @@
   <title>Commands — EHR Risk Framework</title>
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../assets/site.css" />
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
   <header class="site-header">
     <div class="inner">
-      <a class="brand" href="/">EHR Risk <span>Framework</span></a>
+      <a class="brand" href="/"><img class="brand-logo" src="../assets/logo.svg" width="28" height="28" alt="" />EHR Risk <span>Framework</span></a>
       <nav class="nav" aria-label="Primary">
         <a href="/">Home</a>
         <a href="/why">Why it matters</a>
@@ -75,7 +76,7 @@ make train-temporal
 # CLI package
 ehr-ai train --help
 PYTHONPATH=. python -m training.train \
-  --format longitudinal --data data/raw/ehr_data.csv --model logreg
+  --format longitudinal --data data/demo/ehr_data.csv --model logreg
 
 # Leakage audit &amp; SHAP
 make leak-audit
@@ -89,8 +90,8 @@ make -C research-paper paper-quick</code></pre>
       <h2>3. API smoke (curl)</h2>
 <pre><code>curl -sS http://127.0.0.1:8000/health | jq .
 curl -sS http://127.0.0.1:8000/v1/workspace/status | jq .
-curl -sS 'http://127.0.0.1:8000/v1/datasets/profile?path=data/raw/ehr_data.csv' | jq .
-curl -sS 'http://127.0.0.1:8000/v1/datasets/profile?path=data/raw/ehr_data.csv&amp;age_band=50_59' | jq .
+curl -sS 'http://127.0.0.1:8000/v1/datasets/profile?path=data/demo/ehr_data.csv' | jq .
+curl -sS 'http://127.0.0.1:8000/v1/datasets/profile?path=data/demo/ehr_data.csv&amp;age_band=50_59' | jq .
 curl -sS http://127.0.0.1:8000/v1/model/schema | jq .
 curl -sS -X POST http://127.0.0.1:8000/v1/predict \
   -H 'Content-Type: application/json' \

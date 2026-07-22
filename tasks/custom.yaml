@@ -7,7 +7,8 @@ task:
     Point --data at your CSV; adjust horizon/index for leakage-safe labels.
 
 target:
-  column: chronic_disease
+  # Matches data/demo/ehr_data.csv (bundled demo). Use chronic_disease only if your CSV has that column.
+  column: label
 
 prediction:
   horizon_days: null
@@ -21,7 +22,7 @@ features:
 
 data:
   format: longitudinal
-  suggested_path: data/raw/ehr_data.csv
+  suggested_path: data/demo/ehr_data.csv
 
 training:
   model_kind: logreg

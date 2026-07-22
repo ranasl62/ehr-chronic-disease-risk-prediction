@@ -78,7 +78,8 @@ Optional: `cp .env.example .env` (set `API_KEY`, ports). GPU / overrides: `cp do
 | Results ZIP | http://127.0.0.1:8000/v1/reports/download.zip | — | — |
 | **Docs website** | [`docs/`](docs/) → [GitHub Pages](https://ranasl62.github.io/ehr-chronic-disease-risk-prediction/) | — | — |
 
-**First loop:** Datasets (demo + health) → Train → Results / Analytics → Predict.  
+**First loop:** Datasets (bundled teaching demos + health) → Train → Results / Analytics → Predict.
+Teaching fixtures are `data/demo/ehr_data.csv` (default longitudinal Train path) and `data/demo/sample_ehr.csv`; legacy `data/raw/` references resolve as compatibility fallbacks.
 Demo CSVs only — no PHI. **Research and education only** — not for patient care.
 
 **Stop / clean:** `docker compose down` · `docker compose down --rmi local` (also drop local images).
@@ -106,7 +107,9 @@ If you use this project, please email feedback or open a GitHub issue — detail
 - Train logistic regression, random forest, or XGBoost on longitudinal or tabular demo data
 - Import BYO CSV (with column mapping), optional SQL / thin OMOP·FHIR adapters
 - Run dataset health, multi-model compare, named experiment runs
+- Hide bundled demos, browse dataset rows, or delete selected allowed datasets (idempotent if a selected file is already absent)
 - Export metrics, audits, and figures; call `POST /v1/predict` with schema-aligned features
+- Review light HPO as a best-trial card and trial table, with unavailable metrics rendered as `n/a`
 - Customize UI theme/density and train defaults in Config Center
 
 Software verification metrics (synthetic, not clinical) live under the local-only

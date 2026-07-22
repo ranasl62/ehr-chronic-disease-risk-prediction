@@ -45,6 +45,7 @@ from utils.config import (
     MODEL_PATH,
     REPORTS_DIR,
     TRAINING_MANIFEST_PATH,
+    resolve_training_data_path,
 )
 
 
@@ -77,9 +78,14 @@ def build_xy_longitudinal(
     and features are built from events truncated to the index time.
     """
     df = clean_longitudinal_ehr(df)
-    lc = label_col or ("label" if "label" in df.columns else "chronic_disease")
-    if lc not in df.columns:
-        raise ValueError(f"Label column not found: expected 'label' or 'chronic_disease'.")
+    candidates = [c for c in (label_col, "label", "chronic_disease") if c]
+    lc = next((c for c in candidates if c in df.columns), None)
+    if lc is None:
+        raise ValueError(
+            "Label column not found: expected 'label' or 'chronic_disease'"
+            + (f" (requested {label_col!r})" if label_col else "")
+            + "."
+        )
 
     strategy = index_strategy
     if horizon_days is not None and strategy == "last_event" and index_time_col is None:
@@ -218,7 +224,7 @@ def run_training(
     feature_inclusive: bool = True,
     label_col: str | None = None,
 ):
-    data_path = Path(
+    data_path = resolve_training_data_path(
         data_path
         or (DEFAULT_EHR_LONGITUDINAL_CSV if data_format == "longitudinal" else DEFAULT_RAW_CSV)
     )

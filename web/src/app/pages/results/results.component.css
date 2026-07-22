@@ -14,9 +14,37 @@
 .fig-filter input {
   padding: 0.4rem 0.6rem; border: 1px solid var(--line); border-radius: 4px; font: inherit;
 }
+.fig-quick { display: flex; gap: 0.4rem; flex-wrap: wrap; margin: 0.35rem 0 0.25rem; }
+.fig-quick .btn.active {
+  background: #2a6b5a;
+  color: #fff;
+  border-color: #2a6b5a;
+}
 .card.wide { grid-column: 1 / -1; height: 320px; }
-.run-list { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; gap: 0.35rem; }
-.run-list li { display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center; font-size: 0.88rem; }
+.runs-toolbar { display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; margin: 0.35rem 0 0.5rem; }
+.runs-search { margin: 0; flex: 1; min-width: 12rem; max-width: 24rem; }
+.runs-meta { font-size: 0.85rem; padding-bottom: 0.35rem; }
+.runs-scroll { overflow: auto; max-height: 28rem; border: 1px solid var(--line); border-radius: 6px; margin-bottom: 0.5rem; }
+.runs-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.runs-table th, .runs-table td {
+  padding: 0.4rem 0.55rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle;
+}
+.runs-table th {
+  position: sticky; top: 0; background: var(--surface-2); white-space: nowrap; font-weight: 600;
+}
+.runs-table th.num, .runs-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.runs-table .col-cmp { width: 4.5rem; text-align: center; }
+.runs-table .empty { text-align: center; color: var(--muted); padding: 1rem; }
+.runs-table .tag { margin-right: 0.25rem; }
+.runs-pager {
+  display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;
+  font-size: 0.85rem; margin-bottom: 1rem;
+}
+.runs-pager .btn { padding: 0.3rem 0.65rem; font-size: 0.85rem; }
+.runs-pager .page-size { display: flex; gap: 0.35rem; align-items: center; margin-left: auto; }
+.runs-pager .page-size select {
+  padding: 0.25rem; border: 1px solid var(--line); border-radius: 4px; font: inherit;
+}
 .linkish {
   background: none; border: none; color: #1a5c45; text-decoration: underline;
   cursor: pointer; font: inherit; padding: 0;
@@ -25,6 +53,27 @@
   font-size: 0.72rem; padding: 0.1rem 0.4rem; border-radius: 3px;
   background: #e8f0ec; color: #1a3d32;
 }
+.hpo-best {
+  margin: 0.6rem 0 0.85rem; padding: 0.85rem 1rem;
+  border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2);
+}
+.hpo-params { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.55rem; }
+.hpo-param {
+  padding: 0.15rem 0.4rem; border: 1px solid var(--line); border-radius: 3px; font-size: 0.8rem;
+}
+.hpo-metrics {
+  display: grid; grid-template-columns: repeat(5, minmax(5rem, 1fr)); gap: 0.5rem;
+  margin: 0.85rem 0 0;
+}
+.hpo-metrics dt { color: var(--muted); font-size: 0.75rem; }
+.hpo-metrics dd { margin: 0.1rem 0 0; font-size: 1rem; font-variant-numeric: tabular-nums; }
+.hpo-table-wrap { overflow: auto; border: 1px solid var(--line); border-radius: 6px; }
+.hpo-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.hpo-table th, .hpo-table td { padding: 0.5rem 0.55rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+.hpo-table th { background: var(--surface-2); white-space: nowrap; }
+.hpo-table th.num, .hpo-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.hpo-table tbody tr.best { background: var(--surface-2); }
+.hpo-table .hpo-params { margin-top: 0; }
 .run-detail {
   margin: 0 0 1.25rem; padding: 0.85rem 1rem; border: 1px solid var(--line);
   border-radius: 6px; background: var(--surface-2);
@@ -38,4 +87,5 @@ pre.mini {
 @media (max-width: 800px) {
   .chart-grid { grid-template-columns: 1fr; }
   .card.wide { grid-column: auto; }
+  .hpo-metrics { grid-template-columns: repeat(2, minmax(5rem, 1fr)); }
 }

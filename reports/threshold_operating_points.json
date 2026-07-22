@@ -1,0 +1,47 @@
+{
+  "present": true,
+  "threshold": 0.5,
+  "points": [
+    {
+      "threshold": 0.3,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "accuracy": 0.0,
+      "positive_rate": 1.0
+    },
+    {
+      "threshold": 0.4,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "accuracy": 0.5,
+      "positive_rate": 0.5
+    },
+    {
+      "threshold": 0.5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "accuracy": 0.5,
+      "positive_rate": 0.5
+    },
+    {
+      "threshold": 0.6,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "accuracy": 1.0,
+      "positive_rate": 0.0
+    },
+    {
+      "threshold": 0.7,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "accuracy": 1.0,
+      "positive_rate": 0.0
+    }
+  ],
+  "note": "Research operating points; not clinical decision thresholds."
+}

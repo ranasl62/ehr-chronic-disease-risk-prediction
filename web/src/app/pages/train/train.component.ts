@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ApiService, CompareBody, HpoBody, JobInfo, TaskInfo, TrainBody } from '../../core/api.service';
 import { WorkspaceState } from '../../core/workspace.state';
 import { Subscription, interval, switchMap, takeWhile } from 'rxjs';
@@ -16,7 +16,9 @@ import { Subscription, interval, switchMap, takeWhile } from 'rxjs';
 export class TrainComponent implements OnInit, OnDestroy {
   private readonly api = inject(ApiService);
   private readonly state = inject(WorkspaceState);
+  private readonly route = inject(ActivatedRoute);
   private pollSub?: Subscription;
+  demoBanner = signal(false);
 
   tasks = signal<TaskInfo[]>([]);
   taskId = '';
@@ -30,7 +32,7 @@ export class TrainComponent implements OnInit, OnDestroy {
   indexStrategy = 'last_event';
   indexTimeCol: string | null = null;
   labelCol: string | null = null;
-  dataPath = 'data/raw/ehr_data.csv';
+  dataPath = 'data/demo/ehr_data.csv';
   dataFormat = 'longitudinal';
   /** Optional research-scoped light HPO grid. */
   enableHpo = false;
@@ -42,8 +44,9 @@ export class TrainComponent implements OnInit, OnDestroy {
   busy = signal(false);
 
   ngOnInit(): void {
+    const demo = this.route.snapshot.queryParamMap.get('demo') === '1';
     const d = this.state.selectedDataset();
-    if (d) {
+    if (!demo && d) {
       this.dataPath = d.path;
       this.dataFormat = d.format;
       const s = d.suggested;
@@ -56,9 +59,35 @@ export class TrainComponent implements OnInit, OnDestroy {
       }
     }
     this.api.tasks().subscribe({
-      next: (r) => this.tasks.set(r.tasks),
+      next: (r) => {
+        this.tasks.set(r.tasks);
+        if (demo) this.applyDemoPreset();
+      },
     });
     this.refreshJobs();
+  }
+
+  /** Bundled CSV + custom task — research/education demo only. */
+  applyDemoPreset(): void {
+    this.demoBanner.set(true);
+    this.taskId = 'custom';
+    const t = this.selectedTask();
+    if (t) {
+      this.applyTask();
+    } else {
+      this.dataPath = 'data/demo/ehr_data.csv';
+      this.dataFormat = 'longitudinal';
+      this.modelKind = 'logreg';
+      this.calibrate = false;
+      this.splitByPatient = true;
+      this.temporalSplit = false;
+      this.useMultiWindow = true;
+      this.windowsDays = [7, 30, 180];
+      this.horizonDays = null;
+      this.indexStrategy = 'last_event';
+      this.indexTimeCol = null;
+      this.labelCol = 'label';
+    }
   }
 
   ngOnDestroy(): void {

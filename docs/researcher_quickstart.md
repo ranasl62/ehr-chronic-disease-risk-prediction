@@ -66,8 +66,11 @@ cd web && npm install && npm start
 ## Bring your own CSV
 
 1. Match the longitudinal contract (`patient_id`, `timestamp`, labs/vitals, `label`).  
-2. Optional: `index_time` + horizon via UI or CLI.  
-3. [`DATA_GUIDE.md`](../DATA_GUIDE.md) · [`docs/data_sources_and_schema.md`](data_sources_and_schema.md).  
+2. In the UI: **Datasets → File upload** (files land in `data/uploads/`).  
+3. Optionally uncheck **Show bundled demo datasets** so only your imports appear (`GET /v1/datasets?include_demo=false`).  
+4. Bundled teaching fixtures live in [`data/demo/`](../data/demo/) — not for clinical claims.  
+5. Optional: `index_time` + horizon via UI or CLI.  
+6. [`docs/data_sources_and_schema.md`](data_sources_and_schema.md) · MIMIC: [`mimic_access_and_outreach.md`](mimic_access_and_outreach.md).  
 
 ## Next
 

@@ -2,6 +2,14 @@
   <h1>Train &amp; audit</h1>
   <p class="lede">Pick a task preset or configure manually. Compare runs logreg / RF / XGBoost (+ LightGBM if installed). LSTM is not available.</p>
 
+  @if (demoBanner()) {
+    <div class="demo-banner" role="status">
+      <strong>Demo preset loaded</strong> — bundled
+      <code>data/demo/ehr_data.csv</code> with the <code>custom</code> task (logreg).
+      Research and education only — not for patient care.
+    </div>
+  }
+
   <form class="form" (ngSubmit)="startTrain()">
     <label>Task preset
       <select [(ngModel)]="taskId" name="taskId" (change)="applyTask()">

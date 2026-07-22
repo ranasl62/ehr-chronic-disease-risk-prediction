@@ -1,0 +1,17 @@
+{
+  "generated_at_utc": "2026-07-22T05:21:10.062128+00:00",
+  "threshold": 0.5,
+  "metrics": {
+    "roc_auc": NaN,
+    "pr_auc": NaN,
+    "brier": 0.24837024390033224,
+    "ece": 0.41750270562770564,
+    "ece_bins": 10,
+    "accuracy": 0.5,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0
+  },
+  "classification_report_text": "              precision    recall  f1-score   support\n\n           0       1.00      0.50      0.67         2\n           1       0.00      0.00      0.00         0\n\n    accuracy                           0.50         2\n   macro avg       0.50      0.25      0.33         2\nweighted avg       1.00      0.50      0.67         2\n",
+  "meta": {}
+}

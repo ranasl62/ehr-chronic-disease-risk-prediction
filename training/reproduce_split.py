@@ -17,12 +17,13 @@ from preprocessing.cleaning import clean_longitudinal_ehr
 from preprocessing.ehr_loader import load_data, load_ehr_data
 from training.splits import temporal_patient_train_test_indices
 from training.train import build_xy_longitudinal, build_xy_tabular
+from utils.config import resolve_training_data_path
 
 
 def load_xy_groups_from_artifact(artifact: dict[str, Any]) -> tuple[pd.DataFrame, pd.Series, np.ndarray]:
     fe = artifact.get("feature_engineering") or {}
     fmt = fe.get("format", "tabular")
-    data_path = Path(fe.get("data_path", ""))
+    data_path = resolve_training_data_path(fe.get("data_path", ""))
     if not data_path.is_file():
         raise FileNotFoundError(f"Artifact data_path not found: {data_path}")
 
@@ -64,7 +65,7 @@ def reproducible_train_test_indices(
     if split_method == "temporal_patient":
         if not fe:
             raise ValueError("temporal_patient split requires feature_engineering meta (fe).")
-        dp = Path(fe.get("data_path", ""))
+        dp = resolve_training_data_path(fe.get("data_path", ""))
         if not dp.is_file():
             raise FileNotFoundError(f"temporal_patient: data_path missing: {dp}")
         df = clean_longitudinal_ehr(load_ehr_data(dp))

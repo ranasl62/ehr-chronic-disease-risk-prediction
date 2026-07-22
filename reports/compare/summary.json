@@ -1,7 +1,9 @@
 {
-  "data_path": "data/raw/ehr_data.csv",
+  "data_path": "data/demo/ehr_data.csv",
   "models_compared": [
-    "logreg"
+    "logreg",
+    "random_forest",
+    "xgboost"
   ],
   "calibrate": false,
   "ranking_metric": "roc_auc",
@@ -11,8 +13,8 @@
       "metrics": {
         "roc_auc": NaN,
         "pr_auc": NaN,
-        "brier": 0.21159150099504148,
-        "ece": 0.45489812191078605,
+        "brier": 0.20762754191886204,
+        "ece": 0.4415743302983367,
         "ece_bins": 10,
         "accuracy": 0.5,
         "precision": 0.0,
@@ -21,13 +23,55 @@
       },
       "roc_auc": NaN,
       "pr_auc": NaN,
-      "brier": 0.21159150099504148,
-      "ece": 0.45489812191078605,
+      "brier": 0.20762754191886204,
+      "ece": 0.4415743302983367,
       "calibrated": false,
       "model_path": "reports/compare/model_logreg.pkl",
       "selected": true
+    },
+    {
+      "model": "random_forest",
+      "metrics": {
+        "roc_auc": NaN,
+        "pr_auc": NaN,
+        "brier": 0.24837024390033224,
+        "ece": 0.41750270562770564,
+        "ece_bins": 10,
+        "accuracy": 0.5,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "roc_auc": NaN,
+      "pr_auc": NaN,
+      "brier": 0.24837024390033224,
+      "ece": 0.41750270562770564,
+      "calibrated": false,
+      "model_path": "reports/compare/model_random_forest.pkl",
+      "selected": false
+    },
+    {
+      "model": "xgboost",
+      "metrics": {
+        "roc_auc": NaN,
+        "pr_auc": NaN,
+        "brier": 0.2584170699119568,
+        "ece": 0.5083473920822144,
+        "ece_bins": 10,
+        "accuracy": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "roc_auc": NaN,
+      "pr_auc": NaN,
+      "brier": 0.2584170699119568,
+      "ece": 0.5083473920822144,
+      "calibrated": false,
+      "model_path": "reports/compare/model_xgboost.pkl",
+      "selected": false
     }
   ],
   "selected_model": "logreg",
-  "disclaimer": "Research comparison only \u2014 not for clinical use."
+  "disclaimer": "For research and education only. Outputs are not clinical recommendations."
 }

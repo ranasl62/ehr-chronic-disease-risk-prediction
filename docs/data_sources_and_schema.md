@@ -35,6 +35,11 @@ Use only data you are **authorized** to hold. Typical **public, research-grade**
 4. **Calibration** — `--calibrate` for probability quality; monitor drift (PSI in `evaluation_report.json` when enabled).
 5. **Governance** — BAAs, IRB, minimum necessary; no PHI in logs (see API middleware).
 
-## Synthetic demo files in-repo
+## Synthetic demo files
 
-`data/raw/ehr_data.csv` and `sample_ehr.csv` are **small synthetic teaching datasets** for CI and local runs — not representative of clinical performance.
+Bundled teaching fixtures live in **`data/demo/`** (`ehr_data.csv`, `sample_ehr.csv`).  
+Paper-scale synthetic cohort: `data/raw/paper_synthetic_cohort.csv`.  
+**User imports:** `data/uploads/` (gitignored). Turn demos off in the Datasets UI when working only with your files.
+
+`data/raw/ehr_data.csv` and `data/raw/sample_ehr.csv` are compatibility symlinks into `data/demo/`.
+

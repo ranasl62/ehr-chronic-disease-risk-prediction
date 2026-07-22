@@ -1,6 +1,20 @@
 <div class="shell">
   <header class="top">
-    <a routerLink="/" class="brand">EHR Risk Workbench</a>
+    <a routerLink="/" class="brand" aria-label="EHR Risk Workbench home">
+      <svg class="brand-logo" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true" focusable="false">
+        <!-- Theme accent tile; cream mark reads on dark header -->
+        <rect width="32" height="32" rx="7" fill="#2a6b5a"/>
+        <!-- Baseline (index) -->
+        <path d="M7 22.5h18" stroke="#e4f2ed" stroke-width="1.75" stroke-linecap="round"/>
+        <!-- Ascending risk / calibration bars -->
+        <rect x="8" y="16" width="3.2" height="6.5" rx="1" fill="#e4f2ed" opacity="0.55"/>
+        <rect x="13.4" y="12.5" width="3.2" height="10" rx="1" fill="#e4f2ed" opacity="0.75"/>
+        <rect x="18.8" y="8.5" width="3.2" height="14" rx="1" fill="#f4f7f5"/>
+        <!-- Soft integrity arc -->
+        <path d="M8 14.5c3.2-4.2 7.2-6.2 12.5-6.2" fill="none" stroke="#e4f2ed" stroke-width="1.5" stroke-linecap="round" opacity="0.9"/>
+      </svg>
+      <span class="brand-text">EHR Risk Workbench</span>
+    </a>
     <nav>
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
       <a routerLink="/datasets" routerLinkActive="active">Datasets</a>

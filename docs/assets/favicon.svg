@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="EHR Risk Framework">
+  <rect width="32" height="32" rx="7" fill="#2a6b5a"/>
+  <path d="M7 22.5h18" stroke="#e4f2ed" stroke-width="1.75" stroke-linecap="round"/>
+  <rect x="8" y="16" width="3.2" height="6.5" rx="1" fill="#e4f2ed" opacity="0.55"/>
+  <rect x="13.4" y="12.5" width="3.2" height="10" rx="1" fill="#e4f2ed" opacity="0.75"/>
+  <rect x="18.8" y="8.5" width="3.2" height="14" rx="1" fill="#f4f7f5"/>
+  <path d="M8 14.5c3.2-4.2 7.2-6.2 12.5-6.2" fill="none" stroke="#e4f2ed" stroke-width="1.5" stroke-linecap="round" opacity="0.9"/>
+</svg>

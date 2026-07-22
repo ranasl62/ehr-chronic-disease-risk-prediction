@@ -46,6 +46,19 @@ def test_zip_contains_limitations_and_manifest():
     names = set(zf.namelist())
     assert any("LIMITATIONS" in n for n in names)
     assert "README_PACK.json" in names
+    assert "reports/methods.md" in names
+    methods = zf.read("reports/methods.md").decode("utf-8")
+    assert "Research and education" in methods
+    assert "Methods note" in methods
+
+
+def test_build_methods_markdown_mentions_model_and_disclaimer():
+    from api.data_io import build_methods_markdown
+
+    text = build_methods_markdown()
+    assert "not intended for patient care" in text.lower() or "not intended for patient care" in text
+    assert "Model:" in text
+    assert "Leakage audit" in text
 
 
 def test_openhealth_evaluate_returns_dict():

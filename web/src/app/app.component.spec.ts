@@ -15,4 +15,14 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     expect(fixture.componentInstance).toBeTruthy();
   });
+
+  it('shows brand text and logo mark', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.brand')).toBeTruthy();
+    expect(el.querySelector('.brand-logo')).toBeTruthy();
+    expect(el.querySelector('.brand-text')?.textContent).toContain('EHR Risk Workbench');
+    expect(el.textContent).toContain('research and education');
+  });
 });

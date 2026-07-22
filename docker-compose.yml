@@ -115,7 +115,7 @@ services:
       - --format
       - longitudinal
       - --data
-      - data/raw/ehr_data.csv
+      - data/demo/ehr_data.csv
       - --model
       - logreg
       - --split-by-patient

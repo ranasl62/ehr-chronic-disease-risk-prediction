@@ -16,14 +16,32 @@ export class ApiService {
     return this.http.get<WorkspaceStatus>(`${this.base}/v1/workspace/status`);
   }
 
-  datasets(): Observable<{ datasets: DatasetInfo[] }> {
-    return this.http.get<{ datasets: DatasetInfo[] }>(`${this.base}/v1/datasets`);
+  datasets(includeDemo = true): Observable<{
+    datasets: DatasetInfo[];
+    include_demo?: boolean;
+    demo_root?: string;
+    uploads_root?: string;
+  }> {
+    const q = includeDemo ? '' : '?include_demo=false';
+    return this.http.get<{
+      datasets: DatasetInfo[];
+      include_demo?: boolean;
+      demo_root?: string;
+      uploads_root?: string;
+    }>(`${this.base}/v1/datasets${q}`);
   }
 
   uploadDataset(file: File): Observable<unknown> {
     const fd = new FormData();
     fd.append('file', file, file.name);
     return this.http.post(`${this.base}/v1/datasets/upload`, fd);
+  }
+
+  deleteDataset(path: string): Observable<DatasetDeleteResult> {
+    return this.http.delete<DatasetDeleteResult>(
+      `${this.base}/v1/datasets`,
+      { params: { path } }
+    );
   }
 
   importForm(rows: Record<string, unknown>[], name = 'form_import.csv'): Observable<unknown> {
@@ -47,6 +65,10 @@ export class ApiService {
 
   resultsZipUrl(): string {
     return `${this.base}/v1/reports/download.zip`;
+  }
+
+  methodsMdUrl(): string {
+    return `${this.base}/v1/reports/methods.md`;
   }
 
   train(body: TrainBody): Observable<JobInfo> {
@@ -148,6 +170,14 @@ export class ApiService {
   }
 }
 
+export interface DatasetDeleteResult {
+  deleted: boolean;
+  already_absent?: boolean;
+  path: string;
+  requested?: string;
+  error?: string;
+}
+
 export interface WorkspaceStatus {
   api_ok: boolean;
   model_ready: boolean;
@@ -167,8 +197,11 @@ export interface DatasetInfo {
   path: string;
   format: string;
   exists: boolean;
+  bytes?: number;
   bundled?: boolean;
   source_type?: string;
+  /** demo = bundled teaching fixtures; user = data/uploads */
+  category?: 'demo' | 'user' | string;
   suggested?: {
     horizon_days?: number;
     index_strategy?: string;
@@ -310,12 +343,17 @@ export interface ThresholdReport {
   threshold?: number;
   points?: {
     threshold: number;
-    precision: number;
-    recall: number;
-    f1: number;
-    accuracy: number;
-    positive_rate: number;
+    precision?: number;
+    recall?: number;
+    f1?: number;
+    accuracy?: number;
+    positive_rate?: number;
+    net_benefit?: number;
   }[];
+  decision_curve?: {
+    prevalence?: number;
+    points?: { threshold: number; net_benefit?: number }[];
+  };
   note?: string;
 }
 

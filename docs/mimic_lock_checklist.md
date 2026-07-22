@@ -2,7 +2,7 @@
 
 Credentialed MIMIC-IV data **never** goes in git. This checklist ends with a local `cohort_lock.json` (SHA-256 only).
 
-Cross-links: [extract runbook](mimic_extract_splits_runbook.md) · [lock details](mimic_results_lock.md) · [SQL templates](../sql/feature_queries.sql) · [data schema](data_sources_and_schema.md)
+Cross-links: [access + outreach + test plan](mimic_access_and_outreach.md) · [extract runbook](mimic_extract_splits_runbook.md) · [lock details](mimic_results_lock.md) · [SQL templates](../sql/feature_queries.sql) · [data schema](data_sources_and_schema.md)
 
 ## 1. Credentials
 

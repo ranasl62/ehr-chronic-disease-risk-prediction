@@ -8,7 +8,9 @@ Shipped in this pass vs intentionally deferred. Framing: research / education on
 |------|------|
 | Experiment browser | `GET /v1/runs`, `GET /v1/runs/{id}`, promote; Results UI list / open / compare / promote |
 | Fairness panel | `GET /v1/reports/fairness`, Results “Run fairness” + group table (age bands / TPR·FPR); summary + ZIP |
-| Light HPO | `POST /v1/jobs/hpo` + Train optional light grid; `reports/hpo_report.json` |
+| Light HPO | `POST /v1/jobs/hpo` + Train optional light grid; Results best-trial card + trials table (`n/a` for unavailable metrics); `reports/hpo_report.json` |
+| Demo dataset catalog | Teaching fixtures under `data/demo/`; Train defaults to `data/demo/ehr_data.csv`; legacy raw paths resolve as fallbacks |
+| Dataset browse / delete | Demo toggle, tabular selection, multi-delete; missing allowed paths return idempotent `already_absent` |
 | Job UX | Cancel (queued/best-effort), recent jobs list on Train, clearer status |
 | Task clarity | Task description + `required_columns` (readmission_30d highlights `index_time`) |
 | Auth empty states | Global 401 banner → Config; Predict already CTAs to Train when no schema |

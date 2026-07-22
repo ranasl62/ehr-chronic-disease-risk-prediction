@@ -5,9 +5,15 @@
   background: var(--ink); color: #f4f7f5; flex-wrap: wrap;
 }
 .brand {
+  display: inline-flex; align-items: center; gap: 0.55rem;
   font-family: var(--font-display); font-weight: 600; font-size: 1.15rem;
   color: #f4f7f5; text-decoration: none; letter-spacing: 0.02em;
 }
+.brand-logo {
+  width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0;
+  display: block;
+}
+.brand-text { line-height: 1.2; }
 nav { display: flex; gap: 0.35rem; flex-wrap: wrap; }
 nav a {
   color: #c5d0c9; text-decoration: none; padding: 0.35rem 0.65rem;

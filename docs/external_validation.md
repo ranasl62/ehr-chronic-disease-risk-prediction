@@ -21,7 +21,7 @@ This repo cannot replace **your** second dataset or site, but it supports strong
 **Patient-level folds** (GroupKFold): summary mean/std **ROC-AUC** and **Brier** across folds. Use for stability reporting before locking a single hold-out.
 
 ```bash
-PYTHONPATH=. python scripts/group_cv_report.py --format longitudinal --data data/raw/ehr_data.csv --model logreg
+PYTHONPATH=. python scripts/group_cv_report.py --format longitudinal --data data/demo/ehr_data.csv --model logreg
 ```
 
 ## 3. True external validation (your action items)

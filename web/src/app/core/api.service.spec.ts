@@ -43,8 +43,13 @@ describe('ApiService (UI → backend contract)', () => {
   it('GET /v1/datasets', () => {
     api.datasets().subscribe((r) => expect(r.datasets.length).toBe(1));
     http.expectOne('/v1/datasets').flush({
-      datasets: [{ id: 'ehr_data', label: 'Demo', path: 'data/raw/ehr_data.csv', format: 'longitudinal', exists: true }],
+      datasets: [{ id: 'ehr_data', label: 'Demo', path: 'data/demo/ehr_data.csv', format: 'longitudinal', exists: true }],
     });
+  });
+
+  it('GET /v1/datasets?include_demo=false', () => {
+    api.datasets(false).subscribe((r) => expect(r.datasets.length).toBe(0));
+    http.expectOne('/v1/datasets?include_demo=false').flush({ datasets: [], include_demo: false });
   });
 
   it('POST /v1/datasets/upload', () => {

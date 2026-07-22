@@ -59,6 +59,16 @@ def test_reports_summary_includes_fairness_keys(client):
     assert "files" in js
 
 
+def test_methods_md_endpoint(client):
+    r = client.get("/v1/reports/methods.md")
+    assert r.status_code == 200
+    assert "text/markdown" in r.headers.get("content-type", "")
+    body = r.text
+    assert "Methods note" in body
+    assert "research" in body.lower()
+    assert "patient care" in body.lower()
+
+
 def test_threshold_operating_points_helper():
     y = np.array([0, 0, 1, 1, 1, 0])
     p = np.array([0.1, 0.4, 0.55, 0.8, 0.9, 0.2])

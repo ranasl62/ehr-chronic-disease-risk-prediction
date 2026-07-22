@@ -7,12 +7,13 @@
   <meta name="description" content="Import, browse, health gate before train" />
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../assets/site.css" />
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
   <header class="site-header">
     <div class="inner">
-      <a class="brand" href="/">EHR Risk <span>Framework</span></a>
+      <a class="brand" href="/"><img class="brand-logo" src="../assets/logo.svg" width="28" height="28" alt="" />EHR Risk <span>Framework</span></a>
       <nav class="nav" aria-label="Primary"></nav>
     </div>
   </header>
@@ -24,19 +25,20 @@
 
     <figure class="shot">
       <img src="../media/02_datasets_health.png" alt="Datasets page" width="1200" height="750" />
-      <figcaption>Datasets — browse + health report</figcaption>
+      <figcaption>Datasets — bundled-demo toggle, tabular browse, multi-select delete, and health report (synthetic teaching data)</figcaption>
     </figure>
     <section class="section">
       <h2>Tabs</h2>
       <table class="data">
         <thead><tr><th>Tab</th><th>Purpose</th></tr></thead>
         <tbody>
-          <tr><td>Browse</td><td>Select bundled or previously imported CSVs; run <strong>Dataset health</strong>; Continue to train</td></tr>
+          <tr><td>Browse</td><td>Show or hide bundled fixtures in <code>data/demo/</code>; select a CSV; run <strong>Dataset health</strong>; Continue to train</td></tr>
           <tr><td>File upload</td><td>Upload a CSV (demo / BYO research data only)</td></tr>
           <tr><td>Form / JSON</td><td>Paste JSON rows for small synthetic experiments</td></tr>
           <tr><td>SQL</td><td>Read-only <code>SELECT</code> / <code>WITH … SELECT</code> import into workspace</td></tr>
         </tbody>
       </table>
+      <p class="muted">Browse is a table: check one or more rows and choose <strong>Delete selected</strong>. The delete endpoint is idempotent for missing allowed files and returns <code>already_absent</code> instead of failing.</p>
     </section>
     <section class="section">
       <h2>Health report checks</h2>

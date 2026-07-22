@@ -24,7 +24,7 @@
 | Track | Source | Notes |
 |-------|--------|-------|
 | Software verification | `data/raw/paper_synthetic_cohort.csv` | Synthetic; no PHI |
-| Teaching demo | `data/raw/ehr_data.csv` | Tiny; CI only |
+| Teaching demo | `data/demo/ehr_data.csv` | Tiny; CI only (legacy raw path resolves as a fallback) |
 | Credentialed MIMIC | Local `data/processed/` | Never committed |
 
 ## 4. Evaluation

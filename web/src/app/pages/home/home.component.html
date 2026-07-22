@@ -6,11 +6,16 @@
   </p>
 
   <div class="actions">
+    <a routerLink="/train" [queryParams]="{ demo: '1' }" class="btn primary">Run demo</a>
     <button type="button" class="btn" (click)="refresh()">Refresh status</button>
-    <a routerLink="/datasets" class="btn primary">Start: import / pick data</a>
+    <a routerLink="/datasets" class="btn">Import / pick data</a>
     <a routerLink="/analytics" class="btn">Analytics</a>
     <a class="btn" [href]="zipUrl" download="ehr_risk_results_pack.zip">Download results ZIP</a>
   </div>
+  <p class="muted demo-note">
+    <strong>Run demo</strong> opens Train with the bundled longitudinal CSV and the
+    <code>custom</code> task preset (logreg). Research and education only — not for patient care.
+  </p>
 
   @if (loading()) {
     <p class="muted">Checking workspace…</p>
