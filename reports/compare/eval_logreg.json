@@ -1,11 +1,11 @@
 {
-  "generated_at_utc": "2026-07-22T05:21:09.654407+00:00",
+  "generated_at_utc": "2026-07-23T06:10:17.106186+00:00",
   "threshold": 0.5,
   "metrics": {
     "roc_auc": NaN,
     "pr_auc": NaN,
-    "brier": 0.20762754191886204,
-    "ece": 0.4415743302983367,
+    "brier": 0.21159150099504148,
+    "ece": 0.45489812191078605,
     "ece_bins": 10,
     "accuracy": 0.5,
     "precision": 0.0,

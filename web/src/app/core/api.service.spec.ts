@@ -105,6 +105,20 @@ describe('ApiService (UI → backend contract)', () => {
     });
   });
 
+  it('GET /v1/datasets/health with task_id', () => {
+    api.datasetHealth('data/demo/ehr_data.csv', 'readmission_30d').subscribe((h) => {
+      expect(h.health.blockers?.length).toBeGreaterThan(0);
+    });
+    const req = http.expectOne((r) => r.url === '/v1/datasets/health');
+    expect(req.request.params.get('task_id')).toBe('readmission_30d');
+    req.flush({
+      path: 'data/demo/ehr_data.csv',
+      n_rows: 20,
+      n_columns: 10,
+      health: { ready_for_training: false, blockers: ['task_required_columns: missing'], warnings: [] },
+    });
+  });
+
   it('POST /v1/jobs/train', () => {
     api
       .train({
@@ -170,8 +184,10 @@ describe('ApiService (UI → backend contract)', () => {
       log_tail: [],
     });
 
-    api.shap().subscribe((j) => expect(j.kind).toBe('shap'));
-    http.expectOne('/v1/jobs/shap').flush({
+    api.shap({ run_id: 'run_x' }).subscribe((j) => expect(j.kind).toBe('shap'));
+    const shapReq = http.expectOne('/v1/jobs/shap');
+    expect(shapReq.request.body).toEqual({ run_id: 'run_x' });
+    shapReq.flush({
       id: 's1',
       kind: 'shap',
       status: 'queued',
@@ -179,6 +195,30 @@ describe('ApiService (UI → backend contract)', () => {
       result: {},
       log_tail: [],
     });
+  });
+
+  it('POST /v1/jobs/external-validate and GET analysis-pack', () => {
+    api.externalValidate({ data_path: 'data/demo/ehr_data.csv' }).subscribe((j) => {
+      expect(j.kind).toBe('external_validate');
+    });
+    http.expectOne('/v1/jobs/external-validate').flush({
+      id: 'e1',
+      kind: 'external_validate',
+      status: 'queued',
+      message: '',
+      result: {},
+      log_tail: [],
+    });
+
+    api.analysisPack('data/demo/ehr_data.csv').subscribe((p) => expect(p.n_rows).toBe(10));
+    const req = http.expectOne((r) => r.url === '/v1/reports/analysis-pack');
+    expect(req.request.params.get('path')).toBe('data/demo/ehr_data.csv');
+    req.flush({ n_rows: 10, n_patients: 5 });
+  });
+
+  it('resultsZipUrl and methodsMdUrl accept run_id', () => {
+    expect(api.resultsZipUrl('run_a')).toContain('run_id=run_a');
+    expect(api.methodsMdUrl('run_a')).toContain('run_id=run_a');
   });
 
   it('GET /v1/jobs/:id', () => {
@@ -249,15 +289,6 @@ describe('ApiService (UI → backend contract)', () => {
     });
   });
 
-  it('GET /v1/reports/summary and URL helpers', () => {
-    api.reportsSummary().subscribe((r) => expect(r.files.length).toBe(1));
-    http.expectOne('/v1/reports/summary').flush({
-      files: [{ name: 'evaluation_report.json', bytes: 10, url: '/v1/reports/file/evaluation_report.json' }],
-    });
-    expect(api.reportFileUrl('x.png')).toBe('/v1/reports/file/x.png');
-    expect(api.resultsZipUrl()).toBe('/v1/reports/download.zip');
-  });
-
   it('GET schema/metrics/meta and POST predict', () => {
     api.schema().subscribe((s) => expect(s.feature_columns).toEqual(['a']));
     http.expectOne('/v1/model/schema').flush({
@@ -276,5 +307,43 @@ describe('ApiService (UI → backend contract)', () => {
     const req = http.expectOne('/v1/predict');
     expect(req.request.body).toEqual({ features: { a: 1 }, include_explanation: true });
     req.flush({ risk_probability: 0.5, risk_level: 'medium' });
+  });
+
+  it('DELETE dataset, run detail, promote, thresholds, fairness report', () => {
+    api.deleteDataset('data/uploads/x.csv').subscribe((r) => expect(r.deleted).toBeTrue());
+    http.expectOne((r) => r.url === '/v1/datasets' && r.method === 'DELETE').flush({ deleted: true, path: 'x' });
+
+    api.runDetail('run_a').subscribe((d) => expect(d.run_id).toBe('run_a'));
+    http.expectOne('/v1/runs/run_a').flush({ run_id: 'run_a', path: 'reports/runs/run_a', has_model: true });
+
+    api.promoteRun('run_a').subscribe((r) => expect(r.model_path).toContain('models'));
+    http.expectOne('/v1/runs/run_a/promote').flush({ run_id: 'run_a', model_path: 'models/x.joblib' });
+
+    api.thresholds().subscribe((t) => expect(t.present).toBeTrue());
+    http.expectOne('/v1/reports/thresholds').flush({ present: true, points: [] });
+
+    api.fairnessReport().subscribe((f) => expect(f.present).toBeTrue());
+    http.expectOne('/v1/reports/fairness').flush({ present: true, by_group: [] });
+
+    api.reportsSummary().subscribe((r) => expect(r.files.length).toBe(1));
+    http.expectOne('/v1/reports/summary').flush({
+      files: [{ name: 'evaluation_report.json', bytes: 10, url: '/v1/reports/file/evaluation_report.json' }],
+    });
+    expect(api.reportFileUrl('x.png')).toBe('/v1/reports/file/x.png');
+    expect(api.resultsZipUrl()).toBe('/v1/reports/download.zip');
+  });
+
+  it('covers analysisPackUrl and profile filter params', () => {
+    expect(api.analysisPackUrl('data/raw/x.csv')).toContain('path=data%2Fraw%2Fx.csv');
+    api.datasetProfile('data/raw/x.csv', { label: '1', patient_id: 'p1' }).subscribe();
+    const req = http.expectOne((r) => r.url === '/v1/datasets/profile');
+    expect(req.request.params.get('label')).toBe('1');
+    expect(req.request.params.get('patient_id')).toBe('p1');
+    req.flush({ path: 'x', n_rows: 1, n_columns: 1, columns: [], cohort_rows: [] });
+
+    api.importSql('select 1').subscribe();
+    const sqlReq = http.expectOne('/v1/datasets/from-sql');
+    expect(sqlReq.request.body.connection_url).toBeUndefined();
+    sqlReq.flush({ path: 'data/uploads/s.csv' });
   });
 });

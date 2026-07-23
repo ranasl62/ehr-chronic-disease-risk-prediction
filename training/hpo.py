@@ -98,6 +98,7 @@ def run_light_hpo(
     grid: list[dict[str, Any]] | None = None,
     promote_best: bool = False,
     max_trials: int = 6,
+    reports_dir: Path | None = None,
 ) -> dict[str, Any]:
     """
     Fit a small hyperparameter grid on the standard train/hold-out split.
@@ -197,8 +198,12 @@ def run_light_hpo(
         out["promoted"] = True
         out["promoted_params"] = best.get("params")
 
-    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    path = REPORTS_DIR / "hpo_report.json"
+    report_dir = Path(reports_dir) if reports_dir is not None else REPORTS_DIR
+    report_dir.mkdir(parents=True, exist_ok=True)
+    path = report_dir / "hpo_report.json"
     path.write_text(json.dumps(json_safe(out), indent=2), encoding="utf-8")
-    out["report_path"] = str(path.relative_to(PROJECT_ROOT))
+    try:
+        out["report_path"] = str(path.relative_to(PROJECT_ROOT))
+    except ValueError:
+        out["report_path"] = str(path)
     return out

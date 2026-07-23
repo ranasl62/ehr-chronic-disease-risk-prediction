@@ -1,19 +1,13 @@
 {
-  "data_path": "/app/data/demo/ehr_data.csv",
-  "format": "longitudinal",
+  "artifact": "/app/reports/runs/20260723T122625Z_logreg/model.pkl",
   "split_method": "patient_group",
   "n_rows": 10,
   "n_patients": 10,
-  "train_rows": 8,
-  "test_rows": 2,
   "patient_disjoint_train_test": true,
-  "data_quality_issues": [],
   "notes": [],
   "horizon_days": null,
   "index_strategy": "last_event",
   "feature_inclusive": true,
-  "timestamp_parse_ok": true,
-  "patients_with_valid_time": 10,
   "temporal_integrity": {
     "feature_events_after_index": 0,
     "feature_inclusive": true,
@@ -22,5 +16,8 @@
     "passed": true,
     "notes": [],
     "label_col": "label"
-  }
+  },
+  "warnings": [
+    "ICD/diagnosis-style feature columns detected (w7d_icd_unique_count, w30d_icd_unique_count, w180d_icd_unique_count). Codes finalized after discharge can leak same-admission or short-horizon outcomes (see JAMA Network Open 2025 label-leakage literature). Prefer excluding post-index codes."
+  ]
 }

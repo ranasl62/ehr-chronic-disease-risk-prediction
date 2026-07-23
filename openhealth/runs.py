@@ -41,15 +41,24 @@ def _read_json(path: Path) -> dict[str, Any] | None:
 
 
 def _run_summary(d: Path) -> dict[str, Any]:
+    from openhealth.trust_pack import trust_flags_from_dir
+
     meta = _read_json(d / "run_meta.json") or {}
     ev = _read_json(d / "evaluation_report.json") or {}
     metrics = ev.get("metrics") if isinstance(ev.get("metrics"), dict) else None
+    flags = trust_flags_from_dir(d)
     return {
         "run_id": d.name,
         "path": str(d.relative_to(PROJECT_ROOT)),
-        "has_model": (d / "model.pkl").is_file(),
-        "has_evaluation": (d / "evaluation_report.json").is_file(),
-        "has_manifest": (d / "training_manifest.json").is_file(),
+        "has_model": flags.get("has_model", (d / "model.pkl").is_file()),
+        "has_evaluation": flags.get("has_evaluation", (d / "evaluation_report.json").is_file()),
+        "has_manifest": flags.get("has_manifest", (d / "training_manifest.json").is_file()),
+        "has_leakage": bool(flags.get("has_leakage")),
+        "has_shap": bool(flags.get("has_shap")),
+        "has_calibration": bool(flags.get("has_calibration")),
+        "trust_complete": bool(flags.get("trust_complete")),
+        "leakage_passed": flags.get("leakage_passed"),
+        "trust": flags,
         "meta": meta,
         "metrics": metrics,
         "model_kind": meta.get("model_kind") or (ev.get("meta") or {}).get("model_kind"),
@@ -71,6 +80,8 @@ def list_runs(limit: int = 30) -> list[dict[str, Any]]:
 
 def get_run(run_id: str) -> dict[str, Any]:
     """Full run detail: meta, metrics, manifest excerpt, file list."""
+    from openhealth.trust_pack import read_trust_pack
+
     p = run_path(run_id)
     if not p.is_dir():
         raise FileNotFoundError(f"run not found: {run_id}")
@@ -84,6 +95,8 @@ def get_run(run_id: str) -> dict[str, Any]:
         "evaluation": _read_json(p / "evaluation_report.json"),
         "manifest": _read_json(p / "training_manifest.json"),
         "feature_importance": _read_json(p / "feature_importance.json"),
+        "trust_pack": read_trust_pack(p),
+        "leakage_audit": _read_json(p / "leakage_audit.json"),
         "files": files,
     }
 
@@ -96,15 +109,27 @@ def write_run_meta(run_id: str, meta: dict[str, Any]) -> Path:
 
 
 def promote_run(run_id: str) -> dict[str, Any]:
+    from openhealth.trust_pack import PROMOTE_EXTRA, write_trust_pack
+
     p = run_path(run_id)
     model = p / "model.pkl"
     if not model.is_file():
         raise FileNotFoundError(f"No model.pkl in run {run_id}")
     shutil.copy2(model, MODEL_PATH)
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     for name in ("evaluation_report.json", "feature_importance.json", "training_manifest.json"):
         src = p / name
         if src.is_file():
             shutil.copy2(src, REPORTS_DIR / name)
+    for name in PROMOTE_EXTRA:
+        src = p / name
+        if src.is_file():
+            shutil.copy2(src, REPORTS_DIR / name)
+    write_trust_pack(run_id, p)
+    # Refresh shared trust pack copy after rewrite
+    tp = p / "trust_pack.json"
+    if tp.is_file():
+        shutil.copy2(tp, REPORTS_DIR / "trust_pack.json")
     try:
         from openhealth.config_store import load_config, save_config
 

@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-07-22T05:38:18.744542+00:00",
+  "generated_at_utc": "2026-07-23T12:26:25.820753+00:00",
   "threshold": 0.5,
   "metrics": {
     "roc_auc": NaN,
@@ -14,7 +14,7 @@
   },
   "classification_report_text": "              precision    recall  f1-score   support\n\n           0       1.00      0.50      0.67         2\n           1       0.00      0.00      0.00         0\n\n    accuracy                           0.50         2\n   macro avg       0.50      0.25      0.33         2\nweighted avg       1.00      0.50      0.67         2\n",
   "meta": {
-    "model_path": "/app/reports/runs/20260722T053818Z_logreg/model.pkl",
+    "model_path": "/app/reports/runs/20260723T122625Z_logreg/model.pkl",
     "model_kind": "logreg",
     "calibrated": false,
     "feature_engineering": {
@@ -36,7 +36,7 @@
     },
     "training_manifest_path": "/app/reports/training_manifest.json",
     "training_manifest": {
-      "generated_at_utc": "2026-07-22T05:38:18.694993+00:00",
+      "generated_at_utc": "2026-07-23T12:26:25.792146+00:00",
       "data_sha256": "d7be825a5f58fb9aea610ded521799e510c2777754be68629a64b88db87688ae",
       "git_revision": "unknown",
       "split_method": "patient_group",

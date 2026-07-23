@@ -186,19 +186,25 @@ def run_train_job(rec: JobRecord, params: dict[str, Any]) -> None:
             "promoted": promote,
         },
     )
+    from openhealth.trust_pack import write_trust_pack
+
+    write_trust_pack(run_id, run_dir)
     if promote:
         shutil.copy2(model_out, MODEL_PATH)
         from openhealth.runs import promote_run
 
-        # already copied model; sync config active_run_id
+        # Sync shared reports + active_run_id (includes trust extras)
         try:
-            from openhealth.config_store import load_config, save_config
-
-            cfg = load_config()
-            cfg["active_run_id"] = run_id
-            save_config(cfg)
+            promote_run(run_id)
         except Exception:
-            pass
+            try:
+                from openhealth.config_store import load_config, save_config
+
+                cfg = load_config()
+                cfg["active_run_id"] = run_id
+                save_config(cfg)
+            except Exception:
+                pass
     try:
         from api.main import get_artifact
 
@@ -326,6 +332,8 @@ def run_leakage_audit_job(rec: JobRecord, params: dict[str, Any]) -> None:
     import json
     import sys
 
+    from openhealth.runs import ensure_run, run_path
+    from openhealth.trust_pack import mirror_to_shared, resolve_active_run_id, write_trust_pack
     from utils.json_safe import json_safe
 
     audit_path = PROJECT_ROOT / "scripts" / "leakage_audit.py"
@@ -336,10 +344,16 @@ def run_leakage_audit_job(rec: JobRecord, params: dict[str, Any]) -> None:
     sys.modules["leakage_audit_mod"] = mod
     spec.loader.exec_module(mod)
 
-    out_path = REPORTS_DIR / "leakage_audit.json"
+    run_id = resolve_active_run_id(params.get("run_id"))
+    artifact = Path(MODEL_PATH)
+    if run_id:
+        run_model = run_path(run_id) / "model.pkl"
+        if run_model.is_file():
+            artifact = run_model
+
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    if params.get("use_artifact") and Path(MODEL_PATH).is_file():
-        report = mod.audit_from_artifact(Path(MODEL_PATH))
+    if params.get("use_artifact") and artifact.is_file():
+        report = mod.audit_from_artifact(artifact)
     else:
         data_path = Path(params["data_path"])
         if not data_path.is_absolute():
@@ -358,8 +372,19 @@ def run_leakage_audit_job(rec: JobRecord, params: dict[str, Any]) -> None:
             index_time_col=params.get("index_time_col"),
             feature_inclusive=bool(params.get("feature_inclusive", True)),
         )
-    out_path.write_text(json.dumps(json_safe(report), indent=2), encoding="utf-8")
-    rec.result = {"report_path": str(out_path), "passed": _audit_passed(report)}
+    payload = json.dumps(json_safe(report), indent=2)
+    shared_out = REPORTS_DIR / "leakage_audit.json"
+    shared_out.write_text(payload, encoding="utf-8")
+    if run_id:
+        rd = ensure_run(run_id)
+        (rd / "leakage_audit.json").write_text(payload, encoding="utf-8")
+        write_trust_pack(run_id, rd)
+        mirror_to_shared(rd / "trust_pack.json", "trust_pack.json")
+    rec.result = {
+        "report_path": str(shared_out),
+        "passed": _audit_passed(report),
+        "run_id": run_id,
+    }
     rec.message = "leakage audit complete"
 
 
@@ -425,14 +450,27 @@ def run_shap_job(rec: JobRecord, params: dict[str, Any]) -> None:
     import joblib
 
     from explainability.shap_explainer import explain_model
+    from openhealth.runs import ensure_run, run_path
+    from openhealth.trust_pack import mirror_to_shared, resolve_active_run_id, write_trust_pack
     from training.reproduce_split import split_train_test_from_artifact
 
-    if not Path(MODEL_PATH).is_file():
+    run_id = resolve_active_run_id(params.get("run_id"))
+    model_path = Path(MODEL_PATH)
+    if run_id:
+        run_model = run_path(run_id) / "model.pkl"
+        if run_model.is_file():
+            model_path = run_model
+    if not model_path.is_file():
         raise FileNotFoundError("model.pkl missing — train first")
-    art = joblib.load(MODEL_PATH)
-    out = Path(params.get("out") or (REPORTS_DIR / "shap_summary.png"))
+    art = joblib.load(model_path)
+
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    shared_out = REPORTS_DIR / "shap_summary.png"
+    out = Path(params.get("out") or shared_out)
     if not out.is_absolute():
         out = PROJECT_ROOT / out
+    if run_id and params.get("out") is None:
+        out = ensure_run(run_id) / "shap_summary.png"
     out.parent.mkdir(parents=True, exist_ok=True)
     X_train, X_test, _, _, _, _ = split_train_test_from_artifact(art)
     fe = art.get("feature_engineering") or {}
@@ -443,11 +481,50 @@ def run_shap_job(rec: JobRecord, params: dict[str, Any]) -> None:
         plot_path=out,
         random_state=int(fe.get("random_state", 42)),
     )
+    if run_id:
+        # Mirror to shared workspace for checklist / ZIP backward compat
+        if out.resolve() != shared_out.resolve():
+            mirror_to_shared(out, "shap_summary.png")
+        write_trust_pack(run_id, ensure_run(run_id))
+        mirror_to_shared(ensure_run(run_id) / "trust_pack.json", "trust_pack.json")
+    elif out.resolve() != shared_out.resolve():
+        mirror_to_shared(out, "shap_summary.png")
     try:
         from api.main import get_artifact
 
         get_artifact.cache_clear()
     except Exception:
         pass
-    rec.result = {"shap_path": str(out)}
+    rec.result = {"shap_path": str(out), "run_id": run_id}
     rec.message = "shap summary written"
+
+
+def run_external_validate_job(rec: JobRecord, params: dict[str, Any]) -> None:
+    from openhealth.runs import ensure_run, run_path
+    from openhealth.trust_pack import mirror_to_shared, resolve_active_run_id, write_trust_pack
+    from training.external_validate import external_validate, write_external_validation_report
+
+    run_id = resolve_active_run_id(params.get("run_id"))
+    model_path = Path(MODEL_PATH)
+    if run_id:
+        rm = run_path(run_id) / "model.pkl"
+        if rm.is_file():
+            model_path = rm
+    data_path = Path(params["data_path"])
+    if not data_path.is_absolute():
+        data_path = PROJECT_ROOT / data_path
+    rec.append(f"external validate on {data_path.name} (run={run_id})")
+    report = external_validate(
+        artifact_path=model_path,
+        data_path=data_path,
+        data_format=params.get("data_format", "longitudinal"),
+        label_col=params.get("label_col"),
+    )
+    report["run_id"] = run_id
+    run_dir = ensure_run(run_id) if run_id else None
+    out = write_external_validation_report(report, run_dir=run_dir)
+    if run_id and run_dir is not None:
+        write_trust_pack(run_id, run_dir)
+        mirror_to_shared(run_dir / "trust_pack.json", "trust_pack.json")
+    rec.result = {"report_path": str(out), "metrics": report.get("metrics"), "run_id": run_id}
+    rec.message = "external validation complete"

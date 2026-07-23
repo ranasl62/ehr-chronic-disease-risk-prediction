@@ -24,13 +24,27 @@ This repo cannot replace **your** second dataset or site, but it supports strong
 PYTHONPATH=. python scripts/group_cv_report.py --format longitudinal --data data/demo/ehr_data.csv --model logreg
 ```
 
-## 3. True external validation (your action items)
+## 3. True external validation (API / UI)
+
+Freeze a trained run, then score a **second CSV** with the same feature contract:
+
+```bash
+# API
+curl -X POST http://127.0.0.1:8000/v1/jobs/external-validate \
+  -H 'Content-Type: application/json' \
+  -d '{"data_path":"data/demo/ehr_data.csv","data_format":"longitudinal","run_id":"<optional_run_id>"}'
+```
+
+Workbench: Results → open a run → **External validation** form → poll job → `reports/external_validation_report.json` (also copied into the run trust pack).
+
+Still required on your side:
 
 - Second **hospital**, **time window**, or **registry** extract in the **same feature contract** (`docs/data_sources_and_schema.md`).
 - Freeze **training_manifest** + **evaluation_report** per release; record data SHA-256.
-- Document inclusion/exclusion and index/horizon definitions before touching the external file (see [`mimic_lock_checklist.md`](mimic_lock_checklist.md) and [`data_sources_and_schema.md`](data_sources_and_schema.md)).
+- Document inclusion/exclusion and index/horizon definitions before touching the external file (see [`mimic_lock_checklist.md`](mimic_lock_checklist.md)).
 
 ## 4. API / UI visibility
 
 - **`GET /v1/model/metrics`** — reads `reports/evaluation_report.json` and reports whether **`data_sha256` matches** the loaded `model.pkl` manifest.
-- Angular **Results** / **Home** checklist surfaces the same metrics when the JSON exists.
+- **`GET /v1/reports/methods.md?run_id=`** and **`GET /v1/reports/download.zip?run_id=`** — run-scoped methods note and ZIP including the trust pack.
+- Angular **Results** trust checklist + **Home** workspace status surface leakage/SHAP when present.

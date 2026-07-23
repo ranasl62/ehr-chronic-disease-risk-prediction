@@ -93,7 +93,8 @@ Optional: `cp .env.example .env` (set `API_KEY`, ports). GPU / overrides: `cp do
 | **Live demo** | [ehr-risk-framework.larucare.com](https://ehr-risk-framework.larucare.com/) | — | — |
 | **Live API** | [ehr-api.larucare.com](https://ehr-api.larucare.com/) | — | — |
 
-**First loop:** Datasets (bundled teaching demos + health) → Train → Results / Analytics → Predict.
+**First loop:** Datasets (bundled teaching demos + health) → Train → Results / Analytics → Predict.  
+Full research sequence (trust pack, leakage, external validate, analysis pack, ZIP/methods, Analytics PNG export/print): [`docs/RESEARCH_WORKFLOW.md`](docs/RESEARCH_WORKFLOW.md).
 Teaching fixtures are `data/demo/ehr_data.csv` (default longitudinal Train path) and `data/demo/sample_ehr.csv`; legacy `data/raw/` references resolve as compatibility fallbacks.
 Demo CSVs only — no PHI. **Research and education only** — not for patient care.
 

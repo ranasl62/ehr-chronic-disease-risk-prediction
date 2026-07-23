@@ -123,7 +123,11 @@
           <tr><td>Calibration</td><td>Train with calibrate flag</td><td>Brier, ECE, calibration plot</td></tr>
           <tr><td>SHAP</td><td>Results → Generate SHAP</td><td>SHAP summary + explain on predict</td></tr>
           <tr><td>Fairness helpers</td><td>Results → Run fairness / <code>POST /v1/jobs/fairness</code></td><td>Group metrics (age bands / aligned CSV)</td></tr>
-          <tr><td>Analytics</td><td>Workbench Analytics</td><td>Cohort charts + model tables</td></tr>
+          <tr><td>Analytics</td><td>Workbench Analytics</td><td>Cohort charts + model tables; per-chart PNG export and print/PDF for appendix figures</td></tr>
+          <tr><td>Trust pack</td><td>Auto after train; bind jobs with <code>run_id</code></td><td><code>reports/runs/&lt;id&gt;/trust_pack.json</code></td></tr>
+          <tr><td>External validation</td><td>Results → External validate / <code>POST /v1/jobs/external-validate</code></td><td><code>external_validation_report.json</code></td></tr>
+          <tr><td>Analysis pack</td><td>Analytics KPIs + download / <code>GET /v1/reports/analysis-pack</code></td><td><code>analysis_pack.json</code></td></tr>
+          <tr><td>Methods + ZIP</td><td>Results download (optional <code>run_id</code>)</td><td><code>methods.md</code> + <code>download.zip</code></td></tr>
           <tr><td>Operating points</td><td>Results → Threshold table</td><td><code>reports/threshold_operating_points.json</code></td></tr>
         </tbody>
       </table>

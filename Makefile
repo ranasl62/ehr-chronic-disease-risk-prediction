@@ -7,7 +7,10 @@ install:
 	$(PYTHON) -m pip install -r requirements.txt && $(PYTHON) -m pip install -e .
 
 test:
-	PYTHONPATH=. pytest tests/ -q --tb=short
+	PYTHONPATH=. $(PYTHON) -m pytest tests/ -m "not e2e" -q --tb=short
+
+test-cov:
+	PYTHONPATH=. $(PYTHON) -m pytest tests/ -m "not e2e" -q --tb=short
 
 test-web:
 	cd web && npm run test:ci

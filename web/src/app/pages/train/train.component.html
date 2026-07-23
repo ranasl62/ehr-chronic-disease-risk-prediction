@@ -22,14 +22,28 @@
 
     @if (selectedTask(); as t) {
       <div class="task-hint">
+        @if (t.id === 'horizon_detection_30d') {
+          <p class="tag">Research detection (horizon)</p>
+        }
+        @if (t.id === 'teaching_leaky_contrast') {
+          <p class="tag warn">Teaching — expect leakage warnings</p>
+        }
         <p class="task-desc">{{ t.description || 'No description for this task.' }}</p>
         <p class="muted">
           Required columns:
           <code>{{ (t.required_columns || []).join(', ') || '—' }}</code>
-          @if (t.id === 'readmission_30d') {
-            <span> · Needs <code>index_time</code> (typically discharge) and binary <code>label</code>.</span>
+          @if (t.id === 'readmission_30d' || t.id === 'horizon_detection_30d') {
+            <span> · Needs <code>index_time</code> and binary <code>label</code>.</span>
           }
         </p>
+        <button type="button" class="btn" (click)="checkTaskHealth()">Check data health for this task</button>
+        @if (taskHealthBlockers().length) {
+          <ul class="blockers">
+            @for (b of taskHealthBlockers(); track b) {
+              <li>{{ b }}</li>
+            }
+          </ul>
+        }
       </div>
     }
 

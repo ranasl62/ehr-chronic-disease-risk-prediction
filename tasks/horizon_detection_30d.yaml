@@ -1,0 +1,35 @@
+# Research horizon detection: binary outcome within 30 days of index_time.
+# Same leakage-aware contract as readmission-style tasks. Not realtime alerting.
+task:
+  id: horizon_detection_30d
+  name: Horizon Outcome Detection (30d)
+  description: >
+    Research detection task — detect whether the labeled outcome occurs within 30 days
+    after index_time using only pre-index / at-index features. Batch case-finding for
+    methods work; not a clinical monitor or bedside alert.
+
+target:
+  column: label
+
+prediction:
+  horizon_days: 30
+  index_strategy: column
+  index_time_col: index_time
+  feature_inclusive: true
+
+features:
+  windows_days: [7, 30, 180]
+  window_days: 180
+
+data:
+  format: longitudinal
+  suggested_path: data/demo/ehr_data.csv
+
+training:
+  model_kind: logreg
+  calibrate: true
+  split_by_patient: true
+  temporal_split: false
+
+evaluation:
+  metrics: [roc_auc, pr_auc, brier, ece, precision, recall, f1]

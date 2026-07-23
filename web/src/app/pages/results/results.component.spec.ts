@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { ResultsComponent } from './results.component';
 import { ApiService } from '../../core/api.service';
 import { UiPrefsService } from '../../core/ui-prefs.service';
@@ -25,6 +25,8 @@ describe('ResultsComponent', () => {
       'reportFileUrl',
       'resultsZipUrl',
       'methodsMdUrl',
+      'externalValidate',
+      'leakageAudit',
     ]);
     api.reportsSummary.and.returnValue(
       of({
@@ -103,14 +105,34 @@ describe('ResultsComponent', () => {
         run_id: 'run_a',
         path: 'reports/runs/run_a',
         has_model: true,
+        has_leakage: true,
+        has_shap: false,
+        trust_complete: false,
+        leakage_passed: true,
+        trust: {
+          has_model: true,
+          has_evaluation: true,
+          has_leakage: true,
+          has_shap: false,
+          has_calibration: true,
+          leakage_passed: true,
+          trust_complete: false,
+        },
         model_kind: 'logreg',
         metrics: { roc_auc: 0.75 },
         meta: { kind: 'train' },
       })
     );
     api.reportFileUrl.and.callFake((n: string) => `/v1/reports/file/${n}`);
-    api.resultsZipUrl.and.returnValue('/v1/reports/download.zip');
-    api.methodsMdUrl.and.returnValue('/v1/reports/methods.md');
+    api.resultsZipUrl.and.callFake((runId?: string | null) =>
+      runId ? `/v1/reports/download.zip?run_id=${runId}` : '/v1/reports/download.zip'
+    );
+    api.methodsMdUrl.and.callFake((runId?: string | null) =>
+      runId ? `/v1/reports/methods.md?run_id=${runId}` : '/v1/reports/methods.md'
+    );
+    api.externalValidate.and.returnValue(of({ id: 'j3', kind: 'external_validate', status: 'queued', message: '', result: {}, log_tail: [] }));
+    api.shap.and.returnValue(of({ id: 'j1', kind: 'shap', status: 'queued', message: '', result: {}, log_tail: [] }));
+    api.leakageAudit.and.returnValue(of({ id: 'j2', kind: 'leakage_audit', status: 'queued', message: '', result: {}, log_tail: [] }));
 
     await TestBed.configureTestingModule({
       imports: [ResultsComponent],
@@ -253,6 +275,39 @@ describe('ResultsComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Download methods.md');
   }));
 
+  it('shows trust checklist and passes run_id to SHAP/leakage', fakeAsync(() => {
+    cmp.showCharts = false;
+    fixture.detectChanges();
+    tick(20);
+    cmp.openRun('run_a');
+    tick(20);
+    fixture.detectChanges();
+    const items = cmp.trustChecklist(cmp.selectedRun());
+    expect(items.some((i) => i.label === 'Leakage audit' && i.ok === true)).toBeTrue();
+    expect(fixture.nativeElement.textContent).toContain('Trust pack');
+    expect(cmp.zipUrl()).toContain('run_id=run_a');
+    expect(cmp.methodsMdUrl()).toContain('run_id=run_a');
+    cmp.runShap();
+    expect(api.shap).toHaveBeenCalledWith({ run_id: 'run_a' });
+    cmp.runLeakageForSelected();
+    expect(api.leakageAudit).toHaveBeenCalled();
+    const leakArg = api.leakageAudit.calls.mostRecent().args[0] as Record<string, unknown>;
+    expect(leakArg['run_id']).toBe('run_a');
+  }));
+
+  it('posts external validate job for selected run', fakeAsync(() => {
+    cmp.showCharts = false;
+    fixture.detectChanges();
+    tick(20);
+    cmp.openRun('run_a');
+    tick(20);
+    cmp.extValPath = 'data/demo/ehr_data.csv';
+    cmp.runExternalValidate();
+    expect(api.externalValidate).toHaveBeenCalledWith(
+      jasmine.objectContaining({ data_path: 'data/demo/ehr_data.csv', run_id: 'run_a' })
+    );
+  }));
+
   it('filters metrics by name', fakeAsync(() => {
     cmp.showCharts = false;
     fixture.detectChanges();
@@ -365,5 +420,235 @@ describe('ResultsComponent', () => {
     expect(cmp.pagedRuns().every((r) => r.model_kind === 'logreg')).toBeTrue();
     cmp.goRunPage(99);
     expect(cmp.runPage).toBe(2);
+  }));
+
+  it('renders charts when enabled', fakeAsync(() => {
+    for (const name of ['compare', 'metric', 'importance', 'threshold', 'fairness']) {
+      const c = document.createElement('canvas');
+      c.setAttribute('data-chart', name);
+      fixture.nativeElement.appendChild(c);
+    }
+    cmp.showCharts = true;
+    fixture.detectChanges();
+    tick(50);
+    expect(cmp.chartsReady()).toBeTrue();
+    cmp.onShowCharts(false);
+    tick(20);
+    fixture.destroy();
+  }));
+
+  it('promoteSelected loadThresholds runFairness and compare runs', fakeAsync(() => {
+    cmp.showCharts = false;
+    api.promoteRun.and.returnValue(of({ run_id: 'run_a', model_path: 'models/x.joblib' }));
+    api.job.and.returnValue(
+      of({ id: 'f1', kind: 'fairness', status: 'succeeded', message: '', result: {}, log_tail: [] })
+    );
+    api.fairness.and.returnValue(
+      of({ id: 'f1', kind: 'fairness', status: 'queued', message: '', result: {}, log_tail: [] })
+    );
+    fixture.detectChanges();
+    tick(20);
+    cmp.openRun('run_a');
+    tick(20);
+    cmp.promoteSelected();
+    expect(api.promoteRun).toHaveBeenCalledWith('run_a');
+    tick(20);
+
+    cmp.toggleCompareRun('run_a', true);
+    expect(cmp.runCompareRows.length).toBe(1);
+    cmp.toggleCompareRun('run_a', false);
+    expect(cmp.runCompareRows.length).toBe(0);
+
+    cmp.loadThresholds();
+    expect(api.thresholds).toHaveBeenCalled();
+    tick(20);
+
+    cmp.runFairness();
+    tick(2000);
+    expect(api.fairness).toHaveBeenCalled();
+  }));
+
+  it('handles reload and job errors', fakeAsync(() => {
+    cmp.showCharts = false;
+    fixture.detectChanges();
+    tick(20);
+    api.reportsSummary.and.returnValue(throwError(() => ({ status: 401 })));
+    cmp.reload();
+    tick(20);
+    expect(cmp.error()).toContain('401');
+
+    api.runDetail.and.returnValue(throwError(() => ({ error: { detail: 'missing run' } })));
+    cmp.openRun('bad');
+    expect(cmp.error()).toBe('missing run');
+
+    api.promoteRun.and.returnValue(throwError(() => ({ error: { detail: { message: 'deny' } } })));
+    cmp.selectedRun.set({
+      run_id: 'run_a',
+      path: 'x',
+      has_model: true,
+      trust: {},
+    } as never);
+    cmp.promoteSelected();
+    expect(cmp.error()).toBe('deny');
+
+    api.shap.and.returnValue(throwError(() => ({ error: { detail: ['a', 'b'] } })));
+    cmp.runShap();
+    expect(cmp.error()).toContain('a');
+
+    api.thresholds.and.returnValue(throwError(() => ({ message: 'thr fail' })));
+    cmp.loadThresholds();
+    expect(cmp.error()).toBe('thr fail');
+  }));
+
+  it('covers helpers setFigFilter trustChecklist and formatting', fakeAsync(() => {
+    cmp.showCharts = false;
+    fixture.detectChanges();
+    tick(20);
+    cmp.setFigFilter('shap');
+    expect(cmp.figFilter).toBe('shap');
+    expect(cmp.trustChecklist(null)).toEqual([]);
+
+    const run = {
+      run_id: 'r1',
+      path: 'p',
+      has_model: true,
+      has_evaluation: true,
+      has_manifest: true,
+      has_leakage: false,
+      metrics: { roc_auc: null },
+      meta: { note: null, nested: { a: 1 } },
+    } as never;
+    expect(cmp.runStatusLabels(run)).toContain('manifest');
+    const priv = cmp as unknown as { runSearchText(r: unknown): string };
+    expect(priv.runSearchText(run)).toContain('r1');
+
+    const fmt = cmp as unknown as {
+      formatParamValue(v: unknown): string;
+      flattenAudit(o: Record<string, unknown>): unknown[];
+      thresholdChartPoints(): unknown[];
+    };
+    expect(fmt.formatParamValue(true)).toBe('true');
+    expect(fmt.formatParamValue(null)).toBe('n/a');
+    expect(fmt.formatParamValue({ x: 1 })).toContain('x');
+    expect(fmt.flattenAudit({ a: { b: 1 }, c: [1, 2] }).length).toBeGreaterThan(0);
+
+    api.reportsSummary.and.returnValue(
+      of({
+        files: [],
+        thresholds: {
+          decision_curve: {
+            points: [{ threshold: 0.2, net_benefit: 0.05 }, { threshold: 0.9, net_benefit: 0.01 }],
+          },
+        },
+      })
+    );
+    fixture = TestBed.createComponent(ResultsComponent);
+    cmp = fixture.componentInstance;
+    cmp.showCharts = false;
+    fixture.detectChanges();
+    tick(20);
+    expect(cmp.hasThresholdChartData()).toBeTrue();
+
+    cmp.onPageSize(50);
+    expect(TestBed.inject(UiPrefsService).prefs().table_page_size).toBe(50);
+
+    cmp.selectedRun.set(null);
+    cmp.promoteSelected();
+    expect(api.promoteRun).not.toHaveBeenCalled();
+
+    api.shap.and.returnValue(
+      of({ id: 'j9', kind: 'shap', status: 'queued', message: '', result: {}, log_tail: [] })
+    );
+    api.job.and.returnValue(throwError(() => ({ message: 'poll err' })));
+    cmp.runShap();
+    tick(2000);
+    expect(cmp.error()).toContain('poll err');
+  }));
+
+  it('clears shap fig filter and handles empty summary helpers', fakeAsync(() => {
+    cmp.showCharts = false;
+    api.reportsSummary.and.returnValue(
+      of({
+        metrics: {},
+        files: [{ name: 'calibration_holdout.png', bytes: 1, url: '/v1/reports/file/c.png' }],
+      })
+    );
+    fixture = TestBed.createComponent(ResultsComponent);
+    cmp = fixture.componentInstance;
+    cmp.showCharts = false;
+    fixture.detectChanges();
+    tick(20);
+    cmp.figFilter = 'shap';
+    cmp.reload();
+    tick(20);
+    expect(cmp.figFilter).toBe('');
+
+    expect(cmp.formatParams(null)).toEqual([]);
+    const priv = cmp as unknown as { thresholdChartPoints(): unknown[] };
+    cmp.thresholds.set({
+      decision_curve: { points: [{ threshold: Number.NaN, net_benefit: 1 }] },
+    });
+    expect(priv.thresholdChartPoints().length).toBe(0);
+
+    cmp.summary.set(null);
+    expect(cmp.filteredFigs()).toEqual([]);
+
+    api.runs.and.returnValue(throwError(() => new Error('runs fail')));
+    api.fairnessReport.and.returnValue(throwError(() => new Error('fairness fail')));
+    cmp.reload();
+    tick(20);
+    fixture.destroy();
+  }));
+
+  it('renders decision-curve chart with net benefit only', fakeAsync(() => {
+    api.reportsSummary.and.returnValue(
+      of({
+        metrics: {},
+        files: [],
+        thresholds: {
+          decision_curve: {
+            points: [{ threshold: 0.1, net_benefit: 0.02 }, { threshold: 0.5, net_benefit: 0.01 }],
+          },
+        },
+      })
+    );
+    fixture = TestBed.createComponent(ResultsComponent);
+    cmp = fixture.componentInstance;
+    const c = document.createElement('canvas');
+    c.setAttribute('data-chart', 'threshold');
+    fixture.nativeElement.appendChild(c);
+    cmp.showCharts = true;
+    fixture.detectChanges();
+    tick(50);
+    expect(cmp.chartsReady()).toBeTrue();
+    fixture.destroy();
+  }));
+
+  it('covers chart helper and destroy paths', fakeAsync(() => {
+    cmp.showCharts = false;
+    fixture.detectChanges();
+    tick(20);
+    const priv = cmp as unknown as {
+      canvas(ref: unknown, name: string): HTMLCanvasElement | undefined;
+      bar(el: HTMLCanvasElement | undefined, cfg: object): void;
+      thresholdChartPoints(): unknown[];
+    };
+    const c = document.createElement('canvas');
+    c.setAttribute('data-chart', 'compare');
+    fixture.nativeElement.appendChild(c);
+    priv.bar(undefined, { type: 'bar', data: { labels: [], datasets: [] } });
+    priv.bar(c, { type: 'bar', data: { labels: ['a'], datasets: [{ data: [1] }] } });
+    priv.bar(c, { type: 'bar', data: { labels: ['b'], datasets: [{ data: [2] }] } });
+    expect(priv.canvas(undefined, 'compare')).toBeTruthy();
+    cmp.summary.set({ files: [] });
+    cmp.thresholds.set(null);
+    expect(priv.thresholdChartPoints()).toEqual([]);
+    fixture.destroy();
+  }));
+
+  it('clears pending redraw timer on destroy', fakeAsync(() => {
+    cmp.showCharts = true;
+    fixture.detectChanges();
+    fixture.destroy();
   }));
 });

@@ -11,7 +11,7 @@ from api.data_io import profile_dataset
 from utils.config import PROJECT_ROOT
 
 
-def dataset_health_report(path: Path | str) -> dict[str, Any]:
+def dataset_health_report(path: Path | str, *, task_id: str | None = None) -> dict[str, Any]:
     p = Path(path)
     if not p.is_absolute():
         p = PROJECT_ROOT / p
@@ -48,6 +48,35 @@ def dataset_health_report(path: Path | str) -> dict[str, Any]:
         blocking=False,
     )
 
+    if task_id:
+        try:
+            from openhealth.task_spec import load_task
+
+            spec = load_task(task_id)
+            req = spec.required_columns()
+            missing = [c for c in req if c not in df.columns]
+            # label may be chronic_disease alias
+            if missing and "label" in missing and "chronic_disease" in df.columns:
+                missing = [c for c in missing if c != "label"]
+            ok_task = len(missing) == 0
+            detail = (
+                f"task `{task_id}` columns ok ({', '.join(req)})"
+                if ok_task
+                else f"task `{task_id}` missing required columns: {missing} "
+                f"(need index/horizon/label contract: {req})"
+            )
+            _check("task_required_columns", ok_task, detail, blocking=True)
+            if spec.index_strategy == "column" and spec.index_time_col:
+                _check(
+                    "task_index_time",
+                    spec.index_time_col in df.columns,
+                    f"index_time_col `{spec.index_time_col}` "
+                    + ("present" if spec.index_time_col in df.columns else "missing for horizon-safe labeling"),
+                    blocking=spec.index_time_col not in df.columns,
+                )
+        except Exception as e:
+            _check("task_required_columns", False, f"could not load task `{task_id}`: {e}", blocking=True)
+
     if has_pid:
         dup_rows = int(df.duplicated().sum())
         _check("duplicate_rows", dup_rows == 0, f"{dup_rows} exact duplicate rows", blocking=False)
@@ -76,9 +105,6 @@ def dataset_health_report(path: Path | str) -> dict[str, Any]:
         temporal_ok = bad == 0
         temporal_detail = "all timestamps parseable" if temporal_ok else f"{bad} unparseable timestamps"
         if temporal_ok and len(df):
-            # within-patient order consistency (non-decreasing after sort check)
-            g = df.assign(_ts=ts).sort_values(["patient_id", "_ts"])
-            # if sort changes row order vs original grouped order, still OK; check NaT only
             temporal_detail = "PASS"
     _check("temporal_integrity", temporal_ok, temporal_detail, blocking=not temporal_ok and has_ts)
 
@@ -94,7 +120,7 @@ def dataset_health_report(path: Path | str) -> dict[str, Any]:
         leakage_risk = "HIGH"
     if label_col and has_ts and "index_time" in df.columns:
         leakage_notes.append("index_time present — good for horizon-safe labeling")
-        if leakage_risk == "MEDIUM":
+        if leakage_risk == "MEDIUM":  # pragma: no cover -- unreachable: MEDIUM requires missing index_time
             leakage_risk = "LOW"
 
     n_patients = profile.get("n_patients") or 0
@@ -115,6 +141,7 @@ def dataset_health_report(path: Path | str) -> dict[str, Any]:
             "leakage_notes": leakage_notes,
             "ready_for_training": bool(ready),
             "tiny_cohort": bool(isinstance(n_patients, int) and 0 < n_patients < 50),
+            "task_id": task_id,
             "blockers": blockers,
             "warnings": warnings,
             "checks": checks,

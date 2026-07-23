@@ -1,0 +1,34 @@
+{
+  "kind": "analysis_pack",
+  "path": "/app/data/raw/paper_synthetic_cohort.csv",
+  "n_rows": 16577,
+  "n_patients": 3000,
+  "n_columns": 13,
+  "label_column": "label",
+  "label_prevalence": 0.301,
+  "missingness": {
+    "patient_id": 0.0,
+    "timestamp": 0.0,
+    "index_time": 0.0,
+    "icd_code": 0.0,
+    "lab_value": 0.0,
+    "vital_signs": 0.0,
+    "glucose": 0.0,
+    "blood_pressure": 0.0,
+    "cholesterol": 0.0,
+    "age": 0.0,
+    "sex": 0.0,
+    "age_band": 0.0,
+    "label": 0.0
+  },
+  "time_span": "2019-02-01 00:00:00 \u2192 2022-06-04 00:00:00",
+  "subgroup_counts": {
+    "age_band": {
+      "41-60": 6604,
+      "61-80": 6380,
+      "<=40": 3593,
+      "81+": 0
+    }
+  },
+  "disclaimer": "Descriptive cohort summary for research \u2014 not a clinical dashboard."
+}

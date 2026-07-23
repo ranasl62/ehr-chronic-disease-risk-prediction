@@ -23,6 +23,7 @@ from api.jobs import (
     get_job,
     list_recent_jobs,
     run_compare_job,
+    run_external_validate_job,
     run_hpo_job,
     run_leakage_audit_job,
     run_shap_job,
@@ -95,6 +96,9 @@ _REPORT_ALLOWLIST = {
     "fairness_report.json",
     "hpo_report.json",
     "threshold_operating_points.json",
+    "trust_pack.json",
+    "external_validation_report.json",
+    "analysis_pack.json",
 }
 
 
@@ -148,6 +152,18 @@ class LeakageJobBody(BaseModel):
     index_strategy: Literal["last_event", "before_last", "column"] = "last_event"
     index_time_col: str | None = None
     feature_inclusive: bool = True
+    run_id: str | None = None
+
+
+class ShapJobBody(BaseModel):
+    run_id: str | None = None
+
+
+class ExternalValidateJobBody(BaseModel):
+    data_path: str
+    data_format: Literal["longitudinal", "tabular"] = "longitudinal"
+    run_id: str | None = None
+    label_col: str | None = None
 
 
 class HpoJobBody(BaseModel):
@@ -269,6 +285,12 @@ def list_datasets(
                 )
     UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
     for p in sorted(UPLOADS_DIR.glob("*.csv")):
+        exists = p.is_file()
+        try:
+            nbytes = p.stat().st_size if exists else 0
+        except OSError:
+            exists = False
+            nbytes = 0
         out.append(
             {
                 "id": f"upload:{p.name}",
@@ -278,8 +300,8 @@ def list_datasets(
                 "bundled": False,
                 "source_type": "byo",
                 "category": "user",
-                "exists": True,
-                "bytes": p.stat().st_size,
+                "exists": exists,
+                "bytes": nbytes,
             }
         )
     return {
@@ -310,11 +332,11 @@ def get_prediction_task(task_id: str, _: bool = AuthDep):
 
 
 @router.get("/datasets/health")
-def dataset_health(path: str, _: bool = AuthDep):
+def dataset_health(path: str, task_id: str | None = None, _: bool = AuthDep):
     from openhealth.health import dataset_health_report
 
     try:
-        return json_safe(dataset_health_report(_resolve_under_project(path)))
+        return json_safe(dataset_health_report(_resolve_under_project(path), task_id=task_id))
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
     except Exception as e:
@@ -546,12 +568,51 @@ def start_leakage(body: LeakageJobBody, _: bool = AuthDep):
 
 
 @router.post("/jobs/shap")
-def start_shap(_: bool = AuthDep):
+def start_shap(body: ShapJobBody | None = None, _: bool = AuthDep):
+    params = (body or ShapJobBody()).model_dump()
     try:
-        rec = submit_job("shap", lambda r: run_shap_job(r, {}))
+        rec = submit_job("shap", lambda r: run_shap_job(r, params))
     except RuntimeError as e:
         raise HTTPException(status_code=409, detail=str(e)) from e
     return _job_public(rec)
+
+
+@router.post("/jobs/external-validate")
+def start_external_validate(body: ExternalValidateJobBody, _: bool = AuthDep):
+    path = _resolve_under_project(str(resolve_training_data_path(body.data_path)))
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail=f"data not found: {body.data_path}")
+    params = body.model_dump()
+    params["data_path"] = str(path)
+    try:
+        rec = submit_job("external_validate", lambda r: run_external_validate_job(r, params))
+    except RuntimeError as e:
+        raise HTTPException(status_code=409, detail=str(e)) from e
+    return _job_public(rec)
+
+
+@router.get("/reports/analysis-pack")
+def reports_analysis_pack(path: str, run_id: str | None = None, _: bool = AuthDep):
+    from openhealth.analysis_pack import build_analysis_pack, write_analysis_pack
+    from openhealth.runs import ensure_run
+    from openhealth.trust_pack import mirror_to_shared, resolve_active_run_id, write_trust_pack
+
+    try:
+        resolved = _resolve_under_project(path)
+        pack = build_analysis_pack(resolved)
+        rid = resolve_active_run_id(run_id)
+        run_dir = ensure_run(rid) if rid else None
+        write_analysis_pack(pack, run_dir=run_dir)
+        if rid and run_dir is not None:
+            write_trust_pack(rid, run_dir)
+            mirror_to_shared(run_dir / "trust_pack.json", "trust_pack.json")
+        return json_safe(pack)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.post("/jobs/hpo")
@@ -681,19 +742,28 @@ def reports_summary(_: bool = AuthDep):
 
 
 @router.get("/reports/download.zip")
-def reports_download_zip(_: bool = AuthDep):
-    data = build_results_zip()
+def reports_download_zip(run_id: str | None = None, _: bool = AuthDep):
+    try:
+        data = build_results_zip(run_id=run_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    fname = f"ehr_risk_results_{run_id}.zip" if run_id else "ehr_risk_results_pack.zip"
     return Response(
         content=data,
         media_type="application/zip",
-        headers={"Content-Disposition": 'attachment; filename="ehr_risk_results_pack.zip"'},
+        headers={"Content-Disposition": f'attachment; filename="{fname}"'},
     )
 
 
 @router.get("/reports/methods.md")
-def reports_methods_md(_: bool = AuthDep):
+def reports_methods_md(run_id: str | None = None, _: bool = AuthDep):
     """Short Markdown methods note from active run reports (research honesty tone)."""
-    text = build_methods_markdown()
+    try:
+        text = build_methods_markdown(run_id=run_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
     return Response(
         content=text,
         media_type="text/markdown; charset=utf-8",

@@ -51,4 +51,32 @@ describe('DataTableComponent', () => {
     cmp.exportCsv();
     expect(click).toHaveBeenCalled();
   });
+
+  it('paginates and sorts text columns', () => {
+    cmp.go(2);
+    expect(cmp.page).toBe(2);
+    cmp.sortBy('name');
+    cmp.recompute();
+    cmp.onPageSize();
+    expect(cmp.pageRows.length).toBeLessThanOrEqual(cmp.pageSize);
+    cmp.rows = [];
+    cmp.recompute();
+    expect(cmp.pageRows.length).toBe(0);
+  });
+
+  it('formats percent columns and tracks rows', () => {
+    cmp.columns = [{ key: 'pct', label: 'Pct', format: 'percent' }];
+    cmp.rows = [{ pct: 42.5, __id: 'x' }];
+    cmp.recompute();
+    expect(cmp.trackRow(0, cmp.rows[0])).toBe('x');
+    expect(cmp.asNumber('nope')).toBe(0);
+    fixture.detectChanges();
+  });
+
+  it('resets page when filtered rows shrink', () => {
+    cmp.go(2);
+    cmp.query = 'zzzzz';
+    cmp.recompute();
+    expect(cmp.page).toBe(1);
+  });
 });

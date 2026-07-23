@@ -14,6 +14,7 @@ import { FormsModule } from '@angular/forms';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
 import {
   ApiService,
+  AnalysisPack,
   DatasetInfo,
   DatasetProfile,
   ReportsSummary,
@@ -42,6 +43,8 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('labelChart') labelChartRef?: ElementRef<HTMLCanvasElement>;
   @ViewChild('ageChart') ageChartRef?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('sexChart') sexChartRef?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('prevalenceChart') prevalenceChartRef?: ElementRef<HTMLCanvasElement>;
   @ViewChild('missChart') missChartRef?: ElementRef<HTMLCanvasElement>;
   @ViewChild('numericChart') numericChartRef?: ElementRef<HTMLCanvasElement>;
   @ViewChild('metricChart') metricChartRef?: ElementRef<HTMLCanvasElement>;
@@ -68,6 +71,7 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
     { key: 'glucose_mean', label: 'Glucose μ', numeric: true, format: 'number' },
   ];
   profile = signal<DatasetProfile | null>(null);
+  analysisPack = signal<AnalysisPack | null>(null);
   status = signal<WorkspaceStatus | null>(null);
   reports = signal<ReportsSummary | null>(null);
   error = signal<string | null>(null);
@@ -77,6 +81,7 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
   missingRows: Record<string, unknown>[] = [];
   labelRows: Record<string, unknown>[] = [];
   ageRows: Record<string, unknown>[] = [];
+  sexRows: Record<string, unknown>[] = [];
   importanceRows: Record<string, unknown>[] = [];
   compareRows: Record<string, unknown>[] = [];
   columnRows: Record<string, unknown>[] = [];
@@ -97,6 +102,10 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
   ];
   ageCols: DataTableColumn[] = [
     { key: 'band', label: 'Age band' },
+    { key: 'count', label: 'Count', numeric: true, format: 'number', digits: '1.0-0' },
+  ];
+  sexCols: DataTableColumn[] = [
+    { key: 'sex', label: 'Sex' },
     { key: 'count', label: 'Count', numeric: true, format: 'number', digits: '1.0-0' },
   ];
   importanceCols: DataTableColumn[] = [
@@ -184,6 +193,56 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.scheduleRedraw();
   }
 
+  analysisPackDownloadUrl(): string {
+    return this.api.analysisPackUrl(this.path || 'data/demo/ehr_data.csv');
+  }
+
+  formatPct(v: number | null | undefined): string {
+    if (v == null || !Number.isFinite(Number(v))) return '—';
+    return `${(Number(v) * 100).toFixed(1)}%`;
+  }
+
+  exportChartPng(chartName: string, fileBase: string): void {
+    const el = this.canvas(undefined, chartName);
+    if (!el) return;
+    const chart = Chart.getChart(el);
+    const href = chart ? chart.toBase64Image('image/png', 1) : el.toDataURL('image/png');
+    this.downloadDataUrl(href, `${fileBase}.png`);
+  }
+
+  exportAllChartsPng(): void {
+    const names: Array<[string, string]> = [
+      ['label', 'label_distribution'],
+      ['age', 'age_bands'],
+      ['sex', 'sex_distribution'],
+      ['prevalence', 'label_prevalence'],
+      ['miss', 'missingness'],
+      ['numeric', 'numeric_means'],
+      ['metric', 'holdout_metrics'],
+      ['importance', 'feature_importance'],
+      ['compare', 'model_comparison'],
+    ];
+    for (const [name, file] of names) {
+      const el = this.canvas(undefined, name);
+      if (!el || !Chart.getChart(el)) continue;
+      this.exportChartPng(name, file);
+    }
+  }
+
+  printReport(): void {
+    if (typeof window !== 'undefined') window.print();
+  }
+
+  private downloadDataUrl(href: string, filename: string): void {
+    const a = document.createElement('a');
+    a.href = href;
+    a.download = filename;
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
   load(): void {
     if (!this.path?.trim()) {
       this.error.set('Select a dataset to load analytics.');
@@ -213,6 +272,10 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.scheduleRedraw();
       },
       error: (e) => this.error.set(e?.error?.detail || e.message),
+    });
+    this.api.analysisPack(this.path).subscribe({
+      next: (pack) => this.analysisPack.set(pack),
+      error: () => this.analysisPack.set(null),
     });
     this.api.workspaceStatus().subscribe({
       next: (s) => {
@@ -287,6 +350,13 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.labelRows = Object.entries(labels).map(([label, count]) => ({ label, count }));
     const ages = p.age_band_counts || {};
     this.ageRows = Object.entries(ages).map(([band, count]) => ({ band, count }));
+    const sexCounts: Record<string, number> = {};
+    for (const row of p.cohort_rows || []) {
+      const sex = row.sex;
+      const key = sex == null || sex === '' ? 'unknown' : String(sex);
+      sexCounts[key] = (sexCounts[key] || 0) + 1;
+    }
+    this.sexRows = Object.entries(sexCounts).map(([sex, count]) => ({ sex, count }));
     this.columnRows = (p.columns || []).map((name, index) => ({ name, index: index + 1 }));
   }
 
@@ -383,6 +453,47 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
           options: {
             plugins: { title: { display: true, text: 'Age bands' } },
             scales: { y: { beginAtZero: true } },
+          },
+        });
+      }
+    }
+
+    if (this.prefs.show_sex_chart && this.sexRows.length) {
+      this.bar(this.canvas(this.sexChartRef, 'sex'), {
+        type: 'doughnut',
+        data: {
+          labels: this.sexRows.map((r) => String(r['sex'])),
+          datasets: [
+            {
+              data: this.sexRows.map((r) => Number(r['count'])),
+              backgroundColor: colors,
+            },
+          ],
+        },
+        options: { plugins: { title: { display: true, text: 'Sex distribution (cohort)' } } },
+      });
+    }
+
+    if (this.prefs.show_prevalence_chart) {
+      const labels = p.label_counts || {};
+      const keys = Object.keys(labels);
+      const total = keys.reduce((s, k) => s + Number(labels[k] || 0), 0);
+      if (keys.length && total > 0) {
+        this.bar(this.canvas(this.prevalenceChartRef, 'prevalence'), {
+          type: 'bar',
+          data: {
+            labels: keys,
+            datasets: [
+              {
+                label: 'Share of rows',
+                data: keys.map((k) => Number(labels[k]) / total),
+                backgroundColor: colors[1],
+              },
+            ],
+          },
+          options: {
+            plugins: { title: { display: true, text: 'Label prevalence (share)' } },
+            scales: { y: { beginAtZero: true, max: 1 } },
           },
         });
       }

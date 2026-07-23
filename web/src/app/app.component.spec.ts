@@ -25,4 +25,12 @@ describe('AppComponent', () => {
     expect(el.querySelector('.brand-text')?.textContent).toContain('EHR Risk Workbench');
     expect(el.textContent).toContain('research and education');
   });
+
+  it('dismisses auth banner', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const cmp = fixture.componentInstance;
+    spyOn(cmp.auth, 'clear');
+    cmp.dismissAuth();
+    expect(cmp.auth.clear).toHaveBeenCalled();
+  });
 });
