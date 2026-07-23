@@ -18,7 +18,15 @@ module.exports = function (config) {
     coverageReporter: {
       dir: require('path').join(__dirname, './coverage/web'),
       subdir: '.',
-      reporters: [{ type: 'html' }, { type: 'text-summary' }],
+      reporters: [{ type: 'html' }, { type: 'text-summary' }, { type: 'json-summary', file: 'coverage-summary.json' }],
+      check: {
+        global: {
+          statements: 100,
+          lines: 100,
+          branches: 79,
+          functions: 100,
+        },
+      },
     },
     reporters: ['progress', 'kjhtml'],
     browsers: ['ChromeHeadless'],

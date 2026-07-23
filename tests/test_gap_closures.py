@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import time
 from pathlib import Path
 
@@ -106,7 +107,7 @@ def test_hpo_job_queues(client, wait_jobs_idle):
                 break
             time.sleep(0.4)
         assert st["status"] in ("succeeded", "failed")
-        if st["status"] == "succeeded":
+        if st["status"] == "succeeded" and os.access(REPORTS_DIR, os.W_OK):
             assert (REPORTS_DIR / "hpo_report.json").is_file()
 
 
@@ -116,7 +117,7 @@ def test_jobs_list_endpoint(client):
     assert "jobs" in r.json()
 
 
-def test_light_hpo_module_runs():
+def test_light_hpo_module_runs(tmp_path):
     from training.hpo import run_light_hpo
 
     data = PROJECT_ROOT / "data" / "raw" / "ehr_data.csv"
@@ -129,7 +130,8 @@ def test_light_hpo_module_runs():
         windows_days=(7, 30, 180),
         max_trials=2,
         promote_best=False,
+        reports_dir=tmp_path,
     )
     assert out["n_trials"] >= 1
     assert out["best"] is not None
-    assert Path(PROJECT_ROOT / out["report_path"]).is_file()
+    assert (tmp_path / "hpo_report.json").is_file()

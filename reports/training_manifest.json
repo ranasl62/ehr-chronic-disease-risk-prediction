@@ -1,9 +1,9 @@
 {
-  "generated_at_utc": "2026-07-22T05:38:18.694993+00:00",
+  "generated_at_utc": "2026-07-23T12:26:25.792146+00:00",
   "data_path": "/app/data/demo/ehr_data.csv",
   "data_sha256": "d7be825a5f58fb9aea610ded521799e510c2777754be68629a64b88db87688ae",
   "data_bytes": 1184,
-  "model_path": "/app/reports/runs/20260722T053818Z_logreg/model.pkl",
+  "model_path": "/app/reports/runs/20260723T122625Z_logreg/model.pkl",
   "model_kind": "logreg",
   "calibrated": false,
   "split_method": "patient_group",

@@ -1,0 +1,59 @@
+{
+  "run_id": "20260723T122625Z_logreg",
+  "updated_at": "2026-07-23T12:26:26.313438+00:00",
+  "data_sha256": "d7be825a5f58fb9aea610ded521799e510c2777754be68629a64b88db87688ae",
+  "artifacts": {
+    "model.pkl": {
+      "present": true,
+      "bytes": 10364,
+      "sha256": "f5374d45606b85a8604d25b8619c09d448b7a658552a6f5cd745ae3fa1e2382f"
+    },
+    "evaluation_report.json": {
+      "present": true,
+      "bytes": 1684,
+      "sha256": "f3eb626e359c100b6388f9252cd978224f9a362fac1f0f849e958a4091afdbfd"
+    },
+    "feature_importance.json": {
+      "present": true,
+      "bytes": 1105,
+      "sha256": "eb1128f7073a364d6387c78f9e7889b876b2e185fbf585555f18589c0777de3e"
+    },
+    "training_manifest.json": {
+      "present": true,
+      "bytes": 471,
+      "sha256": "76e8d810d7753e170dad5cd606d0d832367c5a64626202fe0e65e061864ff560"
+    },
+    "calibration_holdout.png": {
+      "present": true,
+      "bytes": 7997,
+      "sha256": "8543adbaaf4076fe0beda54f6af8da2afb2e0c5bbc01bbc65dc56a7611844b88"
+    },
+    "leakage_audit.json": {
+      "present": true,
+      "bytes": 807,
+      "sha256": "3081cc0f4277361fbc67b8c109e301bd27e0de95a010ba608fcb8cd3e5d1e3c6"
+    },
+    "external_validation_report.json": {
+      "present": true,
+      "bytes": 619,
+      "sha256": "576d9e0734014f4d56bf020b2809215a2e029c4216f237d66a24e91f90a31fd2"
+    },
+    "analysis_pack.json": {
+      "present": true,
+      "bytes": 697,
+      "sha256": "698da3aee2f96bf6d1c616f2ae31aab97a608685b5bd7fb9807b67c669ef12e6"
+    }
+  },
+  "flags": {
+    "has_model": true,
+    "has_evaluation": true,
+    "has_manifest": true,
+    "has_calibration": true,
+    "has_leakage": true,
+    "has_shap": false,
+    "has_external_validation": true,
+    "has_analysis_pack": true,
+    "leakage_passed": true,
+    "trust_complete": true
+  }
+}

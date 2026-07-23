@@ -18,6 +18,8 @@ export interface UiPrefs {
   show_metric_chart: boolean;
   show_importance_chart: boolean;
   show_compare_chart: boolean;
+  show_sex_chart: boolean;
+  show_prevalence_chart: boolean;
   /** When false, Datasets browse hides bundled demos (data/demo) and shows uploads only. */
   show_demo_datasets: boolean;
   label_chart_type: 'doughnut' | 'pie' | 'bar';
@@ -41,6 +43,8 @@ export const DEFAULT_UI_PREFS: UiPrefs = {
   show_metric_chart: true,
   show_importance_chart: true,
   show_compare_chart: true,
+  show_sex_chart: true,
+  show_prevalence_chart: true,
   show_demo_datasets: true,
   label_chart_type: 'doughnut',
   metric_chart_type: 'radar',
@@ -99,6 +103,8 @@ export class UiPrefsService {
       show_metric_chart: p.show_metric_chart,
       show_importance_chart: p.show_importance_chart,
       show_compare_chart: p.show_compare_chart,
+      show_sex_chart: p.show_sex_chart,
+      show_prevalence_chart: p.show_prevalence_chart,
       show_demo_datasets: p.show_demo_datasets,
     };
   }
@@ -114,6 +120,7 @@ export class UiPrefsService {
   }
 
   private applyDom(p: UiPrefs): void {
+    /* istanbul ignore next -- only hit in non-DOM environments (SSR) */
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
     root.dataset['density'] = p.density;

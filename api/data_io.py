@@ -34,6 +34,23 @@ _ZIP_ALLOW = [
     "fairness_report.json",
     "hpo_report.json",
     "threshold_operating_points.json",
+    "trust_pack.json",
+    "external_validation_report.json",
+    "analysis_pack.json",
+]
+
+_RUN_ZIP_FILES = [
+    "model.pkl",
+    "evaluation_report.json",
+    "feature_importance.json",
+    "training_manifest.json",
+    "calibration_holdout.png",
+    "leakage_audit.json",
+    "shap_summary.png",
+    "trust_pack.json",
+    "run_meta.json",
+    "external_validation_report.json",
+    "analysis_pack.json",
 ]
 
 
@@ -370,10 +387,25 @@ def _audit_pass_fail_counts(audit: dict[str, Any] | None) -> tuple[int, int]:
     return passed, failed
 
 
-def build_methods_markdown() -> str:
-    """Short research-only methods note from active report artifacts (no invented claims)."""
+def _reports_root_for_methods(run_id: str | None = None) -> Path:
+    """Shared reports/ or a named run directory for methods/ZIP content."""
+    if not run_id:
+        return REPORTS_DIR
+    if ".." in run_id or "/" in run_id or "\\" in run_id:
+        raise ValueError("Invalid run_id")
+    from openhealth.runs import run_path
+
+    p = run_path(run_id)
+    if not p.is_dir():
+        raise FileNotFoundError(f"run not found: {run_id}")
+    return p
+
+
+def build_methods_markdown(run_id: str | None = None) -> str:
+    """Short research-only methods note from active (or run-scoped) report artifacts."""
+    root = _reports_root_for_methods(run_id)
     manifest: dict[str, Any] = {}
-    mp = REPORTS_DIR / "training_manifest.json"
+    mp = root / "training_manifest.json"
     if mp.is_file():
         try:
             raw = json.loads(mp.read_text(encoding="utf-8"))
@@ -383,7 +415,7 @@ def build_methods_markdown() -> str:
             manifest = {}
 
     evaluation: dict[str, Any] = {}
-    ep = REPORTS_DIR / "evaluation_report.json"
+    ep = root / "evaluation_report.json"
     if ep.is_file():
         try:
             raw = json.loads(ep.read_text(encoding="utf-8"))
@@ -393,7 +425,7 @@ def build_methods_markdown() -> str:
             evaluation = {}
 
     leakage: dict[str, Any] | None = None
-    lp = REPORTS_DIR / "leakage_audit.json"
+    lp = root / "leakage_audit.json"
     if lp.is_file():
         try:
             raw = json.loads(lp.read_text(encoding="utf-8"))
@@ -401,6 +433,40 @@ def build_methods_markdown() -> str:
                 leakage = raw
         except Exception:
             leakage = None
+
+    trust: dict[str, Any] | None = None
+    tp = root / "trust_pack.json"
+    if tp.is_file():
+        try:
+            raw = json.loads(tp.read_text(encoding="utf-8"))
+            if isinstance(raw, dict):
+                trust = raw
+        except Exception:
+            trust = None
+
+    ext: dict[str, Any] | None = None
+    epv = root / "external_validation_report.json"
+    if not epv.is_file():
+        epv = REPORTS_DIR / "external_validation_report.json"
+    if epv.is_file():
+        try:
+            raw = json.loads(epv.read_text(encoding="utf-8"))
+            if isinstance(raw, dict):
+                ext = raw
+        except Exception:
+            ext = None
+
+    analysis: dict[str, Any] | None = None
+    ap = root / "analysis_pack.json"
+    if not ap.is_file():
+        ap = REPORTS_DIR / "analysis_pack.json"
+    if ap.is_file():
+        try:
+            raw = json.loads(ap.read_text(encoding="utf-8"))
+            if isinstance(raw, dict):
+                analysis = raw
+        except Exception:
+            analysis = None
 
     meta = evaluation.get("meta") if isinstance(evaluation.get("meta"), dict) else {}
     fe = meta.get("feature_engineering") if isinstance(meta.get("feature_engineering"), dict) else {}
@@ -444,29 +510,48 @@ def build_methods_markdown() -> str:
 
     pass_n, fail_n = _audit_pass_fail_counts(leakage)
 
+    scope = f"run `{run_id}`" if run_id else "active workspace reports"
     lines = [
         "# Methods note (auto-generated)",
         "",
         "> Research and education artifact only — not a clinical protocol, not FDA-cleared,",
-        "> and not intended for patient care. Values below reflect the active workspace reports,",
-        "> not a claim of external validity.",
+        "> and not intended for patient care. Values below reflect the "
+        + scope
+        + ",",
+        "> not a claim of external validity or regulatory clearance.",
         "",
         "## Run configuration",
         "",
-        f"- **Task id:** `{task_id}`",
-        f"- **Model:** `{model_kind}`",
-        f"- **Isotonic calibration:** `{calibrated}`",
-        f"- **Split:** `{split_method}`"
-        + (f" (temporal_split=`{manifest.get('temporal_split')}`)" if "temporal_split" in manifest else ""),
-        f"- **Index strategy:** `{index_strategy if index_strategy is not None else 'not recorded'}`",
-        f"- **Horizon days:** `{horizon if horizon is not None else 'not recorded'}`",
-        f"- **Feature windows:** `{windows if windows is not None else 'not recorded'}`",
-        f"- **Data path:** `{data_path if data_path is not None else 'not recorded'}`",
-        f"- **Data SHA-256:** `{data_hash if data_hash is not None else 'not recorded'}`",
-        "",
-        "## Leakage audit summary",
-        "",
     ]
+    if run_id:
+        lines.append(f"- **Run id:** `{run_id}`")
+    lines.extend(
+        [
+            f"- **Task id:** `{task_id}`",
+            f"- **Model:** `{model_kind}`",
+            f"- **Isotonic calibration:** `{calibrated}`",
+            f"- **Split:** `{split_method}`"
+            + (f" (temporal_split=`{manifest.get('temporal_split')}`)" if "temporal_split" in manifest else ""),
+            f"- **Index strategy:** `{index_strategy if index_strategy is not None else 'not recorded'}`",
+            f"- **Horizon days:** `{horizon if horizon is not None else 'not recorded'}`",
+            f"- **Feature windows:** `{windows if windows is not None else 'not recorded'}`",
+            f"- **Data path:** `{data_path if data_path is not None else 'not recorded'}`",
+            f"- **Data SHA-256:** `{data_hash if data_hash is not None else 'not recorded'}`",
+            "",
+            "## Trust pack",
+            "",
+        ]
+    )
+    if trust is None:
+        lines.append("- No `trust_pack.json` present for this scope.")
+    else:
+        flags = trust.get("flags") if isinstance(trust.get("flags"), dict) else {}
+        lines.append(f"- **Trust complete:** `{flags.get('trust_complete')}`")
+        lines.append(f"- **Has leakage audit:** `{flags.get('has_leakage')}` (passed=`{flags.get('leakage_passed')}`)")
+        lines.append(f"- **Has SHAP:** `{flags.get('has_shap')}`")
+        lines.append(f"- **Has calibration plot:** `{flags.get('has_calibration')}`")
+        lines.append(f"- **Pack updated_at:** `{trust.get('updated_at')}`")
+    lines.extend(["", "## Leakage audit summary", ""])
     if leakage is None:
         lines.append("- No `leakage_audit.json` present in reports.")
     else:
@@ -481,6 +566,25 @@ def build_methods_markdown() -> str:
             lines.append(
                 f"- Patient-disjoint train/test: `{leakage.get('patient_disjoint_train_test')}`."
             )
+        warns = leakage.get("warnings")
+        if isinstance(warns, list) and warns:
+            lines.append(f"- Warnings ({len(warns)}): " + "; ".join(str(w) for w in warns[:5]))
+    lines.extend(["", "## External validation", ""])
+    if ext is None:
+        lines.append("- No `external_validation_report.json` present.")
+    else:
+        m = ext.get("metrics") if isinstance(ext.get("metrics"), dict) else {}
+        lines.append(f"- **External data:** `{ext.get('data_path')}`")
+        lines.append(f"- **ROC-AUC:** `{m.get('roc_auc')}` · **PR-AUC:** `{m.get('pr_auc')}`")
+        lines.append(f"- **Brier:** `{m.get('brier')}` · **ECE:** `{m.get('ece')}`")
+        lines.append(f"- **N scored:** `{ext.get('n_samples')}`")
+    lines.extend(["", "## Analysis pack", ""])
+    if analysis is None:
+        lines.append("- No `analysis_pack.json` present.")
+    else:
+        lines.append(f"- **Patients:** `{analysis.get('n_patients')}` · **Events/rows:** `{analysis.get('n_rows')}`")
+        lines.append(f"- **Label prevalence:** `{analysis.get('label_prevalence')}`")
+        lines.append(f"- **Time span:** `{analysis.get('time_span')}`")
     lines.extend(
         [
             "",
@@ -495,16 +599,32 @@ def build_methods_markdown() -> str:
     return "\n".join(lines)
 
 
-def build_results_zip() -> bytes:
+def build_results_zip(run_id: str | None = None) -> bytes:
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
-        for name in _ZIP_ALLOW:
-            p = REPORTS_DIR / name
-            if p.is_file():
-                zf.write(p, arcname=f"reports/{name}")
-        methods_md = build_methods_markdown()
+        included: list[str] = []
+        if run_id:
+            root = _reports_root_for_methods(run_id)
+            for name in _RUN_ZIP_FILES:
+                p = root / name
+                if p.is_file():
+                    arc = f"reports/runs/{run_id}/{name}"
+                    zf.write(p, arcname=arc)
+                    included.append(arc)
+            # Also include shared fairness/hpo if present for context
+            for name in ("fairness_report.json", "hpo_report.json", "model_comparison.json"):
+                p = REPORTS_DIR / name
+                if p.is_file():
+                    zf.write(p, arcname=f"reports/{name}")
+                    included.append(name)
+        else:
+            for name in _ZIP_ALLOW:
+                p = REPORTS_DIR / name
+                if p.is_file():
+                    zf.write(p, arcname=f"reports/{name}")
+                    included.append(name)
+        methods_md = build_methods_markdown(run_id=run_id)
         zf.writestr("reports/methods.md", methods_md)
-        # Include model card + quickstart if present
         for rel in (
             "docs/model_card.md",
             "docs/researcher_quickstart.md",
@@ -515,7 +635,6 @@ def build_results_zip() -> bytes:
             p = PROJECT_ROOT / rel
             if p.is_file():
                 zf.write(p, arcname=rel)
-        # Always include a short limitations excerpt
         lim = PROJECT_ROOT / "LIMITATIONS.md"
         if lim.is_file():
             zf.writestr(
@@ -524,8 +643,9 @@ def build_results_zip() -> bytes:
             )
         manifest = {
             "pack": "ehr-risk-research-results",
+            "run_id": run_id,
             "disclaimer": "Research and education artifacts only — not intended for patient care.",
-            "files": [n for n in _ZIP_ALLOW if (REPORTS_DIR / n).is_file()] + ["methods.md"],
+            "files": included + ["methods.md"],
         }
         zf.writestr("README_PACK.json", json.dumps(manifest, indent=2))
     return buf.getvalue()

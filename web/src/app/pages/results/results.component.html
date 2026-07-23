@@ -128,6 +128,37 @@
         }
       </div>
       <p class="muted">{{ sr.path }} · model={{ sr.model_kind || '—' }}</p>
+      <div class="trust-check">
+        <h4>Trust pack</h4>
+        <ul class="trust-list">
+          @for (item of trustChecklist(sr); track item.label) {
+            <li>
+              <span [class.ok]="item.ok === true" [class.bad]="item.ok === false" [class.unk]="item.ok === null">
+                {{ item.ok === true ? '✓' : item.ok === false ? '✗' : '○' }}
+              </span>
+              {{ item.label }}
+            </li>
+          }
+        </ul>
+        <div class="actions tight">
+          <button type="button" class="btn" [disabled]="busy()" (click)="runLeakageForSelected()">Leakage audit (this run)</button>
+          <button type="button" class="btn" [disabled]="busy()" (click)="runShap()">SHAP (this run)</button>
+        </div>
+      </div>
+      <div class="ext-val">
+        <h4>External validation (research)</h4>
+        <p class="muted">Score a second CSV with the selected/active model. Not a clinical claim.</p>
+        <label>Data path
+          <input type="text" [(ngModel)]="extValPath" name="extValPath" />
+        </label>
+        <label>Format
+          <select [(ngModel)]="extValFormat" name="extValFormat">
+            <option value="longitudinal">longitudinal</option>
+            <option value="tabular">tabular</option>
+          </select>
+        </label>
+        <button type="button" class="btn" [disabled]="busy()" (click)="runExternalValidate()">Run external validate</button>
+      </div>
       @if (sr.metrics) {
         <pre class="mini">{{ sr.metrics | json }}</pre>
       }

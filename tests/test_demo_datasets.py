@@ -71,6 +71,25 @@ def test_list_datasets_can_hide_demos(client):
     assert all(d.get("category") == "user" or d["path"].startswith("data/uploads/") for d in js["datasets"])
 
 
+def test_list_datasets_broken_upload_symlink(client, tmp_path: Path):
+    """Broken symlinks under data/uploads must not 500 the list endpoint."""
+    uploads = PROJECT_ROOT / "data" / "uploads"
+    uploads.mkdir(parents=True, exist_ok=True)
+    link = uploads / "missing_upload_link.csv"
+    try:
+        if link.is_symlink() or link.exists():
+            link.unlink()
+        link.symlink_to(uploads / "no_such_target.csv")
+        r = client.get("/v1/datasets", params={"include_demo": False})
+        assert r.status_code == 200
+        row = next(d for d in r.json()["datasets"] if d["path"] == "data/uploads/missing_upload_link.csv")
+        assert row["exists"] is False
+        assert row["bytes"] == 0
+    finally:
+        if link.is_symlink() or link.exists():
+            link.unlink()
+
+
 def test_custom_task_points_at_demo_path(client):
     r = client.get("/v1/tasks")
     assert r.status_code == 200

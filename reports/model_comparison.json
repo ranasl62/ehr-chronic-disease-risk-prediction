@@ -1,9 +1,7 @@
 {
-  "data_path": "data/demo/ehr_data.csv",
+  "data_path": "/tmp/pytest-of-ranasl62/pytest-81/test_openhealth_compare_promot0/tiny_cohort.csv",
   "models_compared": [
-    "logreg",
-    "random_forest",
-    "xgboost"
+    "logreg"
   ],
   "calibrate": false,
   "ranking_metric": "roc_auc",
@@ -13,63 +11,21 @@
       "metrics": {
         "roc_auc": null,
         "pr_auc": null,
-        "brier": 0.20762754191886204,
-        "ece": 0.4415743302983367,
+        "brier": 0.005773072792078903,
+        "ece": 0.07598073961260778,
         "ece_bins": 10,
-        "accuracy": 0.5,
+        "accuracy": 1.0,
         "precision": 0.0,
         "recall": 0.0,
         "f1": 0.0
       },
       "roc_auc": null,
       "pr_auc": null,
-      "brier": 0.20762754191886204,
-      "ece": 0.4415743302983367,
+      "brier": 0.005773072792078903,
+      "ece": 0.07598073961260778,
       "calibrated": false,
-      "model_path": "reports/compare/model_logreg.pkl",
+      "model_path": "reports/compare_unit_cov/model_logreg.pkl",
       "selected": true
-    },
-    {
-      "model": "random_forest",
-      "metrics": {
-        "roc_auc": null,
-        "pr_auc": null,
-        "brier": 0.24837024390033224,
-        "ece": 0.41750270562770564,
-        "ece_bins": 10,
-        "accuracy": 0.5,
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0
-      },
-      "roc_auc": null,
-      "pr_auc": null,
-      "brier": 0.24837024390033224,
-      "ece": 0.41750270562770564,
-      "calibrated": false,
-      "model_path": "reports/compare/model_random_forest.pkl",
-      "selected": false
-    },
-    {
-      "model": "xgboost",
-      "metrics": {
-        "roc_auc": null,
-        "pr_auc": null,
-        "brier": 0.2584170699119568,
-        "ece": 0.5083473920822144,
-        "ece_bins": 10,
-        "accuracy": 0.0,
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0
-      },
-      "roc_auc": null,
-      "pr_auc": null,
-      "brier": 0.2584170699119568,
-      "ece": 0.5083473920822144,
-      "calibrated": false,
-      "model_path": "reports/compare/model_xgboost.pkl",
-      "selected": false
     }
   ],
   "selected_model": "logreg",

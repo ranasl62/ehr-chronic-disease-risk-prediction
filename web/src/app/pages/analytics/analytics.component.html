@@ -1,8 +1,18 @@
-<section class="panel">
-  <h1>Analytics dashboard</h1>
-  <p class="lede">Interactive cohort + model charts and filterable tables. Research visualization only.</p>
+<section class="panel analytics-panel" id="analytics-print-root">
+  <header class="analytics-header no-print">
+    <div>
+      <h1>Analytics dashboard</h1>
+      <p class="lede">Cohort exploration, hold-out metrics, and model charts for research reporting. Not clinical decision support.</p>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="btn" (click)="exportAllChartsPng()" [disabled]="!chartsReady()">Export all charts (PNG)</button>
+      <button type="button" class="btn primary" (click)="printReport()">Print / PDF report</button>
+    </div>
+  </header>
 
-  <div class="toolbar">
+  <p class="print-only print-banner">EHR Risk Framework — Analytics report (research / education only). Generated for methods appendix use. Not for patient care.</p>
+
+  <div class="toolbar no-print">
     <label>Dataset
       <select [(ngModel)]="path" name="path" (change)="load()">
         @for (d of datasets(); track d.id) {
@@ -38,13 +48,27 @@
       <input type="text" [(ngModel)]="filterPatientId" name="fpid" (change)="load()" placeholder="optional" />
     </label>
     <button type="button" class="btn" (click)="load()">Refresh</button>
+    <a class="btn" [href]="analysisPackDownloadUrl()" download="analysis_pack.json">Download analysis pack</a>
   </div>
 
-  <details class="filters">
+  @if (analysisPack(); as ap) {
+    <div class="analysis-pack card-lite">
+      <h2>Analysis pack</h2>
+      <p class="muted">
+        Patients {{ ap.n_patients ?? '—' }} · Rows {{ ap.n_rows ?? '—' }} ·
+        Prevalence {{ formatPct(ap.label_prevalence) }} ·
+        {{ ap.time_span || 'no time span' }}
+      </p>
+    </div>
+  }
+
+  <details class="filters no-print">
     <summary>Chart &amp; display options</summary>
     <div class="filter-grid">
       <label class="chk"><input type="checkbox" [ngModel]="prefs.show_label_chart" (ngModelChange)="toggleChart('show_label_chart', $event)" name="sl" /> Labels</label>
       <label class="chk"><input type="checkbox" [ngModel]="prefs.show_age_chart" (ngModelChange)="toggleChart('show_age_chart', $event)" name="sa" /> Age</label>
+      <label class="chk"><input type="checkbox" [ngModel]="prefs.show_sex_chart" (ngModelChange)="toggleChart('show_sex_chart', $event)" name="sx" /> Sex</label>
+      <label class="chk"><input type="checkbox" [ngModel]="prefs.show_prevalence_chart" (ngModelChange)="toggleChart('show_prevalence_chart', $event)" name="sp" /> Prevalence</label>
       <label class="chk"><input type="checkbox" [ngModel]="prefs.show_missing_chart" (ngModelChange)="toggleChart('show_missing_chart', $event)" name="sm" /> Missing</label>
       <label class="chk"><input type="checkbox" [ngModel]="prefs.show_numeric_chart" (ngModelChange)="toggleChart('show_numeric_chart', $event)" name="sn" /> Numeric</label>
       <label class="chk"><input type="checkbox" [ngModel]="prefs.show_metric_chart" (ngModelChange)="toggleChart('show_metric_chart', $event)" name="sme" /> Metrics</label>
@@ -80,119 +104,174 @@
       <div class="kpi"><span class="k">Rows</span><span class="v">{{ p.n_rows }}</span></div>
       <div class="kpi"><span class="k">Patients</span><span class="v">{{ p.n_patients ?? '—' }}</span></div>
       <div class="kpi"><span class="k">Columns</span><span class="v">{{ p.n_columns }}</span></div>
+      <div class="kpi"><span class="k">Prevalence</span><span class="v">{{ formatPct(analysisPack()?.label_prevalence) }}</span></div>
       <div class="kpi"><span class="k">Time span</span><span class="v small">{{ p.time_span?.min || '—' }} → {{ p.time_span?.max || '—' }}</span></div>
+      <div class="kpi"><span class="k">Dataset</span><span class="v small">{{ path }}</span></div>
     </div>
 
     @if (showCharts()) {
       @if (!chartsReady() && profile()) {
-        <p class="muted">Drawing charts…</p>
+        <p class="muted no-print">Drawing charts…</p>
       }
-      <div class="grid">
-        <div class="card" [class.off]="!prefs.show_label_chart">
-          <canvas #labelChart data-chart="label"></canvas>
+      <div class="grid" id="analytics-charts">
+        <div class="card chart-card" [class.off]="!prefs.show_label_chart">
+          <div class="chart-head no-print">
+            <span>Label distribution</span>
+            <button type="button" class="btn tiny" (click)="exportChartPng('label', 'label_distribution')">PNG</button>
+          </div>
+          <div class="chart-body"><canvas #labelChart data-chart="label"></canvas></div>
         </div>
-        <div class="card" [class.off]="!prefs.show_age_chart">
-          <canvas #ageChart data-chart="age"></canvas>
+        <div class="card chart-card" [class.off]="!prefs.show_age_chart">
+          <div class="chart-head no-print">
+            <span>Age bands</span>
+            <button type="button" class="btn tiny" (click)="exportChartPng('age', 'age_bands')">PNG</button>
+          </div>
+          <div class="chart-body"><canvas #ageChart data-chart="age"></canvas></div>
         </div>
-        <div class="card wide" [class.off]="!prefs.show_missing_chart">
-          <canvas #missChart data-chart="miss"></canvas>
+        <div class="card chart-card" [class.off]="!prefs.show_sex_chart">
+          <div class="chart-head no-print">
+            <span>Sex distribution</span>
+            <button type="button" class="btn tiny" (click)="exportChartPng('sex', 'sex_distribution')">PNG</button>
+          </div>
+          <div class="chart-body"><canvas #sexChart data-chart="sex"></canvas></div>
         </div>
-        <div class="card" [class.off]="!prefs.show_numeric_chart">
-          <canvas #numericChart data-chart="numeric"></canvas>
+        <div class="card chart-card" [class.off]="!prefs.show_prevalence_chart">
+          <div class="chart-head no-print">
+            <span>Label prevalence</span>
+            <button type="button" class="btn tiny" (click)="exportChartPng('prevalence', 'label_prevalence')">PNG</button>
+          </div>
+          <div class="chart-body"><canvas #prevalenceChart data-chart="prevalence"></canvas></div>
         </div>
-        <div class="card" [class.off]="!prefs.show_metric_chart">
-          <canvas #metricChart data-chart="metric"></canvas>
+        <div class="card chart-card wide" [class.off]="!prefs.show_missing_chart">
+          <div class="chart-head no-print">
+            <span>Missingness</span>
+            <button type="button" class="btn tiny" (click)="exportChartPng('miss', 'missingness')">PNG</button>
+          </div>
+          <div class="chart-body"><canvas #missChart data-chart="miss"></canvas></div>
         </div>
-        <div class="card wide" [class.off]="!prefs.show_importance_chart">
-          <canvas #importanceChart data-chart="importance"></canvas>
+        <div class="card chart-card" [class.off]="!prefs.show_numeric_chart">
+          <div class="chart-head no-print">
+            <span>Numeric means</span>
+            <button type="button" class="btn tiny" (click)="exportChartPng('numeric', 'numeric_means')">PNG</button>
+          </div>
+          <div class="chart-body"><canvas #numericChart data-chart="numeric"></canvas></div>
         </div>
-        <div class="card wide" [class.off]="!prefs.show_compare_chart">
-          <canvas #compareChart data-chart="compare"></canvas>
+        <div class="card chart-card" [class.off]="!prefs.show_metric_chart">
+          <div class="chart-head no-print">
+            <span>Hold-out metrics</span>
+            <button type="button" class="btn tiny" (click)="exportChartPng('metric', 'holdout_metrics')">PNG</button>
+          </div>
+          <div class="chart-body"><canvas #metricChart data-chart="metric"></canvas></div>
+        </div>
+        <div class="card chart-card wide" [class.off]="!prefs.show_importance_chart">
+          <div class="chart-head no-print">
+            <span>Feature importance</span>
+            <button type="button" class="btn tiny" (click)="exportChartPng('importance', 'feature_importance')">PNG</button>
+          </div>
+          <div class="chart-body"><canvas #importanceChart data-chart="importance"></canvas></div>
+        </div>
+        <div class="card chart-card wide" [class.off]="!prefs.show_compare_chart">
+          <div class="chart-head no-print">
+            <span>Model comparison</span>
+            <button type="button" class="btn tiny" (click)="exportChartPng('compare', 'model_comparison')">PNG</button>
+          </div>
+          <div class="chart-body"><canvas #compareChart data-chart="compare"></canvas></div>
         </div>
       </div>
     }
 
     @if (showTables()) {
-      <h2>Cohort (filtered patients)</h2>
-      <app-data-table
-        [columns]="cohortCols"
-        [rows]="cohortRows"
-        [pageSize]="prefs.table_page_size"
-        exportName="cohort.csv"
-        (pageSizeChange)="onPageSize($event)"
-      />
+      <section class="tables-block">
+        <h2>Cohort (filtered patients)</h2>
+        <app-data-table
+          [columns]="cohortCols"
+          [rows]="cohortRows"
+          [pageSize]="prefs.table_page_size"
+          exportName="cohort.csv"
+          (pageSizeChange)="onPageSize($event)"
+        />
 
-      <h2>Label counts</h2>
-      <app-data-table
-        [columns]="labelCols"
-        [rows]="labelRows"
-        [pageSize]="prefs.table_page_size"
-        exportName="label_counts.csv"
-        (pageSizeChange)="onPageSize($event)"
-      />
+        <h2>Label counts</h2>
+        <app-data-table
+          [columns]="labelCols"
+          [rows]="labelRows"
+          [pageSize]="prefs.table_page_size"
+          exportName="label_counts.csv"
+          (pageSizeChange)="onPageSize($event)"
+        />
 
-      <h2>Age bands</h2>
-      <app-data-table
-        [columns]="ageCols"
-        [rows]="ageRows"
-        [pageSize]="prefs.table_page_size"
-        exportName="age_bands.csv"
-        (pageSizeChange)="onPageSize($event)"
-      />
+        <h2>Age bands</h2>
+        <app-data-table
+          [columns]="ageCols"
+          [rows]="ageRows"
+          [pageSize]="prefs.table_page_size"
+          exportName="age_bands.csv"
+          (pageSizeChange)="onPageSize($event)"
+        />
 
-      <h2>Missingness</h2>
-      <app-data-table
-        [columns]="missingCols"
-        [rows]="missingRows"
-        [pageSize]="prefs.table_page_size"
-        exportName="missingness.csv"
-        (pageSizeChange)="onPageSize($event)"
-      />
+        <h2>Sex counts</h2>
+        <app-data-table
+          [columns]="sexCols"
+          [rows]="sexRows"
+          [pageSize]="prefs.table_page_size"
+          exportName="sex_counts.csv"
+          (pageSizeChange)="onPageSize($event)"
+        />
 
-      <h2>Numeric preview</h2>
-      <app-data-table
-        [columns]="numericCols"
-        [rows]="numericRows"
-        [pageSize]="prefs.table_page_size"
-        exportName="numeric_preview.csv"
-        (pageSizeChange)="onPageSize($event)"
-      />
+        <h2>Missingness</h2>
+        <app-data-table
+          [columns]="missingCols"
+          [rows]="missingRows"
+          [pageSize]="prefs.table_page_size"
+          exportName="missingness.csv"
+          (pageSizeChange)="onPageSize($event)"
+        />
 
-      <h2>Columns</h2>
-      <app-data-table
-        [columns]="columnCols"
-        [rows]="columnRows"
-        [pageSize]="prefs.table_page_size"
-        exportName="columns.csv"
-        (pageSizeChange)="onPageSize($event)"
-      />
+        <h2>Numeric preview</h2>
+        <app-data-table
+          [columns]="numericCols"
+          [rows]="numericRows"
+          [pageSize]="prefs.table_page_size"
+          exportName="numeric_preview.csv"
+          (pageSizeChange)="onPageSize($event)"
+        />
 
-      <h2>Hold-out metrics</h2>
-      <app-data-table
-        [columns]="metricCols"
-        [rows]="metricRows"
-        [pageSize]="prefs.table_page_size"
-        exportName="metrics.csv"
-        (pageSizeChange)="onPageSize($event)"
-      />
+        <h2>Columns</h2>
+        <app-data-table
+          [columns]="columnCols"
+          [rows]="columnRows"
+          [pageSize]="prefs.table_page_size"
+          exportName="columns.csv"
+          (pageSizeChange)="onPageSize($event)"
+        />
 
-      <h2>Feature importance</h2>
-      <app-data-table
-        [columns]="importanceCols"
-        [rows]="importanceRows"
-        [pageSize]="prefs.table_page_size"
-        exportName="importance.csv"
-        (pageSizeChange)="onPageSize($event)"
-      />
+        <h2>Hold-out metrics</h2>
+        <app-data-table
+          [columns]="metricCols"
+          [rows]="metricRows"
+          [pageSize]="prefs.table_page_size"
+          exportName="metrics.csv"
+          (pageSizeChange)="onPageSize($event)"
+        />
 
-      <h2>Model comparison</h2>
-      <app-data-table
-        [columns]="compareCols"
-        [rows]="compareRows"
-        [pageSize]="prefs.table_page_size"
-        exportName="model_comparison.csv"
-        (pageSizeChange)="onPageSize($event)"
-      />
+        <h2>Feature importance</h2>
+        <app-data-table
+          [columns]="importanceCols"
+          [rows]="importanceRows"
+          [pageSize]="prefs.table_page_size"
+          exportName="importance.csv"
+          (pageSizeChange)="onPageSize($event)"
+        />
+
+        <h2>Model comparison</h2>
+        <app-data-table
+          [columns]="compareCols"
+          [rows]="compareRows"
+          [pageSize]="prefs.table_page_size"
+          exportName="model_comparison.csv"
+          (pageSizeChange)="onPageSize($event)"
+        />
+      </section>
     }
   }
 </section>

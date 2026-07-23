@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { HomeComponent } from './home.component';
 import { ApiService } from '../../core/api.service';
 
@@ -50,5 +50,12 @@ describe('HomeComponent', () => {
     };
     expect(routerLink.queryParams).toEqual({ demo: '1' });
     expect(fixture.nativeElement.textContent).toContain('bundled longitudinal CSV');
+  });
+
+  it('surfaces API errors on refresh', () => {
+    api.workspaceStatus.and.returnValue(throwError(() => ({ message: 'offline' })));
+    fixture.componentInstance.refresh();
+    expect(fixture.componentInstance.error()).toContain('offline');
+    expect(fixture.componentInstance.loading()).toBeFalse();
   });
 });

@@ -6,8 +6,8 @@ import { BUILD_API_ENDPOINT } from './api-endpoint.generated';
  * otherwise use ``fallback`` (typically ``environment.apiUrl``, often '').
  * Empty string keeps same-origin calls for Docker nginx / ``ng serve`` proxy.
  */
-export function resolveApiUrl(fallback = ''): string {
-  const fromBuild = (BUILD_API_ENDPOINT || '').trim().replace(/\/+$/, '');
+export function resolveApiUrl(fallback = '', buildEndpoint: string = BUILD_API_ENDPOINT): string {
+  const fromBuild = (buildEndpoint || '').trim().replace(/\/+$/, '');
   if (fromBuild) {
     return fromBuild;
   }

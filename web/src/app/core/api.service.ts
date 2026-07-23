@@ -64,12 +64,14 @@ export class ApiService {
     return this.http.get<DatasetProfile>(`${this.base}/v1/datasets/profile`, { params });
   }
 
-  resultsZipUrl(): string {
-    return `${this.base}/v1/reports/download.zip`;
+  resultsZipUrl(runId?: string | null): string {
+    const q = runId ? `?run_id=${encodeURIComponent(runId)}` : '';
+    return `${this.base}/v1/reports/download.zip${q}`;
   }
 
-  methodsMdUrl(): string {
-    return `${this.base}/v1/reports/methods.md`;
+  methodsMdUrl(runId?: string | null): string {
+    const q = runId ? `?run_id=${encodeURIComponent(runId)}` : '';
+    return `${this.base}/v1/reports/methods.md${q}`;
   }
 
   train(body: TrainBody): Observable<JobInfo> {
@@ -84,18 +86,37 @@ export class ApiService {
     return this.http.get<{ tasks: TaskInfo[] }>(`${this.base}/v1/tasks`);
   }
 
-  datasetHealth(path: string): Observable<DatasetHealth> {
-    return this.http.get<DatasetHealth>(`${this.base}/v1/datasets/health`, {
-      params: { path },
-    });
+  datasetHealth(path: string, taskId?: string | null): Observable<DatasetHealth> {
+    const params: Record<string, string> = { path };
+    if (taskId) params['task_id'] = taskId;
+    return this.http.get<DatasetHealth>(`${this.base}/v1/datasets/health`, { params });
   }
 
   leakageAudit(body: Record<string, unknown> = { use_artifact: true }): Observable<JobInfo> {
     return this.http.post<JobInfo>(`${this.base}/v1/jobs/leakage-audit`, body);
   }
 
-  shap(): Observable<JobInfo> {
-    return this.http.post<JobInfo>(`${this.base}/v1/jobs/shap`, {});
+  shap(body: { run_id?: string | null } = {}): Observable<JobInfo> {
+    return this.http.post<JobInfo>(`${this.base}/v1/jobs/shap`, body);
+  }
+
+  externalValidate(body: {
+    data_path: string;
+    data_format?: string;
+    run_id?: string | null;
+    label_col?: string | null;
+  }): Observable<JobInfo> {
+    return this.http.post<JobInfo>(`${this.base}/v1/jobs/external-validate`, body);
+  }
+
+  analysisPack(path: string): Observable<AnalysisPack> {
+    return this.http.get<AnalysisPack>(`${this.base}/v1/reports/analysis-pack`, {
+      params: { path },
+    });
+  }
+
+  analysisPackUrl(path: string): string {
+    return `${this.base}/v1/reports/analysis-pack?path=${encodeURIComponent(path)}`;
   }
 
   job(id: string): Observable<JobInfo> {
@@ -319,6 +340,12 @@ export interface RunSummary {
   has_model: boolean;
   has_evaluation?: boolean;
   has_manifest?: boolean;
+  has_leakage?: boolean;
+  has_shap?: boolean;
+  has_calibration?: boolean;
+  trust_complete?: boolean;
+  leakage_passed?: boolean | null;
+  trust?: Record<string, unknown>;
   meta?: Record<string, unknown>;
   metrics?: Record<string, number | null> | null;
   model_kind?: string | null;
@@ -328,7 +355,28 @@ export interface RunDetail extends RunSummary {
   evaluation?: Record<string, unknown> | null;
   manifest?: Record<string, unknown> | null;
   feature_importance?: Record<string, unknown> | null;
+  trust_pack?: Record<string, unknown> | null;
+  leakage_audit?: Record<string, unknown> | null;
   files?: { name: string; bytes: number }[];
+}
+
+export interface AnalysisPack {
+  n_patients?: number;
+  n_rows?: number;
+  label_prevalence?: number | null;
+  time_span?: string | null;
+  missingness?: Record<string, number>;
+  subgroup_counts?: Record<string, unknown>;
+  path?: string;
+  [key: string]: unknown;
+}
+
+export interface ExternalValidationReport {
+  data_path?: string;
+  n_samples?: number;
+  metrics?: Record<string, number | null>;
+  run_id?: string | null;
+  [key: string]: unknown;
 }
 
 export interface FairnessReport {

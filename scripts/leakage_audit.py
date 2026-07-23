@@ -44,6 +44,48 @@ def _patient_disjoint(train_idx: np.ndarray, test_idx: np.ndarray, groups: np.nd
     return g_tr.isdisjoint(g_te)
 
 
+def _icd_proxy_warnings(
+    feature_names: list[str] | None,
+    *,
+    horizon_days: int | None,
+) -> list[str]:
+    """Warn when ICD/diagnosis-style columns appear as model features (label-leakage risk)."""
+    if not feature_names:
+        return []
+    risky = []
+    patterns = (
+        "icd",
+        "diagnosis",
+        "dx_code",
+        "discharge_diag",
+        "primary_diag",
+        "billing_code",
+    )
+    for name in feature_names:
+        low = str(name).lower()
+        if any(p in low for p in patterns):
+            risky.append(str(name))
+    if not risky:
+        return []
+    sample = ", ".join(risky[:8])
+    more = f" (+{len(risky) - 8} more)" if len(risky) > 8 else ""
+    msg = (
+        f"ICD/diagnosis-style feature columns detected ({sample}{more}). "
+        "Codes finalized after discharge can leak same-admission or short-horizon outcomes "
+        "(see JAMA Network Open 2025 label-leakage literature). Prefer excluding post-index codes."
+    )
+    if horizon_days is not None and horizon_days <= 30:
+        msg += f" Horizon={horizon_days}d elevates this risk."
+    return [msg]
+
+
+def _attach_feature_warnings(out: dict, feature_names: list[str] | None) -> dict:
+    warns = list(out.get("warnings") or [])
+    warns.extend(_icd_proxy_warnings(feature_names, horizon_days=out.get("horizon_days")))
+    out["warnings"] = warns
+    return out
+
+
 def _temporal_block(
     df: pd.DataFrame,
     *,
@@ -183,7 +225,8 @@ def audit_from_raw(
         )
         if not out["temporal_integrity"].get("passed", True):
             out["notes"].extend(out["temporal_integrity"].get("notes") or [])
-    return out
+    cols = list(X.columns) if hasattr(X, "columns") else None
+    return _attach_feature_warnings(out, cols)
 
 
 def audit_from_artifact(artifact_path: Path) -> dict:
@@ -239,7 +282,8 @@ def audit_from_artifact(artifact_path: Path) -> dict:
             )
             if not out["temporal_integrity"].get("passed", True):
                 out["notes"].extend(out["temporal_integrity"].get("notes") or [])
-    return out
+    feat_names = art.get("feature_columns") or (list(X.columns) if hasattr(X, "columns") else None)
+    return _attach_feature_warnings(out, feat_names)
 
 
 def main() -> int:

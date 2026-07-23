@@ -1,0 +1,36 @@
+# Teaching contrast: documents a leaky feature pattern for classroom audits.
+# Use data/demo/teaching_leaky_contrast.csv — leakage audit should WARN on ICD features.
+# Prefer honest tasks (diabetes / horizon_detection_30d) for real experiments.
+task:
+  id: teaching_leaky_contrast
+  name: Teaching — Leaky ICD Contrast
+  description: >
+    Education-only preset that points at a tiny demo CSV where ICD-style codes appear
+    as features for a short-horizon label. Run leakage audit to see warnings; do not use
+    for published performance claims.
+
+target:
+  column: label
+
+prediction:
+  horizon_days: 7
+  index_strategy: column
+  index_time_col: index_time
+  feature_inclusive: true
+
+features:
+  windows_days: [7, 30]
+  window_days: 30
+
+data:
+  format: longitudinal
+  suggested_path: data/demo/teaching_leaky_contrast.csv
+
+training:
+  model_kind: logreg
+  calibrate: false
+  split_by_patient: true
+  temporal_split: false
+
+evaluation:
+  metrics: [roc_auc, pr_auc, brier, ece]

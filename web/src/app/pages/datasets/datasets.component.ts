@@ -204,11 +204,13 @@ export class DatasetsComponent implements OnInit {
         this.deleting.set(false);
         this.reload();
       },
-      error: (e) => {
-        this.deleting.set(false);
-        this.error.set(e?.error?.detail || e.message);
-      },
+      error: this.handleDeleteJoinError.bind(this),
     });
+  }
+
+  private handleDeleteJoinError(e: { error?: { detail?: string }; message?: string }): void {
+    this.deleting.set(false);
+    this.error.set(String(e?.error?.detail || e.message || 'Request failed'));
   }
 
   continueTrain(): void {

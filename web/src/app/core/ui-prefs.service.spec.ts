@@ -42,4 +42,16 @@ describe('UiPrefsService', () => {
     expect(out['show_label_chart']).toBeTrue();
     expect(out['density']).toBe('comfortable');
   });
+
+  it('loadLocal returns defaults on corrupt storage', () => {
+    localStorage.setItem('ehr_ui_prefs_v1', '{not-json');
+    const ui = TestBed.inject(UiPrefsService);
+    expect(ui.prefs().theme).toBe(DEFAULT_UI_PREFS.theme);
+  });
+
+  it('mergeFromWorkspace ignores null ui', () => {
+    const ui = TestBed.inject(UiPrefsService);
+    ui.mergeFromWorkspace(null);
+    expect(ui.prefs().theme).toBe(DEFAULT_UI_PREFS.theme);
+  });
 });

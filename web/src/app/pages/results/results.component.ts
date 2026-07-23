@@ -237,7 +237,26 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   methodsMdUrl(): string {
-    return this.api.methodsMdUrl();
+    return this.api.methodsMdUrl(this.selectedRun()?.run_id);
+  }
+
+  zipUrl(): string {
+    return this.api.resultsZipUrl(this.selectedRun()?.run_id);
+  }
+
+  trustChecklist(sr: RunDetail | RunSummary | null | undefined): { label: string; ok: boolean | null }[] {
+    if (!sr) return [];
+    const flags = (sr.trust || (sr as RunDetail).trust_pack?.['flags'] || {}) as Record<string, unknown>;
+    const bool = (v: unknown): boolean | null => (typeof v === 'boolean' ? v : null);
+    return [
+      { label: 'Model', ok: bool(flags['has_model'] ?? sr.has_model) },
+      { label: 'Evaluation', ok: bool(flags['has_evaluation'] ?? sr.has_evaluation) },
+      { label: 'Leakage audit', ok: bool(flags['has_leakage'] ?? sr.has_leakage) },
+      { label: 'Leakage passed', ok: bool(flags['leakage_passed'] ?? sr.leakage_passed) },
+      { label: 'SHAP', ok: bool(flags['has_shap'] ?? sr.has_shap) },
+      { label: 'Calibration', ok: bool(flags['has_calibration'] ?? sr.has_calibration) },
+      { label: 'Trust complete', ok: bool(flags['trust_complete'] ?? sr.trust_complete) },
+    ];
   }
 
   /** Prefer calibration and SHAP figures when listing without a text filter. */
@@ -370,7 +389,34 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   runShap(): void {
-    this.startJob(() => this.api.shap());
+    const runId = this.selectedRun()?.run_id;
+    this.startJob(() => this.api.shap(runId ? { run_id: runId } : {}));
+  }
+
+  runLeakageForSelected(): void {
+    const runId = this.selectedRun()?.run_id;
+    this.startJob(() =>
+      this.api.leakageAudit({ use_artifact: true, ...(runId ? { run_id: runId } : {}) })
+    );
+  }
+
+  extValPath = 'data/demo/ehr_data.csv';
+  extValFormat = 'longitudinal';
+  extValRows: Record<string, unknown>[] = [];
+  extValCols: DataTableColumn[] = [
+    { key: 'metric', label: 'Metric' },
+    { key: 'value', label: 'Value' },
+  ];
+
+  runExternalValidate(): void {
+    const runId = this.selectedRun()?.run_id;
+    this.startJob(() =>
+      this.api.externalValidate({
+        data_path: this.extValPath,
+        data_format: this.extValFormat,
+        run_id: runId || null,
+      })
+    );
   }
 
   runFairness(): void {
@@ -489,10 +535,6 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   fileUrl(name: string): string {
     return this.api.reportFileUrl(name);
-  }
-
-  zipUrl(): string {
-    return this.api.resultsZipUrl();
   }
 
   onPageSize(n: number): void {

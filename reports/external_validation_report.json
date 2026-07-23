@@ -1,0 +1,22 @@
+{
+  "kind": "external_validation",
+  "artifact": "/app/reports/runs/20260723T122625Z_logreg/model.pkl",
+  "data_path": "/app/data/demo/ehr_data.csv",
+  "data_format": "longitudinal",
+  "n_samples": 10,
+  "n_positive": 4,
+  "label_prevalence": 0.4,
+  "metrics": {
+    "roc_auc": 1.0,
+    "pr_auc": 1.0,
+    "brier": 0.04329025148041503,
+    "ece": 0.11762834602570862,
+    "ece_bins": 10,
+    "accuracy": 0.9,
+    "precision": 0.8,
+    "recall": 1.0,
+    "f1": 0.8888888888888888
+  },
+  "disclaimer": "Research hold-out on a second CSV \u2014 not multi-site clinical validation.",
+  "run_id": "20260723T122625Z_logreg"
+}

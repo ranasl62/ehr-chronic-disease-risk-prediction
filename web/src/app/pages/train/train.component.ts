@@ -98,6 +98,22 @@ export class TrainComponent implements OnInit, OnDestroy {
     return this.tasks().find((x) => x.id === this.taskId) || null;
   }
 
+  taskHealthBlockers = signal<string[]>([]);
+
+  checkTaskHealth(): void {
+    const t = this.selectedTask();
+    if (!this.dataPath) return;
+    this.api.datasetHealth(this.dataPath, t?.id || null).subscribe({
+      next: (h) => {
+        const blockers = (h.health?.blockers || []) as string[];
+        this.taskHealthBlockers.set(blockers);
+        if (!blockers.length) this.error.set(null);
+        else this.error.set(`Task health blockers: ${blockers.join('; ')}`);
+      },
+      error: (e) => this.error.set(this.fmtErr(e)),
+    });
+  }
+
   applyTask(): void {
     const t = this.selectedTask();
     if (!t) return;
