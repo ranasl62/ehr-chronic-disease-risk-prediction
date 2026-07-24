@@ -5,6 +5,7 @@
 }
 .figs { display: grid; gap: 1.25rem; margin-top: 0.75rem; }
 .figs img { max-width: 100%; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+.fig-err { margin: 0.5rem 0; font-size: 0.9rem; }
 .actions { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
 .err { color: var(--danger); }
 .muted { color: var(--muted); }

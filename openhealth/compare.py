@@ -134,7 +134,7 @@ def compare_models(
         "ranking_metric": "roc_auc",
         "comparison": rows,
         "selected_model": rows[0]["model"] if rows else None,
-        "disclaimer": "For research and education only. Outputs are not clinical recommendations.",
+        "disclaimer": "For research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future.",
     }
     out_json = REPORTS_DIR / "model_comparison.json"
     out_json.write_text(json.dumps(json_safe(summary), indent=2), encoding="utf-8")

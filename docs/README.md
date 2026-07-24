@@ -58,5 +58,5 @@ Navigation, feedback strip, continue-reading, and footer map: `assets/site.js`.
 
 ## Framing
 
-Research and education only. Do not imply clinical deployment or regulated medical-device status.
+For research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future. Do not imply clinical deployment or regulated medical-device status.
 U.S. healthcare research context on Home / Why describes public scientific value — not a product claim.

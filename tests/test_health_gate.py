@@ -11,6 +11,22 @@ def test_health_ready_on_demo():
     assert any("tiny_cohort" in w for w in h.get("warnings") or [])
 
 
+def test_health_horizon_task_blocks_tiny_demo():
+    report = dataset_health_report("data/demo/ehr_data.csv", task_id="horizon_detection_30d")
+    h = report["health"]
+    assert h["ready_for_training"] is False
+    joined = " ".join(h.get("blockers") or []).lower()
+    assert "index_time" in joined
+
+
+def test_health_horizon_task_ok_on_paper_synthetic():
+    report = dataset_health_report(
+        "data/raw/paper_synthetic_cohort.csv", task_id="horizon_detection_30d"
+    )
+    h = report["health"]
+    assert h["ready_for_training"] is True
+
+
 def test_health_blocker_no_label(tmp_path):
     p = tmp_path / "nolabel.csv"
     p.write_text("patient_id,timestamp\n1,2023-01-01\n", encoding="utf-8")

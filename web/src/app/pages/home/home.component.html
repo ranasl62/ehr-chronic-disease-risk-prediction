@@ -1,20 +1,22 @@
 <section class="panel">
-  <h1>Researcher workbench</h1>
+  <h1 data-tour="home-title">Researcher workbench</h1>
   <p class="lede">
     Leakage-aware EHR chronic disease risk — train, audit, explain, predict.
-    <strong>For research and education</strong> — not FDA-cleared and not intended for patient care.
+    For research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future.
   </p>
 
-  <div class="actions">
-    <a routerLink="/train" [queryParams]="{ demo: '1' }" class="btn primary">Run demo</a>
+  <div class="actions" data-tour="home-actions">
+    <a routerLink="/research" class="btn primary" data-tour="home-wizard">Start research wizard</a>
+    <a routerLink="/train" [queryParams]="{ demo: '1' }" class="btn" data-tour="home-demo">Run demo train</a>
     <button type="button" class="btn" (click)="refresh()">Refresh status</button>
     <a routerLink="/datasets" class="btn">Import / pick data</a>
     <a routerLink="/analytics" class="btn">Analytics</a>
     <a class="btn" [href]="zipUrl" download="ehr_risk_results_pack.zip">Download results ZIP</a>
   </div>
   <p class="muted demo-note">
-    <strong>Run demo</strong> opens Train with the bundled longitudinal CSV and the
-    <code>custom</code> task preset (logreg). Research and education only — not for patient care.
+    <strong>Research wizard</strong> walks task health → train → trust → leakage → external validation → export.
+    <strong>Run demo train</strong> opens Train with the bundled longitudinal CSV.
+    For research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future.
   </p>
 
   @if (loading()) {

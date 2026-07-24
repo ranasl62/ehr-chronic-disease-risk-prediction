@@ -123,6 +123,32 @@ export class PredictComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  exportSessionJson(): void {
+    const payload = {
+      generated_at_utc: new Date().toISOString(),
+      disclaimer: 'For research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future.',
+      model: this.schema()
+        ? {
+            model_kind: this.schema()!.model_kind,
+            calibrated: this.schema()!.calibrated,
+            n_features: this.schema()!.feature_columns.length,
+          }
+        : null,
+      features: { ...this.values },
+      prediction: this.result(),
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'predict_session.json';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
   drivers(): Driver[] {
     const expl = this.result()?.explanation as
       | { top_positive_risk_drivers?: Driver[]; shap_vector?: Record<string, number> }

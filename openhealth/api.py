@@ -85,6 +85,7 @@ def predict(features: dict[str, float], artifact_path: str | Path | None = None)
 def explain(artifact_path: str | Path | None = None, out: str | Path | None = None) -> Path:
     from explainability.shap_explainer import explain_model
     from training.reproduce_split import split_train_test_from_artifact
+    from utils.report_images import require_valid_report_png
 
     path = Path(artifact_path or MODEL_PATH)
     art = joblib.load(path)
@@ -100,7 +101,7 @@ def explain(artifact_path: str | Path | None = None, out: str | Path | None = No
         plot_path=plot,
         random_state=int(fe.get("random_state", 42)),
     )
-    return plot
+    return require_valid_report_png(plot, label="SHAP summary PNG")
 
 
 def save_model(artifact: dict[str, Any], path: str | Path | None = None) -> Path:

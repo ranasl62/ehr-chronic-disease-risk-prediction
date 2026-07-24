@@ -31,6 +31,14 @@
   <main id="main">
     <h1 style="font-family:var(--display);font-size:2rem;margin:0 0 0.5rem">Features in detail</h1>
     <p class="muted" style="margin:0 0 1rem;max-width:42rem">Everything the framework ships for the research workbench loop — from ingest to explainable prediction.</p>
+    <p class="banner">
+      For research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future.
+    </p>
+    <p class="demo-callout">
+      <strong>Free demo server</strong> — it may be slow. Check it with a small amount of data.
+      For larger workloads or freer experimentation, run locally or on your own server.
+      <a href="https://ehr-risk-framework.larucare.com/" target="_blank" rel="noopener">Open live demo</a>
+    </p>
 
     <div class="grid-2" style="margin-bottom:1.25rem">
       <article class="card">
@@ -62,7 +70,7 @@
       <table class="data">
         <thead><tr><th>Path</th><th>What it does</th></tr></thead>
         <tbody>
-          <tr><td>Bundled teaching CSVs</td><td><code>data/demo/ehr_data.csv</code> and <code>data/demo/sample_ehr.csv</code>; paper synthetic cohort remains under <code>data/raw/</code></td></tr>
+          <tr><td>Bundled teaching CSVs</td><td><code>data/demo/ehr_data.csv</code> (tiny; no <code>index_time</code>) and <code>data/demo/sample_ehr.csv</code>; horizon/diabetes tasks need <code>data/raw/paper_synthetic_cohort.csv</code> (has <code>index_time</code>)</td></tr>
           <tr><td>File upload</td><td><code>POST /v1/datasets/upload</code> — CSV into <code>data/uploads/</code></td></tr>
           <tr><td>Form / JSON rows</td><td><code>POST /v1/datasets/from-form</code> for small teaching examples</td></tr>
           <tr><td>SQL import</td><td><code>POST /v1/datasets/from-sql</code> (research DB; keyword denylist — use a read-only role)</td></tr>
@@ -123,19 +131,21 @@
           <tr><td>Calibration</td><td>Train with calibrate flag</td><td>Brier, ECE, calibration plot</td></tr>
           <tr><td>SHAP</td><td>Results → Generate SHAP</td><td>SHAP summary + explain on predict</td></tr>
           <tr><td>Fairness helpers</td><td>Results → Run fairness / <code>POST /v1/jobs/fairness</code></td><td>Group metrics (age bands / aligned CSV)</td></tr>
-          <tr><td>Analytics</td><td>Workbench Analytics</td><td>Cohort charts + model tables; per-chart PNG export and print/PDF for appendix figures</td></tr>
-          <tr><td>Trust pack</td><td>Auto after train; bind jobs with <code>run_id</code></td><td><code>reports/runs/&lt;id&gt;/trust_pack.json</code></td></tr>
-          <tr><td>External validation</td><td>Results → External validate / <code>POST /v1/jobs/external-validate</code></td><td><code>external_validation_report.json</code></td></tr>
+          <tr><td>Analytics</td><td>Workbench Analytics</td><td>Cohort charts + ROC/PR/calibration curves; per-chart PNG + print/PDF</td></tr>
+          <tr><td>Trust pack</td><td>Auto after train; bind jobs with <code>run_id</code></td><td>Per-run file <code>reports/runs/&lt;id&gt;/trust_pack.json</code> (not a dedicated <code>/v1/reports/trust-pack</code> route; flags also appear on <code>GET /v1/runs/{id}</code>)</td></tr>
+          <tr><td>External validation</td><td>Results / Research wizard / <code>POST /v1/jobs/external-validate</code></td><td><code>external_validation_report.json</code></td></tr>
           <tr><td>Analysis pack</td><td>Analytics KPIs + download / <code>GET /v1/reports/analysis-pack</code></td><td><code>analysis_pack.json</code></td></tr>
-          <tr><td>Methods + ZIP</td><td>Results download (optional <code>run_id</code>)</td><td><code>methods.md</code> + <code>download.zip</code></td></tr>
-          <tr><td>Operating points</td><td>Results → Threshold table</td><td><code>reports/threshold_operating_points.json</code></td></tr>
+          <tr><td>Paper curves</td><td>Analytics after retrain / <code>GET /v1/reports/curves</code></td><td><code>evaluation_report.json</code> → <code>curves</code>, <code>bootstrap_cis</code></td></tr>
+          <tr><td>Research wizard</td><td>Nav <strong>Research</strong> / route <code>/research</code></td><td>Guided health → train → trust → leakage → external → export</td></tr>
+          <tr><td>Methods + ZIP</td><td>Results / wizard download (optional <code>run_id</code>)</td><td><code>methods.md</code> + <code>download.zip</code></td></tr>
+          <tr><td>Operating points</td><td>Results → Threshold table / <code>GET /v1/reports/thresholds</code></td><td>Computed from evaluation scores; optional file <code>reports/threshold_operating_points.json</code> when written</td></tr>
         </tbody>
       </table>
     </section>
 
     <section class="section" id="ui">
       <h2>Angular workbench</h2>
-      <p>Pages: Home, Datasets, Train, Results, Analytics, Config, Predict, Docs. Datasets can hide bundled demos, browse tabular rows, and delete selected allowed files; themes and density live in Config. See the <a href="/workbench">annotated screenshot tour</a>.</p>
+      <p>Pages: Home, <strong>Research</strong> (wizard), Datasets, Train, Results, Analytics, Config, Predict, Docs. Use header <strong>Take tour</strong> for a per-page spotlight with short docs (Next / Back / Skip; optional “don’t auto-start”). Datasets can hide bundled demos, browse tabular rows, and delete selected allowed files; themes and density live in Config. End-to-end study loop: <a href="/research-workflow/">Research workflow</a>. See the <a href="/workbench">annotated screenshot tour</a>.</p>
     </section>
 
     <section class="section" id="serve">
@@ -143,8 +153,8 @@
       <ul>
         <li><code>GET /v1/model/schema</code> — feature columns + optional input stats (medians)</li>
         <li><code>POST /v1/predict</code> — risk probability / level + optional SHAP explanation</li>
-        <li>Predict page — schema-driven form filled from medians</li>
-        <li>Results ZIP — metrics, audits, figures for sharing (demo data only in public repos)</li>
+        <li>Predict page — schema-driven form; <strong>Export session JSON</strong> for lab notebooks</li>
+        <li>Results ZIP — metrics, audits, figures, trust pack (demo data only in public repos)</li>
       </ul>
     </section>
 
@@ -160,7 +170,7 @@
   </main>
   <footer class="site-footer">
     <div class="inner">
-      <p class="fine">Maintainer: Md Rana Hossain · <a href="mailto:support@larucare.com">support@larucare.com</a></p>
+      <p class="fine">For research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future. · Maintainer: Md Rana Hossain · <a href="mailto:support@larucare.com">support@larucare.com</a></p>
     </div>
   </footer>
   <script src="../assets/site.js"></script>

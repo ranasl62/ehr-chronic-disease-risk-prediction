@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-07-23T06:10:17.106186+00:00",
+  "generated_at_utc": "2026-07-24T02:11:16.798791+00:00",
   "threshold": 0.5,
   "metrics": {
     "roc_auc": NaN,
@@ -10,8 +10,51 @@
     "accuracy": 0.5,
     "precision": 0.0,
     "recall": 0.0,
-    "f1": 0.0
+    "f1": 0.0,
+    "n_holdout": 2,
+    "single_class_holdout": true
   },
   "classification_report_text": "              precision    recall  f1-score   support\n\n           0       1.00      0.50      0.67         2\n           1       0.00      0.00      0.00         0\n\n    accuracy                           0.50         2\n   macro avg       0.50      0.25      0.33         2\nweighted avg       1.00      0.50      0.67         2\n",
-  "meta": {}
+  "meta": {},
+  "curves": {
+    "roc": {
+      "fpr": [],
+      "tpr": [],
+      "thresholds": []
+    },
+    "pr": {
+      "precision": [],
+      "recall": [],
+      "thresholds": []
+    },
+    "calibration": {
+      "bin_mid": [
+        0.35000000000000003,
+        0.55
+      ],
+      "frac_positive": [
+        0.0,
+        0.0
+      ],
+      "mean_predicted": [
+        0.3866397914515582,
+        0.5231564523700138
+      ],
+      "counts": [
+        1,
+        1
+      ]
+    },
+    "notes": [
+      "single_class_holdout_curves_unavailable"
+    ]
+  },
+  "bootstrap_cis": {
+    "n_boot": 200,
+    "alpha": 0.05,
+    "roc_auc_ci": null,
+    "pr_auc_ci": null,
+    "note": "holdout_too_small_or_single_class"
+  },
+  "quality_note": "Hold-out has a single class \u2014 ROC/PR-AUC and curve plots are n/a; use a larger cohort or stratified split before claiming discrimination."
 }

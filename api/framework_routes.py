@@ -379,5 +379,5 @@ def framework_meta(_: bool = AuthDep):
         "limitations": "/LIMITATIONS.md",
         "personas": ["researcher", "clinical_research"],
         "adapters": ["csv", "xlsx", "json", "sql", "omop_subset", "fhir_r4_subset"],
-        "disclaimer": "For research and education only. Outputs are not clinical recommendations.",
+        "disclaimer": "For research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future.",
     }

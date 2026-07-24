@@ -36,8 +36,8 @@
       <table class="data">
         <thead><tr><th>ID</th><th>Path</th><th>Use</th></tr></thead>
         <tbody>
-          <tr><td>ehr_data</td><td><code>data/demo/ehr_data.csv</code></td><td>Tiny longitudinal teaching / smoke-test fixture</td></tr>
-          <tr><td>paper_synthetic</td><td><code>data/raw/paper_synthetic_cohort.csv</code></td><td>Larger synthetic cohort for demos</td></tr>
+          <tr><td>ehr_data</td><td><code>data/demo/ehr_data.csv</code></td><td>Tiny longitudinal teaching / smoke-test fixture (no <code>index_time</code>; use <code>custom</code> / last_event)</td></tr>
+          <tr><td>paper_synthetic</td><td><code>data/raw/paper_synthetic_cohort.csv</code></td><td>Larger synthetic cohort with <code>index_time</code> for diabetes / horizon / readmission tasks</td></tr>
           <tr><td>sample_ehr</td><td><code>data/demo/sample_ehr.csv</code></td><td>Legacy tabular teaching sample</td></tr>
         </tbody>
       </table>
@@ -49,7 +49,7 @@
 
     <section class="section">
       <h2>Longitudinal columns (typical)</h2>
-      <p><code>patient_id</code>, <code>timestamp</code>, clinical fields (<code>glucose</code>, <code>blood_pressure</code>, <code>cholesterol</code>, <code>lab_value</code>, <code>vital_signs</code>, <code>icd_code</code>), <code>age</code>, <code>label</code>. Optional: <code>index_time</code>, <code>sex</code>, <code>age_band</code>.</p>
+      <p><code>patient_id</code>, <code>timestamp</code>, clinical fields (<code>glucose</code>, <code>blood_pressure</code>, <code>cholesterol</code>, <code>lab_value</code>, <code>vital_signs</code>, <code>icd_code</code>), <code>age</code>, <code>label</code>. Optional but required for horizon-safe tasks: <code>index_time</code>. Also optional: <code>sex</code>, <code>age_band</code>.</p>
       <p class="muted">Multi-window model features look like <code>w7d_glucose</code>, not raw column names — see schema on Predict / <code>/v1/model/schema</code>.</p>
     </section>
 

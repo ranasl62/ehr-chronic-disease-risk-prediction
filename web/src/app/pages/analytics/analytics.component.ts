@@ -50,9 +50,13 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('metricChart') metricChartRef?: ElementRef<HTMLCanvasElement>;
   @ViewChild('importanceChart') importanceChartRef?: ElementRef<HTMLCanvasElement>;
   @ViewChild('compareChart') compareChartRef?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('rocChart') rocChartRef?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('prChart') prChartRef?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('calChart') calChartRef?: ElementRef<HTMLCanvasElement>;
 
   datasets = signal<DatasetInfo[]>([]);
   path = '';
+  qualityNote = signal<string | null>(null);
   filterAgeBand = '';
   filterLabel = '';
   filterPatientId = '';
@@ -76,6 +80,15 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
   reports = signal<ReportsSummary | null>(null);
   error = signal<string | null>(null);
   chartsReady = signal(false);
+  /** Empty-state copy when ROC/PR/calibration points are unavailable. */
+  curveEmpty = signal<{ roc: string | null; pr: string | null; cal: string | null }>({
+    roc: null,
+    pr: null,
+    cal: null,
+  });
+  hasRocCurve = signal(false);
+  hasPrCurve = signal(false);
+  hasCalCurve = signal(false);
 
   numericRows: Record<string, unknown>[] = [];
   missingRows: Record<string, unknown>[] = [];
@@ -221,6 +234,9 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
       ['metric', 'holdout_metrics'],
       ['importance', 'feature_importance'],
       ['compare', 'model_comparison'],
+      ['roc', 'roc_curve'],
+      ['pr', 'pr_curve'],
+      ['cal', 'calibration_curve'],
     ];
     for (const [name, file] of names) {
       const el = this.canvas(undefined, name);
@@ -289,10 +305,54 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
       next: (r) => {
         this.reports.set(r);
         this.lastReports = r;
+        this.qualityNote.set(r.quality_note || null);
+        this.updateCurveAvailability(r);
         this.buildReportTables(r);
         this.scheduleRedraw();
       },
-      error: () => undefined,
+      error: () => {
+        this.updateCurveAvailability(null);
+      },
+    });
+  }
+
+  private updateCurveAvailability(r: ReportsSummary | null): void {
+    const retrain =
+      'No ROC/PR/calibration points yet. Retrain on paper_synthetic (or a larger two-class cohort) so evaluation_report.json includes curves.';
+    const single =
+      'Hold-out is single-class or too small — ROC/PR are unavailable. Retrain on paper_synthetic or a stratified cohort with both outcomes.';
+    const mismatch =
+      'Curve arrays missing or mismatched in the evaluation report. Retrain to regenerate curves (prefer paper_synthetic).';
+    const calHint =
+      'Calibration bins unavailable (need enough scored samples). Retrain on a larger cohort such as paper_synthetic.';
+    if (!r?.curves) {
+      this.hasRocCurve.set(false);
+      this.hasPrCurve.set(false);
+      this.hasCalCurve.set(false);
+      this.curveEmpty.set({ roc: retrain, pr: retrain, cal: retrain });
+      return;
+    }
+    const notes = (r.curves.notes || []).join(' ');
+    const qn = (r.quality_note || '').toLowerCase();
+    let rocPrHint = retrain;
+    if (notes.includes('single_class') || qn.includes('single class')) {
+      rocPrHint = single;
+    } else if (notes.includes('mismatched') || notes.includes('empty_or_mismatched')) {
+      rocPrHint = mismatch;
+    } else if (notes.includes('unavailable') || notes.includes('empty')) {
+      rocPrHint = single;
+    }
+    const rocOk = (r.curves.roc?.fpr?.length || 0) > 0 && (r.curves.roc?.tpr?.length || 0) > 0;
+    const prOk =
+      (r.curves.pr?.precision?.length || 0) > 0 && (r.curves.pr?.recall?.length || 0) > 0;
+    const calOk = (r.curves.calibration?.bin_mid?.length || 0) > 0;
+    this.hasRocCurve.set(rocOk);
+    this.hasPrCurve.set(prOk);
+    this.hasCalCurve.set(calOk);
+    this.curveEmpty.set({
+      roc: rocOk ? null : rocPrHint,
+      pr: prOk ? null : rocPrHint,
+      cal: calOk ? null : calHint,
     });
   }
 
@@ -322,6 +382,7 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.lastReports) {
       this.renderImportance(this.lastReports);
       this.renderCompare(this.lastReports);
+      this.renderEvalCurves(this.lastReports);
     }
     this.chartsReady.set(this.charts.length > 0);
   }
@@ -598,6 +659,116 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
         scales: { y: { beginAtZero: true } },
       },
     });
+  }
+
+  private renderEvalCurves(r: ReportsSummary): void {
+    const curves = r.curves;
+    if (!curves) return;
+    const colors = this.palette();
+    const fpr = curves.roc?.fpr || [];
+    const tpr = curves.roc?.tpr || [];
+    if (fpr.length && tpr.length) {
+      this.bar(this.canvas(this.rocChartRef, 'roc'), {
+        type: 'line',
+        data: {
+          labels: fpr.map((x) => Number(x).toFixed(2)),
+          datasets: [
+            {
+              label: 'ROC',
+              data: tpr.map((y, i) => ({ x: fpr[i], y })),
+              borderColor: colors[0],
+              backgroundColor: 'transparent',
+              pointRadius: 0,
+              tension: 0.15,
+            },
+            {
+              label: 'Chance',
+              data: [
+                { x: 0, y: 0 },
+                { x: 1, y: 1 },
+              ],
+              borderColor: '#999',
+              borderDash: [4, 4],
+              pointRadius: 0,
+            },
+          ],
+        },
+        options: {
+          parsing: false,
+          plugins: { title: { display: true, text: 'ROC curve (hold-out)' } },
+          scales: {
+            x: { type: 'linear', min: 0, max: 1, title: { display: true, text: 'FPR' } },
+            y: { min: 0, max: 1, title: { display: true, text: 'TPR' } },
+          },
+        },
+      });
+    }
+    const prec = curves.pr?.precision || [];
+    const rec = curves.pr?.recall || [];
+    if (prec.length && rec.length) {
+      this.bar(this.canvas(this.prChartRef, 'pr'), {
+        type: 'line',
+        data: {
+          labels: rec.map((x) => Number(x).toFixed(2)),
+          datasets: [
+            {
+              label: 'Precision-Recall',
+              data: prec.map((y, i) => ({ x: rec[i], y })),
+              borderColor: colors[1],
+              backgroundColor: 'transparent',
+              pointRadius: 0,
+              tension: 0.15,
+            },
+          ],
+        },
+        options: {
+          parsing: false,
+          plugins: { title: { display: true, text: 'Precision–Recall curve' } },
+          scales: {
+            x: { type: 'linear', min: 0, max: 1, title: { display: true, text: 'Recall' } },
+            y: { min: 0, max: 1, title: { display: true, text: 'Precision' } },
+          },
+        },
+      });
+    }
+    const mid = curves.calibration?.bin_mid || [];
+    const frac = curves.calibration?.frac_positive || [];
+    const meanP = curves.calibration?.mean_predicted || [];
+    if (mid.length && frac.length) {
+      this.bar(this.canvas(this.calChartRef, 'cal'), {
+        type: 'line',
+        data: {
+          labels: mid.map((x) => Number(x).toFixed(2)),
+          datasets: [
+            {
+              label: 'Observed',
+              data: frac.map((y, i) => ({ x: meanP[i] ?? mid[i], y })),
+              borderColor: colors[0],
+              backgroundColor: 'transparent',
+              showLine: true,
+            },
+            {
+              label: 'Ideal',
+              data: [
+                { x: 0, y: 0 },
+                { x: 1, y: 1 },
+              ],
+              borderColor: '#999',
+              borderDash: [4, 4],
+              pointRadius: 0,
+            },
+          ],
+        },
+        options: {
+          parsing: false,
+          plugins: { title: { display: true, text: 'Calibration (reliability)' } },
+          scales: {
+            x: { type: 'linear', min: 0, max: 1, title: { display: true, text: 'Mean predicted' } },
+            y: { min: 0, max: 1, title: { display: true, text: 'Fraction positive' } },
+          },
+        },
+      });
+    }
   }
 
   private renderMetrics(s: WorkspaceStatus): void {

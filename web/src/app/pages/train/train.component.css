@@ -18,6 +18,7 @@ pre {
 }
 .err { color: var(--danger); }
 .lede, .muted { color: var(--muted); }
+.boot-hint { margin: 0; font-size: 0.8rem; color: var(--muted); }
 .demo-banner {
   margin: 0 0 1rem;
   padding: 0.75rem 0.9rem;

@@ -20,6 +20,12 @@ nav a {
   border-radius: 4px; font-size: 0.9rem;
 }
 nav a:hover, nav a.active { background: rgba(255,255,255,0.08); color: #fff; }
+nav .tour-launch {
+  margin-left: 0.35rem; border: 1px solid rgba(255,255,255,0.28);
+  background: transparent; color: #e4f2ed; border-radius: 4px;
+  padding: 0.35rem 0.65rem; font: inherit; font-size: 0.85rem; cursor: pointer;
+}
+nav .tour-launch:hover { background: rgba(255,255,255,0.1); color: #fff; }
 .banner {
   margin: 0; padding: 0.45rem 1.25rem; font-size: 0.8rem;
   background: #e8f0ec; color: #1a3d32; border-bottom: 1px solid var(--line);

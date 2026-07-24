@@ -17,6 +17,7 @@
     </a>
     <nav>
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+      <a routerLink="/research" routerLinkActive="active">Research</a>
       <a routerLink="/datasets" routerLinkActive="active">Datasets</a>
       <a routerLink="/train" routerLinkActive="active">Train</a>
       <a routerLink="/results" routerLinkActive="active">Results</a>
@@ -24,9 +25,10 @@
       <a routerLink="/config" routerLinkActive="active">Config</a>
       <a routerLink="/predict" routerLinkActive="active">Predict</a>
       <a routerLink="/docs" routerLinkActive="active">Docs</a>
+      <button type="button" class="tour-launch" (click)="startTour()" title="Guided tour for this page">Take tour</button>
     </nav>
   </header>
-  <p class="banner">For research and education only. Outputs are not clinical recommendations and are not intended for patient care.</p>
+  <p class="banner">For research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future.</p>
   @if (auth.message(); as authMsg) {
     <p class="banner-auth" role="alert">
       <span>{{ authMsg }}</span>
@@ -37,4 +39,5 @@
   <main>
     <router-outlet />
   </main>
+  <app-page-tour />
 </div>

@@ -13,9 +13,11 @@ Leakage-aware **clinical machine learning** workbench for research and education
 Default demos cover chronic-disease-style horizons; any binary outcome with an index time and horizon can use the same pipeline (see `tasks/`).  
 Package `openhealth` · CLI `ehr-ai`.
 
-> **For research and education only.** Outputs are not clinical recommendations and are not intended for patient care.
+> **For research and education only.** Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future.
 
 **Website:** [https://ehr.larucare.com/](https://ehr.larucare.com/) · **Live demo:** [https://ehr-risk-framework.larucare.com/](https://ehr-risk-framework.larucare.com/) · **Maintainer:** Md Rana Hossain · **Contact:** [support@larucare.com](mailto:support@larucare.com) · [LinkedIn](https://www.linkedin.com/in/mdranahossain/)
+
+> **Live demo note:** Free demo server — it may be slow. Check it with a small amount of data. For larger workloads or freer experimentation, run locally or on your own server.
 
 ## What problem does this solve?
 
@@ -25,11 +27,12 @@ Ad-hoc notebooks often skip index-time integrity, calibration, and reproducible 
 |-----|------|
 | **Documentation website** | [ehr.larucare.com](https://ehr.larucare.com/) (source [`docs/`](docs/)) |
 | **How it works (A–Z)** | [Guide with screenshots](https://ehr.larucare.com/guide/) |
-| **Live demo (workbench)** | [ehr-risk-framework.larucare.com](https://ehr-risk-framework.larucare.com/) |
+| **Live demo (workbench)** | [ehr-risk-framework.larucare.com](https://ehr-risk-framework.larucare.com/) — free demo server; may be slow; use small data (or run locally for larger workloads) |
 | **Live API** | [ehr-api.larucare.com](https://ehr-api.larucare.com/) |
 | Blog / tutorials | [Prevent data leakage](https://ehr.larucare.com/blog/prevent-data-leakage-clinical-ai/) · [Risk model quickstart](https://ehr.larucare.com/blog/ehr-risk-prediction-quickstart/) |
 | Compare / alternatives | [vs notebooks](https://ehr.larucare.com/compare/vs-ad-hoc-notebooks/) · [vs opaque AutoML](https://ehr.larucare.com/alternatives/opaque-clinical-automl/) |
 | Architecture | [`ARCHITECTURE.md`](ARCHITECTURE.md) |
+| Research workflow | [`docs/RESEARCH_WORKFLOW.md`](docs/RESEARCH_WORKFLOW.md) · [`docs/GAP_CLOSURES.md`](docs/GAP_CLOSURES.md) |
 | Install | [`INSTALLATION.md`](INSTALLATION.md) |
 | Data | [`DATA_GUIDE.md`](DATA_GUIDE.md) · teaching fixtures in `data/demo/` |
 | Why / limits | [`WHY_THIS_FRAMEWORK.md`](WHY_THIS_FRAMEWORK.md) · [`LIMITATIONS.md`](LIMITATIONS.md) |
@@ -90,13 +93,13 @@ Optional: `cp .env.example .env` (set `API_KEY`, ports). GPU / overrides: `cp do
 | API + OpenAPI | http://127.0.0.1:8000/docs (also http://127.0.0.1:8080/api-docs) | `ehr-risk-api:local` | `ranasl62/ehr-risk-api` |
 | Results ZIP | http://127.0.0.1:8000/v1/reports/download.zip | — | — |
 | **Docs website** | [ehr.larucare.com](https://ehr.larucare.com/) ([`docs/`](docs/)) | — | — |
-| **Live demo** | [ehr-risk-framework.larucare.com](https://ehr-risk-framework.larucare.com/) | — | — |
+| **Live demo** | [ehr-risk-framework.larucare.com](https://ehr-risk-framework.larucare.com/) (free; may be slow — prefer small data) | — | — |
 | **Live API** | [ehr-api.larucare.com](https://ehr-api.larucare.com/) | — | — |
 
 **First loop:** Datasets (bundled teaching demos + health) → Train → Results / Analytics → Predict.  
-Full research sequence (trust pack, leakage, external validate, analysis pack, ZIP/methods, Analytics PNG export/print): [`docs/RESEARCH_WORKFLOW.md`](docs/RESEARCH_WORKFLOW.md).
+Full research sequence (wizard, trust pack, leakage, external validate, analysis pack, ROC/PR/calibration curves, ZIP/methods, Analytics PNG export/print, Predict session JSON): [`docs/RESEARCH_WORKFLOW.md`](docs/RESEARCH_WORKFLOW.md).
 Teaching fixtures are `data/demo/ehr_data.csv` (default longitudinal Train path) and `data/demo/sample_ehr.csv`; legacy `data/raw/` references resolve as compatibility fallbacks.
-Demo CSVs only — no PHI. **Research and education only** — not for patient care.
+Demo CSVs only — no PHI. **For research and education only.** Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future.
 
 **Stop / clean:** `docker compose down` · `docker compose down --rmi local` (also drop local images).
 
@@ -169,8 +172,9 @@ Full UI tour: [`docs/workbench/`](docs/workbench/). Refresh: `bash scripts/captu
 
 ```bash
 pip install -r requirements.txt && pip install -e .
-PYTHONPATH=. pytest tests/ -q
+PYTHONPATH=. pytest tests/ -m "not e2e" -q
 cd web && npm install && npm start   # UI :4200 → API :8000
+# optional browser smoke (UI must be up): cd web && npm i -D @playwright/test && npm run e2e:install && npm run e2e
 ```
 
 Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md). Authors: [`AUTHORS.md`](AUTHORS.md).
@@ -202,4 +206,4 @@ If you use this software in research, teaching, or a methods pipeline, please ci
 
 ## License & disclaimer
 
-[MIT](LICENSE). Outputs are research probabilities only. You are responsible for PHI, IRB/DUA, and PhysioNet rules when using real data.
+[MIT](LICENSE). For research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future. You are responsible for PHI, IRB/DUA, and PhysioNet rules when using real data.

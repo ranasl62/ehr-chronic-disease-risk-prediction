@@ -24,9 +24,14 @@
       audit, review metrics and SHAP, then predict. Screenshots use synthetic teaching data only.
     </p>
     <p class="banner">
-      <strong>Research and education only.</strong> Not a medical device. Do not upload PHI.
+      For research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future. Do not upload PHI.
       Live demo: <a href="https://ehr-risk-framework.larucare.com/" target="_blank" rel="noopener">ehr-risk-framework.larucare.com</a>
       · API: <a href="https://ehr-api.larucare.com/docs" target="_blank" rel="noopener">ehr-api.larucare.com</a>
+    </p>
+    <p class="demo-callout">
+      <strong>Free demo server</strong> — it may be slow. Check it with a small amount of data.
+      For larger workloads or freer experimentation, run locally or on your own server.
+      <a href="https://ehr-risk-framework.larucare.com/" target="_blank" rel="noopener">Open live demo</a>
     </p>
 
     <nav class="toc" aria-label="Guide contents">
@@ -35,6 +40,7 @@
         <li><a href="#a-scope">A. Scope &amp; what you get</a></li>
         <li><a href="#b-start">B. Start the stack</a></li>
         <li><a href="#c-home">C. Home — checklist</a></li>
+        <li><a href="#c2-wizard">C2. Research wizard</a></li>
         <li><a href="#d-config">D. Config Center</a></li>
         <li><a href="#e-datasets">E. Datasets &amp; health</a></li>
         <li><a href="#f-train">F. Train &amp; compare</a></li>
@@ -76,6 +82,10 @@ docker compose up --build
         Or open the hosted workbench without installing anything:
         <a href="https://ehr-risk-framework.larucare.com/" target="_blank" rel="noopener">https://ehr-risk-framework.larucare.com/</a>
       </p>
+      <p class="demo-callout">
+        <strong>Free demo server</strong> — it may be slow. Check it with a small amount of data.
+        For larger workloads or freer experimentation, run locally or on your own server.
+      </p>
       <p class="muted">Also: <a href="/quickstart">Quickstart</a> · <a href="/docker-images">Docker Hub images</a></p>
     </section>
 
@@ -92,10 +102,27 @@ docker compose up --build
       <ol class="steps">
         <li>Open the workbench URL and wait for status to leave “Checking workspace…”.</li>
         <li>Confirm green checks for API, demo data, and model (first boot may train via <code>prepare</code>).</li>
-        <li>Use <strong>Run demo</strong> to jump into Train with the bundled longitudinal CSV, or <strong>Import / pick data</strong> for Datasets.</li>
+        <li>Prefer <strong>Start research wizard</strong> for a full study loop, or <strong>Run demo train</strong> / Datasets for a manual path.</li>
         <li>Failed items show a <strong>Fix</strong> link to Datasets, Train, or Results.</li>
       </ol>
-      <p class="muted">Detail page: <a href="/ui-home">Home UI tour</a></p>
+      <p class="muted">Detail page: <a href="/ui-home">Home UI tour</a> · Workflow: <a href="/research-workflow/">Research workflow</a></p>
+    </section>
+
+    <section class="section" id="c2-wizard">
+      <h2>C2. Research wizard</h2>
+      <p>
+        Route <code>/research</code> (also linked from Home). Guided steps: data &amp; task → health → train →
+        trust pack → leakage → external validation → export (ZIP, methods.md, Analytics, Predict).
+        Same jobs and artifacts as the manual pages — intended so a researcher can finish a methods-style
+        pass without jumping between screens.
+      </p>
+      <ol class="steps">
+        <li>Pick a demo or uploaded CSV and a task preset (e.g. <code>horizon_detection_30d</code>).</li>
+        <li>Run health; fix blockers before training.</li>
+        <li>Train, then refresh trust; run leakage and optional external validation.</li>
+        <li>Export ZIP / methods; open Analytics for ROC/PR/calibration PNG export after retrain.</li>
+      </ol>
+      <p class="muted">Full sequence: <a href="/research-workflow/">Research workflow</a></p>
     </section>
 
     <section class="section" id="d-config">
@@ -187,16 +214,17 @@ docker compose up --build
         <li>Open Results after train — check ROC / PR when available, Brier, ECE, accuracy family metrics.</li>
         <li>Optionally run light HPO — inspect best trial (not clinical AutoML).</li>
         <li>Generate SHAP when supported; Home checklist updates when the summary exists.</li>
+        <li>Run external validation and bind leakage/SHAP to a <code>run_id</code> for the trust pack.</li>
         <li>Promote a named run when you want that artifact as the active model.</li>
       </ol>
-      <p class="muted">Detail: <a href="/ui-results">Results UI</a></p>
+      <p class="muted">Detail: <a href="/ui-results">Results UI</a> · Prefer the <strong>Research</strong> wizard (<code>/research</code>) for a guided first pass.</p>
     </section>
 
     <section class="section" id="i-analytics">
       <h2>I. Analytics</h2>
       <p>
-        Route <code>/analytics</code>. Cohort charts and tables for the selected dataset / split —
-        useful for teaching EDA before or after training.
+        Route <code>/analytics</code>. Cohort charts, hold-out ROC / PR / calibration curves (after retrain),
+        PNG export, and print layout for methods appendix figures — teaching EDA and reporting.
       </p>
       <figure class="shot">
         <img src="../media/08_analytics_dashboard.png" alt="Analytics dashboard with cohort charts" width="1200" height="750" />
@@ -205,6 +233,7 @@ docker compose up --build
       <ol class="steps">
         <li>Select the dataset you trained on (or another demo).</li>
         <li>Explore filters and charts — confirm class balance and feature distributions look sane.</li>
+        <li>After retrain, open ROC / PR / calibration cards; export PNG or Print for the appendix.</li>
         <li>Use findings to adjust windows / task config, then retrain if needed.</li>
       </ol>
       <p class="muted">Detail: <a href="/ui-analytics">Analytics UI</a></p>
@@ -304,7 +333,7 @@ docker compose up --build
   <footer class="site-footer">
     <div class="inner">
       <p class="fine">
-        Demo screenshots only · Research / education only ·
+        Demo screenshots only · For research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future. ·
         <a href="mailto:support@larucare.com">support@larucare.com</a>
       </p>
     </div>

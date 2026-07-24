@@ -18,7 +18,7 @@ temporal_split: false
 feature_inclusive: true
 require_api_key: false
 disclaimer_ack: false
-active_run_id: null
+active_run_id: 20260724T021156Z_logreg
 data_mode: synthetic
 ui:
   density: comfortable

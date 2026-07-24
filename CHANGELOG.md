@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Research workbench
+
+- **Research wizard** (`/research`) — guided health → train → trust → leakage → external validation → export
+- **Paper curves** — ROC / PR / calibration points in `evaluation_report.json`; Analytics Chart.js plots; `GET /v1/reports/curves`; bootstrap AUC CIs + quality notes
+- **Analytics** — sex/prevalence charts; per-chart and bulk PNG export; print/PDF layout
+- **Predict** — export session JSON (features + score)
+- **Trust packaging** — per-run `trust_pack.json`; run-scoped leakage/SHAP/external-validate/ZIP/methods
+- Live e2e (`tests/test_e2e_features.py`) and optional Playwright smoke (`web/e2e`)
+- Docs/book/paper notes updated for the complete research loop
+
 ## [1.0.0] — 2026-07-19
 
 ### Framework

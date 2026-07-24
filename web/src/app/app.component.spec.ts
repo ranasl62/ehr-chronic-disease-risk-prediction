@@ -26,11 +26,14 @@ describe('AppComponent', () => {
     expect(el.textContent).toContain('research and education');
   });
 
-  it('dismisses auth banner', () => {
+  it('exposes Take tour and starts page tour', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const cmp = fixture.componentInstance;
-    spyOn(cmp.auth, 'clear');
-    cmp.dismissAuth();
-    expect(cmp.auth.clear).toHaveBeenCalled();
+    spyOn(cmp.tour, 'startForCurrentRoute');
+    fixture.detectChanges();
+    const btn = (fixture.nativeElement as HTMLElement).querySelector('.tour-launch') as HTMLButtonElement;
+    expect(btn?.textContent).toContain('Take tour');
+    btn.click();
+    expect(cmp.tour.startForCurrentRoute).toHaveBeenCalledWith(true);
   });
 });

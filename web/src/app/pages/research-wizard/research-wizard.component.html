@@ -1,0 +1,223 @@
+<section class="panel wizard">
+  <header class="wiz-head">
+    <div>
+      <h1 data-tour="research-title">Research wizard</h1>
+      <p class="lede">
+        Guided loop: data → health → train → trust → leakage → external validation → export.
+        For research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future.
+      </p>
+    </div>
+    <a routerLink="/docs" class="btn">Docs</a>
+  </header>
+
+  <ol class="stepper" aria-label="Research steps" data-tour="research-steps">
+    @for (s of steps; track s.id) {
+      <li>
+        <button type="button" class="step-btn" [class.on]="step() === s.id" (click)="go(s.id)">
+          {{ s.label }}
+        </button>
+      </li>
+    }
+  </ol>
+
+  @if (error()) {
+    <p class="err" role="alert">{{ error() }}</p>
+  }
+  @if (qualityNote()) {
+    <p class="quality">{{ qualityNote() }}</p>
+  }
+
+  @if (step() === 'data') {
+    <section class="card-block">
+      <h2>Choose dataset &amp; task</h2>
+      <p class="muted">
+        Horizon / diabetes / readmission tasks need <code>index_time</code> — use
+        <code>paper_synthetic_cohort.csv</code>. Tiny <code>ehr_data.csv</code> pairs with
+        <code>custom</code> (last_event) only.
+      </p>
+      <div class="form-row">
+        <label>Dataset
+          <select [(ngModel)]="path" name="path" (ngModelChange)="onDatasetChange()">
+            @for (d of datasets(); track d.id) {
+              <option [value]="d.path">{{ d.label }}</option>
+            }
+          </select>
+        </label>
+        <label>Task
+          <select [(ngModel)]="taskId" name="task" (ngModelChange)="onTaskChange()">
+            @for (t of tasks(); track t.id) {
+              <option [value]="t.id">{{ t.id }}</option>
+            }
+          </select>
+        </label>
+        <label>Model
+          <select [(ngModel)]="modelKind" name="mk">
+            <option value="logreg">logreg</option>
+            <option value="random_forest">random_forest</option>
+            <option value="xgboost">xgboost</option>
+            <option value="lightgbm">lightgbm</option>
+          </select>
+        </label>
+      </div>
+      <button type="button" class="btn primary" (click)="go('health')">Next: health check</button>
+    </section>
+  }
+
+  @if (step() === 'health') {
+    <section class="card-block">
+      <h2>Task health</h2>
+      <p class="muted">Confirms required columns / timing fields for <code>{{ taskId }}</code> on <code>{{ path }}</code>.</p>
+      <button type="button" class="btn primary" [disabled]="busy()" (click)="runHealth()">Run health check</button>
+
+      @if (healthReady() === false) {
+        <div class="blocker-banner" role="alert" data-tour="wizard-health-blockers">
+          <p><strong>Not ready for training</strong> — fix blockers below before continuing.</p>
+          <ul class="blocker-list">
+            @for (b of healthBlockers(); track b) {
+              <li>{{ b }}</li>
+            }
+          </ul>
+          @if (needsIndexTime()) {
+            <p class="muted">
+              This task needs <code>index_time</code>. Use <code>paper_synthetic</code>, or switch to
+              the <code>custom</code> task for the tiny demo.
+            </p>
+          }
+          <div class="actions">
+            <button type="button" class="btn primary" (click)="usePaperSynthetic()" data-tour="wizard-use-paper">
+              Use paper_synthetic
+            </button>
+            <button type="button" class="btn" (click)="useCustomTask()" data-tour="wizard-use-custom">
+              Use custom task
+            </button>
+          </div>
+        </div>
+      }
+
+      @if (healthReady() === true) {
+        <p class="ok" data-tour="wizard-health-ready">Ready for training.</p>
+      }
+
+      @if (healthWarnings().length) {
+        <div class="warn-box">
+          <p><strong>Warnings</strong> (non-blocking)</p>
+          <ul>
+            @for (w of healthWarnings(); track w) {
+              <li>{{ w }}</li>
+            }
+          </ul>
+        </div>
+      }
+
+      @if (healthChecks().length) {
+        <ul class="check-list" aria-label="Health checks">
+          @for (c of healthChecks(); track c.name) {
+            <li [class.fail]="!c.ok" [class.ok-check]="c.ok">
+              <span class="check-mark">{{ c.ok ? '✓' : '✗' }}</span>
+              <strong>{{ c.name }}</strong> — {{ c.detail }}
+              @if (!c.ok && c.blocking) {
+                <span class="tag">blocking</span>
+              }
+            </li>
+          }
+        </ul>
+      }
+
+      @if (health()) {
+        <button type="button" class="btn linkish" (click)="showHealthDebug.set(!showHealthDebug())">
+          {{ showHealthDebug() ? 'Hide' : 'Show' }} raw health JSON
+        </button>
+        @if (showHealthDebug()) {
+          <pre class="code">{{ health() | json }}</pre>
+        }
+      }
+
+      <button
+        type="button"
+        class="btn"
+        [disabled]="!canProceedToTrain()"
+        (click)="go('train')"
+        data-tour="wizard-next-train"
+        [attr.title]="canProceedToTrain() ? 'Continue to train' : 'Pass health check first'"
+      >
+        Next: train
+      </button>
+      @if (health() && !canProceedToTrain()) {
+        <p class="muted gate-hint">Next: train stays disabled until health is ready.</p>
+      }
+    </section>
+  }
+
+  @if (step() === 'train') {
+    <section class="card-block">
+      <h2>Train hold-out model</h2>
+      <p class="muted">Uses patient-level split on the selected demo/upload path. Metrics may be n/a on tiny cohorts.</p>
+      @if (!canProceedToTrain()) {
+        <p class="err" role="alert">Health must pass before train. Go back to the health step.</p>
+      }
+      <button type="button" class="btn primary" [disabled]="busy() || !canProceedToTrain()" (click)="startTrain()">
+        Start train
+      </button>
+      @if (job(); as j) {
+        <p>Job <code>{{ j.id }}</code> · {{ j.status }}</p>
+      }
+      @if (runId(); as rid) {
+        <p>Run id: <code>{{ rid }}</code></p>
+      }
+    </section>
+  }
+
+  @if (step() === 'trust') {
+    <section class="card-block">
+      <h2>Trust pack</h2>
+      <p class="muted">Per-run hashes and completeness flags for methods appendix.</p>
+      <button type="button" class="btn" (click)="loadTrust()">Refresh trust</button>
+      <button type="button" class="btn primary" (click)="go('leakage')">Next: leakage</button>
+      @if (trustNote(); as tn) {
+        <pre class="code">{{ tn }}</pre>
+      }
+    </section>
+  }
+
+  @if (step() === 'leakage') {
+    <section class="card-block">
+      <h2>Leakage audit</h2>
+      <button type="button" class="btn primary" [disabled]="busy()" (click)="runLeakage()">Run leakage audit</button>
+      <button type="button" class="btn" (click)="go('external')">Skip to external val</button>
+    </section>
+  }
+
+  @if (step() === 'external') {
+    <section class="card-block">
+      <h2>External validation</h2>
+      <p class="muted">Scores the promoted/run model on the same path (demo stand-in) or your held-out site CSV.</p>
+      <button type="button" class="btn primary" [disabled]="busy()" (click)="runExternal()">Run external validate</button>
+      <button type="button" class="btn" (click)="go('export')">Skip to export</button>
+    </section>
+  }
+
+  @if (step() === 'export') {
+    <section class="card-block">
+      <h2>Export &amp; figures</h2>
+      <div class="actions">
+        <a class="btn primary" [href]="zipUrl()" download>Download results ZIP</a>
+        <a class="btn" [href]="methodsUrl()" download="methods.md">methods.md</a>
+        <a routerLink="/analytics" class="btn">Analytics (ROC / PNG / print)</a>
+        <a routerLink="/results" class="btn">Results</a>
+        <a routerLink="/predict" class="btn">Predict</a>
+      </div>
+    </section>
+  }
+
+  <aside class="log">
+    <h3>Activity</h3>
+    @if (!log().length) {
+      <p class="muted">Steps will appear here.</p>
+    }
+    <ul>
+      @for (line of log(); track $index) {
+        <li>{{ line }}</li>
+      }
+    </ul>
+  </aside>
+</section>

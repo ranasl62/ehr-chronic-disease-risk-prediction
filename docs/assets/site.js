@@ -5,6 +5,7 @@
     { href: "/features", label: "Features", group: "start" },
     { href: "/blog", label: "Blog", group: "start" },
     { href: "/workbench", label: "Workbench", group: "guide" },
+    { href: "/research-workflow", label: "Research workflow", group: "guide" },
     { href: "/guide", label: "How it works", group: "guide" },
     { href: "/quickstart", label: "Quickstart", group: "guide" },
     { href: "/docker-for-beginners", label: "Docker for beginners", group: "guide" },
@@ -40,6 +41,7 @@
     "/features": "Capability catalog from ingest to serve",
     "/blog": "Tutorials on leakage-safe clinical ML",
     "/workbench": "Hub for every UI page with screenshots",
+    "/research-workflow": "End-to-end methods-style study loop in the workbench",
     "/guide": "A–Z walkthrough with screenshots",
     "/quickstart": "Docker → first train → predict",
     "/docker-for-beginners": "Install Docker and run the stack",
@@ -92,7 +94,7 @@
   var RELATED = {
     "/": ["/why", "/guide", "/quickstart", "/workbench"],
     "/why": ["/features", "/blog/prevent-data-leakage-clinical-ai", "/limits", "/cite"],
-    "/features": ["/workbench", "/guide", "/fine-tuning", "/limits"],
+    "/features": ["/workbench", "/research-workflow", "/guide", "/fine-tuning"],
     "/blog": [
       "/blog/why-clinical-ai-label-leakage",
       "/blog/calibration-gap-brier-ece",
@@ -144,8 +146,9 @@
       "/cite",
       "/blog",
     ],
-    "/workbench": ["/guide", "/ui-home", "/ui-train", "/ui-predict"],
-    "/guide": ["/workbench", "/quickstart", "/ui-train", "/limits"],
+    "/workbench": ["/research-workflow", "/guide", "/ui-home", "/ui-train"],
+    "/research-workflow": ["/workbench", "/guide", "/ui-train", "/fine-tuning"],
+    "/guide": ["/workbench", "/research-workflow", "/quickstart", "/ui-train"],
     "/quickstart": ["/docker-for-beginners", "/guide", "/docker-images", "/workbench"],
     "/docker-for-beginners": ["/quickstart", "/docker-images", "/workbench", "/limits"],
     "/docker-images": ["/docker-for-beginners", "/quickstart", "/commands", "/architecture"],
@@ -195,15 +198,24 @@
   var path = currentPage();
   var isUiDoc = path.indexOf("/ui-") === 0 || path === "/workbench";
 
+  function isNavActive(href) {
+    if (href === "/") return path === "/";
+    if (href === path) return true;
+    if (href === "/workbench" && isUiDoc) return true;
+    // Nested docs (e.g. /blog/…) keep the parent primary item active
+    if (path.indexOf(href + "/") === 0) return true;
+    return false;
+  }
+
   var nav = document.querySelector(".nav");
   if (nav) {
     nav.innerHTML =
       PAGES.map(function (p) {
-        var cur =
-          p.href === path || (p.href === "/workbench" && isUiDoc)
-            ? ' aria-current="page"'
-            : "";
-        return '<a href="' + p.href + '"' + cur + ">" + p.label + "</a>";
+        var active = isNavActive(p.href);
+        var attrs = active
+          ? ' class="is-active" aria-current="page"'
+          : "";
+        return '<a href="' + p.href + '"' + attrs + ">" + p.label + "</a>";
       }).join("") +
       '<a class="btn btn-primary" href="https://github.com/ranasl62/ehr-chronic-disease-risk-prediction">GitHub</a>';
   }
@@ -216,7 +228,8 @@
     sub.innerHTML =
       "<strong>UI pages</strong>" +
       UI_PAGES.map(function (p) {
-        var cur = p.href === path ? ' aria-current="page"' : "";
+        var cur =
+          p.href === path ? ' class="is-active" aria-current="page"' : "";
         return '<a href="' + p.href + '"' + cur + ">" + p.label + "</a>";
       }).join("");
     main.insertBefore(sub, main.firstChild);
@@ -276,6 +289,31 @@
       footerInner.insertBefore(map, fine);
     } else {
       footerInner.appendChild(map);
+    }
+  }
+
+  // Visible note beside Live demo CTAs (free hosted server expectations)
+  if (!document.querySelector(".demo-callout")) {
+    var demoHref = "https://ehr-risk-framework.larucare.com/";
+    var liveBtn =
+      document.querySelector('a.btn[href^="' + demoHref + '"]') ||
+      document.querySelector('a[href^="' + demoHref + '"]');
+    if (liveBtn) {
+      var note = document.createElement("p");
+      note.className = "demo-callout";
+      note.innerHTML =
+        "<strong>Free demo server</strong> — it may be slow. Check it with a small amount of data. " +
+        "For larger workloads or freer experimentation, run locally or on your own server. " +
+        '<a href="' +
+        demoHref +
+        '" target="_blank" rel="noopener">Open live demo</a>';
+      var anchor =
+        liveBtn.closest(".hero-actions") ||
+        liveBtn.closest("p") ||
+        liveBtn.parentElement;
+      if (anchor) {
+        anchor.insertAdjacentElement("afterend", note);
+      }
     }
   }
 

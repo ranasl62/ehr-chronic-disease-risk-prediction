@@ -83,16 +83,45 @@ def test_leakage_and_shap_land_in_run(client, wait_jobs_idle):
 
 
 def test_promote_copies_trust_extras(client, wait_jobs_idle):
+    import struct
+
     run_id = _ensure_trained_run(client, wait_jobs_idle)
     rd = ensure_run(run_id)
     (rd / "leakage_audit.json").write_text(json.dumps({"passed": True, "temporal_integrity": {"passed": True}}), encoding="utf-8")
-    (rd / "shap_summary.png").write_bytes(b"\x89PNG\r\n\x1a\n")
+    # Valid IHDR PNG (not magic-only stub) — promote refuses corrupt figures.
+    ihdr = struct.pack(">IIBBBBB", 8, 8, 8, 2, 0, 0, 0)
+    png = b"\x89PNG\r\n\x1a\n" + struct.pack(">I", 13) + b"IHDR" + ihdr + b"\x00\x00\x00\x00"
+    png = png + b"\x00" * max(0, 64 - len(png))
+    (rd / "shap_summary.png").write_bytes(png)
     write_trust_pack(run_id, rd)
     out = promote_run(run_id)
     assert out["run_id"] == run_id
     assert (REPORTS_DIR / "leakage_audit.json").is_file()
     assert (REPORTS_DIR / "shap_summary.png").is_file()
+    assert (REPORTS_DIR / "shap_summary.png").stat().st_size >= 64
     assert (REPORTS_DIR / "trust_pack.json").is_file()
+
+
+def test_promote_skips_corrupt_shap_stub(client, wait_jobs_idle, tmp_path, monkeypatch):
+    """Corrupt run SHAP must not create a shared gallery stub."""
+    from utils import config
+    import openhealth.runs as runs_mod
+
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    monkeypatch.setattr(config, "REPORTS_DIR", reports)
+    monkeypatch.setattr(runs_mod, "REPORTS_DIR", reports)
+    monkeypatch.setattr("openhealth.trust_pack.REPORTS_DIR", reports)
+
+    run_id = _ensure_trained_run(client, wait_jobs_idle)
+    rd = ensure_run(run_id)
+    shared = reports / "shap_summary.png"
+    (rd / "shap_summary.png").write_bytes(b"\x89PNG\r\n\x1a\n")
+    write_trust_pack(run_id, rd)
+    promote_run(run_id)
+    assert not shared.is_file()
+    pack = write_trust_pack(run_id, rd)
+    assert pack["flags"]["has_shap"] is False
 
 
 def test_icd_proxy_warnings():

@@ -6,15 +6,136 @@ from sklearn.metrics import (
     brier_score_loss,
     classification_report,
     f1_score,
+    precision_recall_curve,
     precision_score,
     recall_score,
     roc_auc_score,
+    roc_curve,
 )
 
-from training.calibration_metrics import expected_calibration_error
+from training.calibration_metrics import calibration_curve_points, expected_calibration_error
 
 
-def evaluate_binary(model, X_test, y_test, threshold: float = 0.5, *, ece_bins: int = 10):
+def _finite_list(arr, *, max_points: int = 200) -> list[float]:
+    """Downsample curve arrays for JSON/UI without changing shape much."""
+    a = np.asarray(arr, dtype=float).ravel()
+    if a.size == 0:
+        return []
+    if a.size > max_points:
+        idx = np.linspace(0, a.size - 1, max_points).astype(int)
+        a = a[idx]
+    out: list[float] = []
+    for v in a:
+        if np.isfinite(v):
+            out.append(float(v))
+    return out
+
+
+def curve_payload(y_true, y_prob, *, ece_bins: int = 10) -> dict:
+    """
+    ROC / PR / calibration points for research Chart.js plots.
+    Single-class holdouts return empty curves plus an explicit note.
+    """
+    y_true_arr = np.asarray(y_true).astype(int).ravel()
+    y_prob_arr = np.asarray(y_prob, dtype=float).ravel()
+    notes: list[str] = []
+    roc = {"fpr": [], "tpr": [], "thresholds": []}
+    pr = {"precision": [], "recall": [], "thresholds": []}
+    if len(y_true_arr) == 0 or len(y_true_arr) != len(y_prob_arr):
+        notes.append("curves_unavailable_empty_or_mismatched")
+        return {
+            "roc": roc,
+            "pr": pr,
+            "calibration": calibration_curve_points(y_true_arr, y_prob_arr, n_bins=ece_bins),
+            "notes": notes,
+        }
+    if len(np.unique(y_true_arr)) < 2:
+        notes.append("single_class_holdout_curves_unavailable")
+    else:
+        fpr, tpr, thr_roc = roc_curve(y_true_arr, y_prob_arr)
+        prec, rec, thr_pr = precision_recall_curve(y_true_arr, y_prob_arr)
+        roc = {
+            "fpr": _finite_list(fpr),
+            "tpr": _finite_list(tpr),
+            "thresholds": _finite_list(thr_roc),
+        }
+        pr = {
+            "precision": _finite_list(prec),
+            "recall": _finite_list(rec),
+            # precision_recall_curve thresholds are len-1 vs points
+            "thresholds": _finite_list(thr_pr),
+        }
+    cal = calibration_curve_points(y_true_arr, y_prob_arr, n_bins=ece_bins)
+    if not cal["counts"]:
+        notes.append("calibration_bins_empty")
+    return {"roc": roc, "pr": pr, "calibration": cal, "notes": notes}
+
+
+def bootstrap_metric_cis(
+    y_true,
+    y_prob,
+    *,
+    n_boot: int = 200,
+    seed: int = 42,
+    alpha: float = 0.05,
+) -> dict:
+    """
+    Percentile bootstrap CIs for ROC-AUC / PR-AUC on the hold-out set.
+    Returns null intervals when the hold-out is single-class or too small.
+    """
+    y_true_arr = np.asarray(y_true).astype(int).ravel()
+    y_prob_arr = np.asarray(y_prob, dtype=float).ravel()
+    empty = {
+        "n_boot": int(n_boot),
+        "alpha": float(alpha),
+        "roc_auc_ci": None,
+        "pr_auc_ci": None,
+        "note": "unavailable",
+    }
+    n = len(y_true_arr)
+    if n < 8 or len(y_true_arr) != len(y_prob_arr) or len(np.unique(y_true_arr)) < 2:
+        empty["note"] = "holdout_too_small_or_single_class"
+        return empty
+    rng = np.random.default_rng(seed)
+    roc_s: list[float] = []
+    pr_s: list[float] = []
+    for _ in range(max(10, int(n_boot))):
+        idx = rng.integers(0, n, size=n)
+        yt = y_true_arr[idx]
+        yp = y_prob_arr[idx]
+        if len(np.unique(yt)) < 2:
+            continue
+        try:
+            roc_s.append(float(roc_auc_score(yt, yp)))
+            pr_s.append(float(average_precision_score(yt, yp)))
+        except ValueError:
+            continue
+    if len(roc_s) < 10:
+        empty["note"] = "insufficient_valid_bootstrap_replicates"
+        return empty
+    lo_q = 100.0 * (alpha / 2.0)
+    hi_q = 100.0 * (1.0 - alpha / 2.0)
+    return {
+        "n_boot": int(n_boot),
+        "alpha": float(alpha),
+        "n_valid": len(roc_s),
+        "roc_auc_ci": [float(np.percentile(roc_s, lo_q)), float(np.percentile(roc_s, hi_q))],
+        "pr_auc_ci": [float(np.percentile(pr_s, lo_q)), float(np.percentile(pr_s, hi_q))],
+        "note": "percentile_bootstrap",
+    }
+
+
+def evaluate_binary(
+    model,
+    X_test,
+    y_test,
+    threshold: float = 0.5,
+    *,
+    ece_bins: int = 10,
+    include_curves: bool = False,
+    bootstrap_cis: bool = False,
+    n_boot: int = 200,
+):
     y_prob = model.predict_proba(X_test)[:, 1]
     y_pred = (y_prob >= threshold).astype(int)
     y_test_arr = np.asarray(y_test)
@@ -38,7 +159,15 @@ def evaluate_binary(model, X_test, y_test, threshold: float = 0.5, *, ece_bins: 
         "recall": float(recall_score(y_test, y_pred, zero_division=0)),
         "f1": float(f1_score(y_test, y_pred, zero_division=0)),
         "report": classification_report(y_test, y_pred, zero_division=0),
+        "n_holdout": int(len(y_test_arr)),
+        "single_class_holdout": bool(single_class),
     }
+    if include_curves:
+        out["curves"] = curve_payload(y_test_arr, y_prob, ece_bins=ece_bins)
+    if bootstrap_cis:
+        out["bootstrap_cis"] = bootstrap_metric_cis(
+            y_test_arr, y_prob, n_boot=n_boot, seed=42
+        )
     return out
 
 

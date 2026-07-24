@@ -1,8 +1,8 @@
 <section class="panel">
-  <h1>Results</h1>
+  <h1 data-tour="results-title">Results</h1>
   <p class="lede">Interactive metrics, named runs, fairness, leakage audit, comparison charts, and filterable figures.</p>
 
-  <div class="actions">
+  <div class="actions" data-tour="results-metrics">
     <button type="button" class="btn" (click)="reload()">Refresh</button>
     <button type="button" class="btn primary" [disabled]="busy()" (click)="runShap()">Generate SHAP</button>
     <button type="button" class="btn" [disabled]="busy()" (click)="runFairness()">Run fairness</button>
@@ -20,8 +20,10 @@
     <p class="muted">Job {{ j.id }} ({{ j.kind }}): {{ j.status }} — {{ j.message }}</p>
   }
 
-  @if (!summary()) {
-    <p class="muted">No reports yet. Train a model first, then refresh.</p>
+  @if (summaryLoading() && !summary()) {
+    <p class="muted" data-tour="results-loading">Loading reports…</p>
+  } @else if (!summaryLoading() && !summary()) {
+    <p class="muted" data-tour="results-empty">No reports yet. Train a model first, then refresh.</p>
     <p><a routerLink="/train" class="btn primary">Go to Train</a></p>
   }
 
@@ -342,9 +344,9 @@
       (pageSizeChange)="onPageSize($event)"
     />
 
-    <h2>Figures</h2>
+    <h2 data-tour="results-figures">Figures</h2>
     @if (!hasReportPngs()) {
-      <p class="muted">No PNG figures in reports yet.</p>
+      <p class="muted">No PNG figures in reports yet. Train, then Generate SHAP for a summary plot.</p>
     } @else {
       <p class="muted">
         @if (hasCalibrationFigure() && hasShapFigure()) {
@@ -372,8 +374,26 @@
       <div class="figs">
         @for (f of filteredFigs(); track f.name) {
           <figure>
-            <figcaption>{{ f.name }}</figcaption>
-            <img [src]="fileUrl(f.name)" [alt]="f.name" />
+            <figcaption>{{ f.name }} <span class="muted">({{ f.bytes }} B)</span></figcaption>
+            @if (figLoadError()[f.name]) {
+              <p class="err fig-err" role="alert">
+                @if (f.name.includes('shap')) {
+                  Could not load {{ f.name }} (missing or corrupt). Click Generate SHAP, then Refresh.
+                } @else if (f.name.includes('calibration')) {
+                  Could not load {{ f.name }}. Retrain with calibration enabled, then Refresh.
+                } @else {
+                  Could not load {{ f.name }}. Regenerate the figure or refresh after train.
+                }
+              </p>
+              <button type="button" class="btn tiny" (click)="retryFig(f.name)">Retry image</button>
+            } @else {
+              <img
+                [src]="fileUrl(f.name)"
+                [alt]="f.name"
+                (error)="onFigError(f.name)"
+                (load)="onFigLoad(f.name)"
+              />
+            }
           </figure>
         } @empty {
           <p class="muted">No PNG figures match the filter.</p>

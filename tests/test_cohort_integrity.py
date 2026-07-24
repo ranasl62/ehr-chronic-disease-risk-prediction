@@ -81,3 +81,34 @@ def test_index_time_column_strategy():
     df["index_time"] = "2023-03-01"
     idx = resolve_index_times(df, index_strategy="column", index_time_col="index_time")
     assert pd.Timestamp(idx.loc[1]) == pd.Timestamp("2023-03-01")
+
+
+def test_stale_index_time_col_ignored_without_column():
+    """UI often sends index_time_col leftover from paper_synthetic on tiny demos."""
+    from feature_engineering.cohort_integrity import coerce_index_params
+
+    df = _toy_df()
+    strategy, col = coerce_index_params(
+        df, index_strategy="last_event", index_time_col="index_time"
+    )
+    assert strategy == "last_event"
+    assert col is None
+    X, y, _, _ = build_xy_longitudinal(
+        df, index_strategy="last_event", index_time_col="index_time"
+    )
+    assert len(X) == 2
+    assert set(y.tolist()) == {0, 1}
+
+
+def test_explicit_column_strategy_still_requires_column():
+    from feature_engineering.cohort_integrity import coerce_index_params
+    import pytest
+
+    df = _toy_df()
+    strategy, col = coerce_index_params(
+        df, index_strategy="column", index_time_col="index_time"
+    )
+    assert strategy == "column"
+    assert col == "index_time"
+    with pytest.raises(ValueError, match="index_time"):
+        build_xy_longitudinal(df, index_strategy="column", index_time_col="index_time")

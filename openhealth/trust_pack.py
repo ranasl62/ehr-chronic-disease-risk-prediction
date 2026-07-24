@@ -11,6 +11,7 @@ from typing import Any
 from training.manifest import sha256_file
 from utils.config import REPORTS_DIR
 from utils.json_safe import json_safe
+from utils.report_images import is_valid_report_png
 
 TRUST_PACK_NAME = "trust_pack.json"
 
@@ -44,6 +45,9 @@ def trust_pack_path(run_dir: Path) -> Path:
 
 def _file_meta(path: Path) -> dict[str, Any] | None:
     if not path.is_file():
+        return None
+    # PNG figures must be real images (reject 8-byte signature stubs).
+    if path.suffix.lower() == ".png" and not is_valid_report_png(path):
         return None
     return {
         "present": True,
@@ -89,7 +93,7 @@ def build_trust_pack(run_id: str, run_dir: Path) -> dict[str, Any]:
 
     has_eval = "evaluation_report.json" in artifacts
     has_leakage = "leakage_audit.json" in artifacts
-    has_shap = "shap_summary.png" in artifacts
+    has_shap = "shap_summary.png" in artifacts  # only if _file_meta accepted a valid PNG
     has_cal = "calibration_holdout.png" in artifacts
     has_model = "model.pkl" in artifacts
     leakage_ok = _leakage_passed(leakage if isinstance(leakage, dict) else None)
@@ -144,9 +148,9 @@ def trust_flags_from_dir(run_dir: Path) -> dict[str, Any]:
         "has_model": (run_dir / "model.pkl").is_file(),
         "has_evaluation": (run_dir / "evaluation_report.json").is_file(),
         "has_manifest": (run_dir / "training_manifest.json").is_file(),
-        "has_calibration": (run_dir / "calibration_holdout.png").is_file(),
+        "has_calibration": is_valid_report_png(run_dir / "calibration_holdout.png"),
         "has_leakage": (run_dir / "leakage_audit.json").is_file(),
-        "has_shap": (run_dir / "shap_summary.png").is_file(),
+        "has_shap": is_valid_report_png(run_dir / "shap_summary.png"),
         "has_external_validation": (run_dir / "external_validation_report.json").is_file(),
         "has_analysis_pack": (run_dir / "analysis_pack.json").is_file(),
         "leakage_passed": None,
@@ -155,9 +159,13 @@ def trust_flags_from_dir(run_dir: Path) -> dict[str, Any]:
 
 
 def mirror_to_shared(src: Path, name: str) -> None:
-    if src.is_file():
-        REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(src, REPORTS_DIR / name)
+    """Copy an artifact into shared reports/. Refuse corrupt PNG stubs."""
+    if not src.is_file():
+        return
+    if name.endswith(".png") and not is_valid_report_png(src):
+        return
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, REPORTS_DIR / name)
 
 
 def resolve_active_run_id(explicit: str | None = None) -> str | None:

@@ -13,7 +13,7 @@ This page explains **who this framework is for**, **what problem it solves**, an
 | You are… | You get… |
 |----------|----------|
 | Health-informatics / ML student or researcher | A leakage-aware train → audit → explain → serve loop without starting from a blank notebook |
-| Lab building chronic-risk prototypes | Task YAML, Docker one-command demo, Angular workbench, downloadable results ZIP |
+| Lab building chronic-risk prototypes | Task YAML, Docker one-command demo, Angular workbench (Research wizard), downloadable results ZIP / curve PNGs |
 | Engineer integrating EHR-style CSV | Clear longitudinal schema, map-preview import, dataset health gates |
 | Reviewer of ML methodology | Calibration, leakage audit, SHAP, and explicit [`LIMITATIONS.md`](../LIMITATIONS.md) |
 
@@ -32,7 +32,7 @@ This page explains **who this framework is for**, **what problem it solves**, an
 Typical workflow:
 
 ```text
-Datasets (import + health) → Train / Compare → Analytics & Results → Predict
+Datasets (import + health) → Research wizard or Train / Compare → Analytics & Results → Predict
 ```
 
 Details: [`ARCHITECTURE.md`](../ARCHITECTURE.md) · [`docs/researcher_quickstart.md`](researcher_quickstart.md) · **website** [`docs/`](./).

@@ -1,6 +1,6 @@
 <section class="panel">
-  <h1>Predict</h1>
-  <p class="lede">Schema-driven feature form from the loaded artifact. Research and education use only.</p>
+  <h1 data-tour="predict-title">Predict</h1>
+  <p class="lede">Schema-driven feature form from the loaded artifact. For research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future.</p>
   <p class="banner-warn">
     Inputs are <strong>model features</strong> (e.g. <code>w7d_glucose</code>), not raw EHR column names.
     Use “Fill medians” when available. Scores are not clinical recommendations.
@@ -20,7 +20,7 @@
   @if (schema(); as s) {
     <p class="muted">Model: {{ s.model_kind }} · calibrated={{ s.calibrated }} · {{ s.feature_columns.length }} features</p>
 
-    <div class="toolbar">
+    <div class="toolbar" data-tour="predict-form">
       <label>Filter features
         <input type="search" [(ngModel)]="featureQuery" name="fq" placeholder="glucose, w180d…" />
       </label>
@@ -50,6 +50,9 @@
       <div class="actions">
         <button type="button" class="btn" (click)="fillMedians()">Fill medians</button>
         <button type="submit" class="btn primary">Predict</button>
+        <button type="button" class="btn" (click)="exportSessionJson()" [disabled]="!result()">
+          Export session JSON
+        </button>
       </div>
     </form>
   }

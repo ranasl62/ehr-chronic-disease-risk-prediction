@@ -39,6 +39,16 @@ select { min-width: 16rem; }
   background: var(--surface-2); margin-bottom: 1rem;
 }
 .analysis-pack h2 { margin: 0 0 0.35rem; font-size: 1rem; }
+.quality {
+  border-left: 3px solid var(--accent);
+  padding: 0.5rem 0.75rem;
+  background: var(--surface-2);
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+}
+.curve-hint {
+  border-left-color: #b8860b;
+}
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem; }
 .card, .chart-card {
   background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
@@ -53,6 +63,16 @@ select { min-width: 16rem; }
 }
 .chart-body { flex: 1; min-height: 0; position: relative; }
 .chart-body canvas { width: 100% !important; height: 100% !important; }
+.chart-body canvas.visually-hidden {
+  position: absolute; width: 1px !important; height: 1px !important;
+  opacity: 0; pointer-events: none; overflow: hidden;
+}
+.curve-empty {
+  margin: 0; padding: 1.25rem 0.85rem; color: var(--muted); font-size: 0.9rem;
+  line-height: 1.45; display: flex; align-items: center; justify-content: center;
+  text-align: center; height: 100%; min-height: 8rem;
+  background: var(--surface-2); border-radius: 6px; border: 1px dashed var(--line);
+}
 .btn.tiny {
   padding: 0.2rem 0.45rem; font-size: 0.75rem; border: 1px solid var(--line);
   border-radius: 4px; background: var(--surface-2); cursor: pointer;

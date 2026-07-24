@@ -12,6 +12,7 @@ joblib
 pydantic>=2.13.4
 requests
 pytest
+pytest-cov
 httpx
 openpyxl>=3.1.0
 PyYAML>=6.0

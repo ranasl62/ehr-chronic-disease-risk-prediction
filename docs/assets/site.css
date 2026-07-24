@@ -92,17 +92,27 @@ a:hover { color: var(--accent); }
   font-size: 0.92rem;
   font-weight: 600;
   padding: 0.35rem 0;
+  border-bottom: 2px solid transparent;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
-.nav a:hover,
-.nav a[aria-current="page"] { color: var(--accent); }
+.nav a:hover { color: var(--accent); }
+.nav a.is-active,
+.nav a[aria-current="page"] {
+  color: var(--accent-dark);
+  border-bottom-color: var(--accent);
+}
 .nav .btn {
   margin-left: 0.35rem;
+  border-bottom: 0;
 }
 .nav a.btn-primary,
 .nav a.btn-primary:hover,
 .nav a.btn-primary:focus,
+.nav a.btn-primary.is-active,
 .nav a.btn-primary[aria-current="page"] {
   color: #fff;
+  border-bottom: 0;
 }
 
 .btn {
@@ -186,6 +196,26 @@ main { max-width: var(--max); margin: 0 auto; padding: 1.75rem 1.25rem 3rem; }
   padding: 0.85rem 1rem;
   font-size: 0.92rem;
   margin: 0 0 1.5rem;
+}
+
+.demo-callout {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  color: var(--ink);
+  margin: 0.85rem 0 0;
+  max-width: 44rem;
+  line-height: 1.45;
+}
+.demo-callout a { font-weight: 600; }
+/* Clearer separation for the content/box below the live-demo note */
+.demo-callout + * {
+  margin-top: 1.75rem;
+}
+.hero .demo-callout {
+  margin-bottom: 1.75rem;
 }
 
 .section { margin: 2rem 0; }
@@ -609,9 +639,14 @@ pre code { background: transparent; padding: 0; color: inherit; }
   border-radius: 4px;
 }
 .ui-subnav a:hover,
+.ui-subnav a.is-active,
 .ui-subnav a[aria-current="page"] {
   color: var(--accent);
   background: var(--accent-soft);
+}
+.ui-subnav a.is-active,
+.ui-subnav a[aria-current="page"] {
+  box-shadow: inset 0 -2px 0 var(--accent);
 }
 .crumb { margin: 0 0 0.35rem; font-size: 0.9rem; }
 .card .thumb {

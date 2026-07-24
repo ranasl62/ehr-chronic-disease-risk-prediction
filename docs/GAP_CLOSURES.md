@@ -21,9 +21,14 @@ Shipped in this pass vs intentionally deferred. Framing: research / education on
 | Task clarity | Task description + `required_columns` (readmission_30d highlights `index_time`) |
 | Auth empty states | Global 401 banner → Config; Predict already CTAs to Train when no schema |
 | LSTM | Not selectable in Train/Config; meta lists under unsupported |
-| Thresholds | `GET /v1/reports/thresholds` + Results table (operating points) |
+| Thresholds | `GET /v1/reports/thresholds` + Results table (operating points; optional `reports/threshold_operating_points.json`) |
+| Trust pack | Per-run `reports/runs/<id>/trust_pack.json` + run detail flags (not `/v1/reports/trust-pack`) |
 | Docs | This note · [`RESEARCH_WORKFLOW.md`](RESEARCH_WORKFLOW.md) · brief website updates (ui-analytics / features) |
 | Analytics export / print | Per-chart PNG + print/PDF layout on Analytics (research appendix figures; not clinical reporting) |
+| Research wizard | `/research` guided loop (health → train → trust → leakage → external → export) |
+| Paper curves | ROC / PR / calibration points in `evaluation_report.json`; Analytics Chart.js plots + `GET /v1/reports/curves`; bootstrap AUC CIs + quality note |
+| Predict session export | Predict page → Export session JSON (features + score; research only) |
+| Playwright smoke | Optional `web/e2e` (`npm run e2e` with UI up) |
 
 ## Deferred
 

@@ -96,9 +96,7 @@ describe('PredictComponent', () => {
   });
 
   it('submit restores medians when reuseAsNextInput false', () => {
-    api.predict.and.returnValue(
-      of({ risk_probability: 0.1, risk_level: 'low', explanation: {} })
-    );
+    api.predict.and.returnValue(of({ risk_probability: 0.1, risk_level: 'low', explanation: {} }));
     cmp.reuseAsNextInput = false;
     cmp.values['w7d_glucose'] = 999;
     cmp.submit();
@@ -138,6 +136,25 @@ describe('PredictComponent', () => {
   it('riskPct returns zero without result', () => {
     cmp.result.set(null);
     expect(cmp.riskPct()).toBe(0);
+  });
+
+  it('exports predict session JSON', () => {
+    cmp.result.set({ risk_probability: 0.4, risk_level: 'medium' });
+    cmp.values = { w7d_glucose: 120 };
+    const createObj = spyOn(URL, 'createObjectURL').and.returnValue('blob:x');
+    const revoke = spyOn(URL, 'revokeObjectURL');
+    const click = jasmine.createSpy('click');
+    spyOn(document, 'createElement').and.callFake((tag: string) => {
+      if (tag === 'a') {
+        return { href: '', download: '', rel: '', click, remove: () => undefined } as unknown as HTMLAnchorElement;
+      }
+      return document.createElement(tag);
+    });
+    spyOn(document.body, 'appendChild');
+    cmp.exportSessionJson();
+    expect(createObj).toHaveBeenCalled();
+    expect(click).toHaveBeenCalled();
+    expect(revoke).toHaveBeenCalled();
   });
 
   it('filters feature groups by query', () => {

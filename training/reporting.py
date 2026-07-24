@@ -60,15 +60,48 @@ def build_evaluation_report(
     meta: dict[str, Any] | None = None,
     threshold: float = 0.5,
     ece_bins: int = 10,
+    include_curves: bool = True,
+    bootstrap_cis: bool = True,
+    n_boot: int = 200,
 ) -> dict[str, Any]:
-    m = evaluate_binary(model, X_test, y_test, threshold=threshold, ece_bins=ece_bins)
-    report = {
+    m = evaluate_binary(
+        model,
+        X_test,
+        y_test,
+        threshold=threshold,
+        ece_bins=ece_bins,
+        include_curves=include_curves,
+        bootstrap_cis=bootstrap_cis,
+        n_boot=n_boot,
+    )
+    metrics = {
+        k: v
+        for k, v in m.items()
+        if k not in ("report", "curves", "bootstrap_cis")
+    }
+    report: dict[str, Any] = {
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "threshold": threshold,
-        "metrics": {k: v for k, v in m.items() if k != "report"},
+        "metrics": metrics,
         "classification_report_text": m["report"],
         "meta": meta or {},
     }
+    if "curves" in m:
+        report["curves"] = m["curves"]
+    if "bootstrap_cis" in m:
+        report["bootstrap_cis"] = m["bootstrap_cis"]
+        # Surface a researcher-facing quality note when AUC is undefined
+        if metrics.get("single_class_holdout"):
+            report["quality_note"] = (
+                "Hold-out has a single class — ROC/PR-AUC and curve plots are n/a; "
+                "use a larger cohort or stratified split before claiming discrimination."
+            )
+        elif report["bootstrap_cis"].get("roc_auc_ci"):
+            lo, hi = report["bootstrap_cis"]["roc_auc_ci"]
+            report["quality_note"] = (
+                f"ROC-AUC bootstrap {int((1 - report['bootstrap_cis']['alpha']) * 100)}% "
+                f"CI ≈ [{lo:.3f}, {hi:.3f}] (research estimate on this hold-out only)."
+            )
     return report
 
 

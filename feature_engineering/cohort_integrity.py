@@ -10,6 +10,36 @@ from __future__ import annotations
 import pandas as pd
 
 
+def coerce_index_params(
+    df: pd.DataFrame,
+    *,
+    index_strategy: str = "last_event",
+    index_time_col: str | None = None,
+    horizon_days: int | None = None,
+) -> tuple[str, str | None]:
+    """
+    Resolve effective ``(index_strategy, index_time_col)`` for cohort building.
+
+    When the UI/config leaves a stale ``index_time_col`` from another dataset but
+    the strategy is not explicitly ``column``, ignore the missing column and keep
+    ``last_event`` / ``before_last``. Explicit ``column`` still requires the column.
+    """
+    strategy = index_strategy or "last_event"
+    col = index_time_col
+
+    if strategy == "column":
+        return "column", col or "index_time"
+
+    if col and col in df.columns:
+        return "column", col
+
+    # Stale column name from workspace/config or a previous dataset suggestion.
+    col = None
+    if horizon_days is not None and strategy == "last_event":
+        strategy = "before_last"
+    return strategy, col
+
+
 def resolve_index_times(
     df: pd.DataFrame,
     *,

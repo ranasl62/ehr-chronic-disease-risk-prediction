@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { ResultsComponent } from './results.component';
-import { ApiService } from '../../core/api.service';
+import { ApiService, ReportsSummary } from '../../core/api.service';
 import { UiPrefsService } from '../../core/ui-prefs.service';
 
 describe('ResultsComponent', () => {
@@ -143,16 +143,54 @@ describe('ResultsComponent', () => {
     cmp = fixture.componentInstance;
   });
 
-  it('loads summary tables', fakeAsync(() => {
+  it('tracks figure load errors', fakeAsync(() => {
     cmp.showCharts = false;
     fixture.detectChanges();
     tick(20);
-    expect(cmp.summary()?.model_comparison?.selected_model).toBe('xgboost');
-    expect(cmp.compareRows.length).toBe(2);
-    expect(cmp.metricRows.length).toBe(2);
-    expect(cmp.importanceRows.length).toBe(2);
-    expect(cmp.leakageRows.length).toBeGreaterThan(0);
-    expect(fixture.nativeElement.textContent).toContain('Results');
+    cmp.onFigError('shap_summary.png');
+    expect(cmp.figLoadError()['shap_summary.png']).toBeTrue();
+    cmp.onFigLoad('shap_summary.png');
+    expect(cmp.figLoadError()['shap_summary.png']).toBeUndefined();
+  }));
+
+  it('shows loading then content without empty-state flash', fakeAsync(() => {
+    const pending = new Subject<ReportsSummary>();
+    api.reportsSummary.and.returnValue(pending.asObservable());
+    fixture = TestBed.createComponent(ResultsComponent);
+    cmp = fixture.componentInstance;
+    cmp.showCharts = false;
+    fixture.detectChanges();
+    expect(cmp.summaryLoading()).toBeTrue();
+    expect(fixture.nativeElement.querySelector('[data-tour="results-loading"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[data-tour="results-empty"]')).toBeFalsy();
+    expect(fixture.nativeElement.textContent).not.toContain('No reports yet');
+
+    pending.next({
+      metrics: { roc_auc: 0.9 },
+      files: [{ name: 'evaluation_report.json', bytes: 10, url: '/v1/reports/file/evaluation_report.json' }],
+    });
+    pending.complete();
+    tick();
+    fixture.detectChanges();
+    expect(cmp.summaryLoading()).toBeFalse();
+    expect(cmp.summary()?.metrics?.['roc_auc']).toBe(0.9);
+    expect(fixture.nativeElement.querySelector('[data-tour="results-loading"]')).toBeFalsy();
+    expect(fixture.nativeElement.querySelector('[data-tour="results-empty"]')).toBeFalsy();
+  }));
+
+  it('shows empty state only after summary load fails', fakeAsync(() => {
+    api.reportsSummary.and.returnValue(throwError(() => ({ message: 'down' })));
+    fixture = TestBed.createComponent(ResultsComponent);
+    cmp = fixture.componentInstance;
+    cmp.showCharts = false;
+    fixture.detectChanges();
+    tick();
+    fixture.detectChanges();
+    expect(cmp.summaryLoading()).toBeFalse();
+    expect(cmp.summary()).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-tour="results-empty"]')).toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain('No reports yet');
+    expect(cmp.error()).toContain('down');
   }));
 
   it('renders HPO null metrics as n/a without raw JSON', fakeAsync(() => {

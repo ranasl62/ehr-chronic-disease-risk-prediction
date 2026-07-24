@@ -95,7 +95,9 @@ def test_openhealth_explain(tmp_path, monkeypatch):
     plot = tmp_path / "shap.png"
 
     def _fake_explain(*_a, **_k):
-        plot.write_bytes(b"png")
+        from utils.report_images import minimal_png_bytes
+
+        plot.write_bytes(minimal_png_bytes())
 
     monkeypatch.setattr("explainability.shap_explainer.explain_model", _fake_explain)
     monkeypatch.setattr(
@@ -751,7 +753,16 @@ def test_run_hpo_and_shap_and_ext(tmp_path, monkeypatch, tiny_csv):
     joblib.dump(art, p)
     monkeypatch.setattr("api.jobs.MODEL_PATH", p)
     monkeypatch.setattr("utils.config.MODEL_PATH", p)
-    monkeypatch.setattr("explainability.shap_explainer.explain_model", lambda *a, **k: None)
+
+    def _fake_shap(*_a, **k):
+        from utils.report_images import minimal_png_bytes
+
+        plot_path = k.get("plot_path")
+        if plot_path:
+            Path(plot_path).parent.mkdir(parents=True, exist_ok=True)
+            Path(plot_path).write_bytes(minimal_png_bytes())
+
+    monkeypatch.setattr("explainability.shap_explainer.explain_model", _fake_shap)
     monkeypatch.setattr(
         "training.reproduce_split.split_train_test_from_artifact",
         lambda a: (art["X_train"], art["X_test"], art["y_train"], art["y_test"], None, None),
@@ -1076,7 +1087,19 @@ def test_openhealth_api_evaluate_and_explain_relative(tmp_path, monkeypatch):
     p = tmp_path / "m.pkl"
     joblib.dump(art, p)
     plot = "reports/custom_shap.png"
-    monkeypatch.setattr("explainability.shap_explainer.explain_model", lambda *a, **k: None)
+
+    def _fake_explain(*_a, **k):
+        from utils.report_images import minimal_png_bytes
+
+        out = Path(k.get("plot_path") or plot)
+        if not out.is_absolute():
+            from utils.config import PROJECT_ROOT
+
+            out = PROJECT_ROOT / out
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_bytes(minimal_png_bytes())
+
+    monkeypatch.setattr("explainability.shap_explainer.explain_model", _fake_explain)
     monkeypatch.setattr(
         "training.reproduce_split.split_train_test_from_artifact",
         lambda a: (art["X_train"], art["X_test"], art["y_train"], art["y_test"], None, None),

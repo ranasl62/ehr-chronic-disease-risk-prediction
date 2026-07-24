@@ -23,7 +23,8 @@ features:
 
 data:
   format: longitudinal
-  suggested_path: data/demo/ehr_data.csv
+  # Needs index_time — tiny demo CSV lacks it; use paper synthetic (or BYO cohort).
+  suggested_path: data/raw/paper_synthetic_cohort.csv
 
 training:
   model_kind: logreg

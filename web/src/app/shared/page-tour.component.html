@@ -1,0 +1,64 @@
+@if (tour.active()) {
+  <div
+    class="tour-root"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="'tour-title'"
+    [attr.aria-describedby]="'tour-body'"
+  >
+    <div class="tour-backdrop" (click)="tour.skip()" aria-hidden="true"></div>
+    @if (hole(); as h) {
+      <div
+        class="tour-hole"
+        [style.top.px]="h.top"
+        [style.left.px]="h.left"
+        [style.width.px]="h.width"
+        [style.height.px]="h.height"
+        aria-hidden="true"
+      ></div>
+    }
+    <div
+      #tipPanel
+      class="tour-tip"
+      [style.top.px]="tip().top"
+      [style.left.px]="tip().left"
+      tabindex="-1"
+    >
+      <div class="tour-tip-head">
+        <strong id="tour-title">{{ step()?.title }}</strong>
+        <span class="tour-count" aria-live="polite">{{ stepLabel }}</span>
+      </div>
+      <p class="tour-body" id="tour-body">{{ step()?.body }}</p>
+      <label class="tour-check">
+        <input
+          type="checkbox"
+          [ngModel]="tour.dontShowAgain()"
+          (ngModelChange)="onDontShow($event)"
+          name="tourDont"
+        />
+        Don’t auto-start tours
+      </label>
+      <div class="tour-actions">
+        <button type="button" class="btn" (click)="tour.skip()" aria-label="Skip tour">Skip</button>
+        <button
+          type="button"
+          class="btn"
+          (click)="tour.back()"
+          [disabled]="tour.stepIndex() === 0"
+          aria-label="Previous tour step"
+        >
+          Back
+        </button>
+        <button
+          #primaryBtn
+          type="button"
+          class="btn primary"
+          (click)="tour.next()"
+          [attr.aria-label]="tour.stepIndex() >= tour.steps().length - 1 ? 'Finish tour' : 'Next tour step'"
+        >
+          {{ tour.stepIndex() >= tour.steps().length - 1 ? 'Finish' : 'Next' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

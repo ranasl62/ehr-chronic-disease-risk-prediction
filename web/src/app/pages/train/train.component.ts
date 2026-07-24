@@ -37,6 +37,8 @@ export class TrainComponent implements OnInit, OnDestroy {
   /** Optional research-scoped light HPO grid. */
   enableHpo = false;
   hpoPromoteBest = false;
+  /** Hold-out bootstrap resamples for ROC/PR CIs (0 = off). */
+  bootstrapSamples = 0;
 
   job = signal<JobInfo | null>(null);
   recentJobs = signal<JobInfo[]>([]);
@@ -133,6 +135,15 @@ export class TrainComponent implements OnInit, OnDestroy {
     }
   }
 
+  onIndexStrategyChange(strategy: string): void {
+    this.indexStrategy = strategy;
+    if (strategy !== 'column') {
+      this.indexTimeCol = null;
+    } else if (!this.indexTimeCol) {
+      this.indexTimeCol = 'index_time';
+    }
+  }
+
   private bodyBase(): TrainBody {
     return {
       data_path: this.dataPath,
@@ -149,6 +160,7 @@ export class TrainComponent implements OnInit, OnDestroy {
       feature_inclusive: true,
       label_col: this.labelCol,
       task_id: this.taskId || null,
+      bootstrap_samples: this.bootstrapSamples > 0 ? this.bootstrapSamples : null,
     };
   }
 

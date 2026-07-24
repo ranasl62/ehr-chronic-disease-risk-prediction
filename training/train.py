@@ -10,6 +10,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 from feature_engineering.cohort_integrity import (
+    coerce_index_params,
     horizon_labels,
     resolve_index_times,
     truncate_events_to_index,
@@ -87,18 +88,21 @@ def build_xy_longitudinal(
             + "."
         )
 
-    strategy = index_strategy
-    if horizon_days is not None and strategy == "last_event" and index_time_col is None:
-        # Without an explicit index column, before_last avoids using the outcome
-        # row both as feature anchor and as the sole label signal.
-        strategy = "before_last"
+    # Ignore stale index_time_col when strategy is not explicitly "column" and
+    # the column is absent (common when switching from paper_synthetic → tiny demo).
+    strategy, index_time_col = coerce_index_params(
+        df,
+        index_strategy=index_strategy,
+        index_time_col=index_time_col,
+        horizon_days=horizon_days,
+    )
 
     index_times = resolve_index_times(
         df,
         patient_col="patient_id",
         time_col="timestamp",
         index_time_col=index_time_col,
-        index_strategy=strategy if index_time_col is None else "column",
+        index_strategy=strategy,
     )
 
     if horizon_days is not None:

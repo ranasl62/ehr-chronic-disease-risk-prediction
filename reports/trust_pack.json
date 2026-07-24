@@ -1,47 +1,32 @@
 {
-  "run_id": "20260723T122625Z_logreg",
-  "updated_at": "2026-07-23T12:26:26.313438+00:00",
-  "data_sha256": "d7be825a5f58fb9aea610ded521799e510c2777754be68629a64b88db87688ae",
+  "run_id": "20260724T021156Z_logreg",
+  "updated_at": "2026-07-24T02:12:04.564835+00:00",
+  "data_sha256": "e5b8df41317ee8e124ed37f09e82cddab347f4246678755531d4a4221eb43dcc",
   "artifacts": {
     "model.pkl": {
       "present": true,
-      "bytes": 10364,
-      "sha256": "f5374d45606b85a8604d25b8619c09d448b7a658552a6f5cd745ae3fa1e2382f"
+      "bytes": 28003,
+      "sha256": "4de59f0763b88ee6b05bae153e2a34cd5b2637f6497aa2278f045c812c132919"
     },
     "evaluation_report.json": {
       "present": true,
-      "bytes": 1684,
-      "sha256": "f3eb626e359c100b6388f9252cd978224f9a362fac1f0f849e958a4091afdbfd"
+      "bytes": 4123,
+      "sha256": "3878ec0d559f41c6b9f72d579d62c8e36afd6ca4ff7ec5a2b6439a306da3a76b"
     },
     "feature_importance.json": {
       "present": true,
-      "bytes": 1105,
-      "sha256": "eb1128f7073a364d6387c78f9e7889b876b2e185fbf585555f18589c0777de3e"
+      "bytes": 1116,
+      "sha256": "38dc6c1b43c6c89305058ca9ae3968b106953fefc11b8918ce0318002bfd48b8"
     },
     "training_manifest.json": {
       "present": true,
-      "bytes": 471,
-      "sha256": "76e8d810d7753e170dad5cd606d0d832367c5a64626202fe0e65e061864ff560"
+      "bytes": 486,
+      "sha256": "fde3bbea147928ec4d0cbeb91bdb35b9b7758fcd368acec62da01e9549ea421b"
     },
     "calibration_holdout.png": {
       "present": true,
-      "bytes": 7997,
-      "sha256": "8543adbaaf4076fe0beda54f6af8da2afb2e0c5bbc01bbc65dc56a7611844b88"
-    },
-    "leakage_audit.json": {
-      "present": true,
-      "bytes": 807,
-      "sha256": "3081cc0f4277361fbc67b8c109e301bd27e0de95a010ba608fcb8cd3e5d1e3c6"
-    },
-    "external_validation_report.json": {
-      "present": true,
-      "bytes": 619,
-      "sha256": "576d9e0734014f4d56bf020b2809215a2e029c4216f237d66a24e91f90a31fd2"
-    },
-    "analysis_pack.json": {
-      "present": true,
-      "bytes": 697,
-      "sha256": "698da3aee2f96bf6d1c616f2ae31aab97a608685b5bd7fb9807b67c669ef12e6"
+      "bytes": 44078,
+      "sha256": "506f5b9d26f5819aa28c247d8ccdb14787e5543b2f7146405845734dd8307679"
     }
   },
   "flags": {
@@ -49,11 +34,11 @@
     "has_evaluation": true,
     "has_manifest": true,
     "has_calibration": true,
-    "has_leakage": true,
+    "has_leakage": false,
     "has_shap": false,
-    "has_external_validation": true,
-    "has_analysis_pack": true,
-    "leakage_passed": true,
-    "trust_complete": true
+    "has_external_validation": false,
+    "has_analysis_pack": false,
+    "leakage_passed": null,
+    "trust_complete": false
   }
 }

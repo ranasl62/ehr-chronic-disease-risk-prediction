@@ -110,6 +110,7 @@ def write_run_meta(run_id: str, meta: dict[str, Any]) -> Path:
 
 def promote_run(run_id: str) -> dict[str, Any]:
     from openhealth.trust_pack import PROMOTE_EXTRA, write_trust_pack
+    from utils.report_images import is_valid_report_png
 
     p = run_path(run_id)
     model = p / "model.pkl"
@@ -123,8 +124,16 @@ def promote_run(run_id: str) -> dict[str, Any]:
             shutil.copy2(src, REPORTS_DIR / name)
     for name in PROMOTE_EXTRA:
         src = p / name
-        if src.is_file():
-            shutil.copy2(src, REPORTS_DIR / name)
+        if not src.is_file():
+            continue
+        # Never promote magic-only / corrupt PNGs into the shared gallery.
+        if name.endswith(".png") and not is_valid_report_png(src):
+            from utils.report_images import remove_invalid_report_png
+
+            # Drop any stale corrupt shared copy so status/ZIP stay honest.
+            remove_invalid_report_png(REPORTS_DIR / name)
+            continue
+        shutil.copy2(src, REPORTS_DIR / name)
     write_trust_pack(run_id, p)
     # Refresh shared trust pack copy after rewrite
     tp = p / "trust_pack.json"
