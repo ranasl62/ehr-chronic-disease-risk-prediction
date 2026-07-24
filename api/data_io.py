@@ -514,8 +514,9 @@ def build_methods_markdown(run_id: str | None = None) -> str:
     lines = [
         "# Methods note (auto-generated)",
         "",
-        "> Research and education artifact only — not a clinical protocol, not FDA-cleared,",
-        "> and not intended for patient care. Values below reflect the "
+        "> For research and education only. Outputs are not clinical recommendations and are not intended for patient care.",
+        "> We are working toward broader general-purpose use in the future. Not a clinical protocol, not FDA-cleared.",
+        "> Values below reflect the "
         + scope
         + ",",
         "> not a claim of external validity or regulatory clearance.",
@@ -599,6 +600,17 @@ def build_methods_markdown(run_id: str | None = None) -> str:
     return "\n".join(lines)
 
 
+def _zip_include_file(path: Path) -> bool:
+    """Skip corrupt/stub PNGs so ZIP packs never advertise invalid figures."""
+    if not path.is_file():
+        return False
+    if path.suffix.lower() == ".png":
+        from utils.report_images import is_valid_report_png
+
+        return is_valid_report_png(path)
+    return True
+
+
 def build_results_zip(run_id: str | None = None) -> bytes:
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
@@ -607,7 +619,7 @@ def build_results_zip(run_id: str | None = None) -> bytes:
             root = _reports_root_for_methods(run_id)
             for name in _RUN_ZIP_FILES:
                 p = root / name
-                if p.is_file():
+                if _zip_include_file(p):
                     arc = f"reports/runs/{run_id}/{name}"
                     zf.write(p, arcname=arc)
                     included.append(arc)
@@ -620,7 +632,7 @@ def build_results_zip(run_id: str | None = None) -> bytes:
         else:
             for name in _ZIP_ALLOW:
                 p = REPORTS_DIR / name
-                if p.is_file():
+                if _zip_include_file(p):
                     zf.write(p, arcname=f"reports/{name}")
                     included.append(name)
         methods_md = build_methods_markdown(run_id=run_id)
@@ -644,7 +656,7 @@ def build_results_zip(run_id: str | None = None) -> bytes:
         manifest = {
             "pack": "ehr-risk-research-results",
             "run_id": run_id,
-            "disclaimer": "Research and education artifacts only — not intended for patient care.",
+            "disclaimer": "For research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future.",
             "files": included + ["methods.md"],
         }
         zf.writestr("README_PACK.json", json.dumps(manifest, indent=2))

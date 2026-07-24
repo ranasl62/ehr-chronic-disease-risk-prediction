@@ -474,6 +474,15 @@ def run_shap_job(rec: JobRecord, params: dict[str, Any]) -> None:
     out.parent.mkdir(parents=True, exist_ok=True)
     X_train, X_test, _, _, _, _ = split_train_test_from_artifact(art)
     fe = art.get("feature_engineering") or {}
+    from utils.report_images import (
+        is_valid_report_png,
+        remove_invalid_report_png,
+        require_valid_report_png,
+    )
+
+    # Drop prior magic-only stubs so a failed write cannot leave shap_present=true.
+    if out.is_file() and not is_valid_report_png(out):
+        remove_invalid_report_png(out)
     explain_model(
         art["model"],
         X_train,
@@ -481,6 +490,7 @@ def run_shap_job(rec: JobRecord, params: dict[str, Any]) -> None:
         plot_path=out,
         random_state=int(fe.get("random_state", 42)),
     )
+    require_valid_report_png(out, label="SHAP summary PNG")
     if run_id:
         # Mirror to shared workspace for checklist / ZIP backward compat
         if out.resolve() != shared_out.resolve():
@@ -489,6 +499,15 @@ def run_shap_job(rec: JobRecord, params: dict[str, Any]) -> None:
         mirror_to_shared(ensure_run(run_id) / "trust_pack.json", "trust_pack.json")
     elif out.resolve() != shared_out.resolve():
         mirror_to_shared(out, "shap_summary.png")
+    # Shared workspace must not keep a corrupt stub when a run wrote a good figure.
+    if shared_out.is_file() and not is_valid_report_png(shared_out):
+        remove_invalid_report_png(shared_out)
+        if out.resolve() != shared_out.resolve() and is_valid_report_png(out):
+            mirror_to_shared(out, "shap_summary.png")
+    require_valid_report_png(
+        shared_out if shared_out.is_file() else out,
+        label="shared SHAP summary PNG",
+    )
     try:
         from api.main import get_artifact
 

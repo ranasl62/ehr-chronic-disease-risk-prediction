@@ -119,6 +119,12 @@ export class ApiService {
     return `${this.base}/v1/reports/analysis-pack?path=${encodeURIComponent(path)}`;
   }
 
+  evaluationCurves(runId?: string | null): Observable<EvaluationCurvesResponse> {
+    const params: Record<string, string> = {};
+    if (runId) params['run_id'] = runId;
+    return this.http.get<EvaluationCurvesResponse>(`${this.base}/v1/reports/curves`, { params });
+  }
+
   job(id: string): Observable<JobInfo> {
     return this.http.get<JobInfo>(`${this.base}/v1/jobs/${id}`);
   }
@@ -245,6 +251,7 @@ export interface TrainBody {
   index_strategy: string;
   index_time_col: string | null;
   feature_inclusive: boolean;
+  bootstrap_samples?: number | null;
   label_col?: string | null;
   task_id?: string | null;
 }
@@ -406,9 +413,38 @@ export interface ThresholdReport {
   note?: string;
 }
 
+export interface EvaluationCurves {
+  roc?: { fpr?: number[]; tpr?: number[]; thresholds?: number[] };
+  pr?: { precision?: number[]; recall?: number[]; thresholds?: number[] };
+  calibration?: {
+    bin_mid?: number[];
+    frac_positive?: number[];
+    mean_predicted?: number[];
+    counts?: number[];
+  };
+  notes?: string[];
+}
+
+export interface EvaluationCurvesResponse {
+  run_id?: string | null;
+  curves: EvaluationCurves;
+  bootstrap_cis?: {
+    n_boot?: number;
+    alpha?: number;
+    roc_auc_ci?: [number, number] | null;
+    pr_auc_ci?: [number, number] | null;
+    note?: string;
+  } | null;
+  quality_note?: string | null;
+  metrics?: Record<string, number | boolean | null>;
+}
+
 export interface ReportsSummary {
   metrics?: Record<string, number | null>;
   threshold?: number;
+  curves?: EvaluationCurves | null;
+  bootstrap_cis?: EvaluationCurvesResponse['bootstrap_cis'];
+  quality_note?: string | null;
   leakage_audit?: Record<string, unknown>;
   feature_importance?: Record<string, number> | { importance?: Record<string, number> };
   model_comparison?: {

@@ -1,5 +1,5 @@
 {
-  "data_path": "/tmp/pytest-of-ranasl62/pytest-81/test_openhealth_compare_promot0/tiny_cohort.csv",
+  "data_path": "/tmp/pytest-of-ranasl62/pytest-105/test_openhealth_compare_promot0/tiny_cohort.csv",
   "models_compared": [
     "logreg"
   ],
@@ -17,7 +17,9 @@
         "accuracy": 1.0,
         "precision": 0.0,
         "recall": 0.0,
-        "f1": 0.0
+        "f1": 0.0,
+        "n_holdout": 1,
+        "single_class_holdout": true
       },
       "roc_auc": NaN,
       "pr_auc": NaN,
@@ -29,5 +31,5 @@
     }
   ],
   "selected_model": "logreg",
-  "disclaimer": "For research and education only. Outputs are not clinical recommendations."
+  "disclaimer": "For research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future."
 }

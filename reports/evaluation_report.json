@@ -1,22 +1,24 @@
 {
-  "generated_at_utc": "2026-07-23T12:26:25.820753+00:00",
+  "generated_at_utc": "2026-07-24T02:12:04.459971+00:00",
   "threshold": 0.5,
   "metrics": {
-    "roc_auc": NaN,
-    "pr_auc": NaN,
-    "brier": 0.20762754191886204,
-    "ece": 0.4415743302983367,
+    "roc_auc": 0.3572621035058431,
+    "pr_auc": 0.002008032128514056,
+    "brier": 0.0016675915132947031,
+    "ece": 0.0004190101705495784,
     "ece_bins": 10,
-    "accuracy": 0.5,
+    "accuracy": 0.9983333333333333,
     "precision": 0.0,
     "recall": 0.0,
-    "f1": 0.0
+    "f1": 0.0,
+    "n_holdout": 600,
+    "single_class_holdout": false
   },
-  "classification_report_text": "              precision    recall  f1-score   support\n\n           0       1.00      0.50      0.67         2\n           1       0.00      0.00      0.00         0\n\n    accuracy                           0.50         2\n   macro avg       0.50      0.25      0.33         2\nweighted avg       1.00      0.50      0.67         2\n",
+  "classification_report_text": "              precision    recall  f1-score   support\n\n           0       1.00      1.00      1.00       599\n           1       0.00      0.00      0.00         1\n\n    accuracy                           1.00       600\n   macro avg       0.50      0.50      0.50       600\nweighted avg       1.00      1.00      1.00       600\n",
   "meta": {
-    "model_path": "/app/reports/runs/20260723T122625Z_logreg/model.pkl",
+    "model_path": "/app/reports/runs/20260724T021156Z_logreg/model.pkl",
     "model_kind": "logreg",
-    "calibrated": false,
+    "calibrated": true,
     "feature_engineering": {
       "format": "longitudinal",
       "window_days": null,
@@ -25,24 +27,142 @@
         30,
         180
       ],
-      "data_path": "/app/data/demo/ehr_data.csv",
+      "data_path": "/app/data/raw/paper_synthetic_cohort.csv",
       "random_state": 42,
       "test_size": 0.2,
       "split_method": "patient_group",
-      "horizon_days": null,
-      "index_strategy": "last_event",
-      "index_time_col": null,
+      "horizon_days": 30,
+      "index_strategy": "column",
+      "index_time_col": "index_time",
       "feature_inclusive": true
     },
     "training_manifest_path": "/app/reports/training_manifest.json",
     "training_manifest": {
-      "generated_at_utc": "2026-07-23T12:26:25.792146+00:00",
-      "data_sha256": "d7be825a5f58fb9aea610ded521799e510c2777754be68629a64b88db87688ae",
+      "generated_at_utc": "2026-07-24T02:12:04.130642+00:00",
+      "data_sha256": "e5b8df41317ee8e124ed37f09e82cddab347f4246678755531d4a4221eb43dcc",
       "git_revision": "unknown",
       "split_method": "patient_group",
       "model_kind": "logreg",
-      "calibrated": false
+      "calibrated": true
     },
-    "psi_train_vs_test_predicted_prob": 10.361589631740209
-  }
+    "psi_train_vs_test_predicted_prob": 0.0014270155756691762
+  },
+  "curves": {
+    "roc": {
+      "fpr": [
+        0.0,
+        0.18864774624373956,
+        0.21202003338898165,
+        0.21368948247078465,
+        0.2621035058430718,
+        0.42237061769616024,
+        0.4340567612687813,
+        0.4357262103505843,
+        0.4540901502504174,
+        0.4557595993322204,
+        0.8297161936560935,
+        1.0
+      ],
+      "tpr": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ],
+      "thresholds": [
+        0.0030952201004037297,
+        0.002549666363360631,
+        0.0025364554147302323,
+        0.0020336489751383367,
+        0.0016071248623084917,
+        0.001488095238095238,
+        0.0014851799957485677,
+        0.0010615711252653928,
+        0.0010137148871938184,
+        0.0005455537370430988,
+        0.0
+      ]
+    },
+    "pr": {
+      "precision": [
+        0.0016666666666666668,
+        0.002008032128514056,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "recall": [
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "thresholds": [
+        0.0,
+        0.0005455537370430988,
+        0.0010137148871938184,
+        0.0010615711252653928,
+        0.0014851799957485677,
+        0.001488095238095238,
+        0.0016071248623084917,
+        0.0020336489751383367,
+        0.0025364554147302323,
+        0.002549666363360631,
+        0.0030952201004037297
+      ]
+    },
+    "calibration": {
+      "bin_mid": [
+        0.05
+      ],
+      "frac_positive": [
+        0.0016666666666666668
+      ],
+      "mean_predicted": [
+        0.0012476564961170884
+      ],
+      "counts": [
+        600
+      ]
+    },
+    "notes": []
+  },
+  "bootstrap_cis": {
+    "n_boot": 200,
+    "alpha": 0.05,
+    "n_valid": 133,
+    "roc_auc_ci": [
+      0.3318269142037399,
+      0.3814691151919867
+    ],
+    "pr_auc_ci": [
+      0.0019451608009708736,
+      0.007963375127719738
+    ],
+    "note": "percentile_bootstrap"
+  },
+  "quality_note": "ROC-AUC bootstrap 95% CI \u2248 [0.332, 0.381] (research estimate on this hold-out only)."
 }

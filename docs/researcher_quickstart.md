@@ -42,17 +42,20 @@ Optional: `cp .env.example .env` · GPU/overrides: `docker-compose.override.exam
 | FastAPI + OpenAPI | http://127.0.0.1:8000/docs (`ehr-risk-api:local` or Docker Hub api image) |
 | Results ZIP | Results page, or `GET /v1/reports/download.zip` |
 
-`data/`, `reports/`, and `model.pkl` persist on the host (bind mount). Research / education only — contact [support@larucare.com](mailto:support@larucare.com).
+`data/`, `reports/`, and `model.pkl` persist on the host (bind mount). For research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future. Contact [support@larucare.com](mailto:support@larucare.com).
 
 ### In the Angular UI
 
-1. **Home** — checklist / API healthy  
-2. **Datasets** — demo or import; run **Dataset health**  
-3. **Train** — task preset or manual → Start / Compare  
-4. **Analytics** — charts + filterable tables  
-5. **Results** — metrics, figures, ZIP  
-6. **Predict** — schema form  
-7. **Config** — workspace + UI preferences  
+1. **Home** — checklist / API healthy; **Start research wizard** for a guided study  
+2. **Research** (`/research`) — health → train → trust → leakage → external → export  
+3. **Datasets** — demo or import; run **Dataset health**  
+4. **Train** — task preset or manual → Start / Compare  
+5. **Analytics** — cohort charts + ROC/PR/calibration (after retrain); PNG / print  
+6. **Results** — metrics, trust, SHAP, external val, ZIP  
+7. **Predict** — schema form; export session JSON  
+8. **Config** — workspace + UI preferences  
+
+Full loop: [`RESEARCH_WORKFLOW.md`](RESEARCH_WORKFLOW.md).
 
 CLI: `pip install -e .` then `ehr-ai start` / `ehr-ai train --task diabetes` — [`INSTALLATION.md`](../INSTALLATION.md).
 
@@ -69,12 +72,15 @@ cd web && npm install && npm start
 2. In the UI: **Datasets → File upload** (files land in `data/uploads/`).  
 3. Optionally uncheck **Show bundled demo datasets** so only your imports appear (`GET /v1/datasets?include_demo=false`).  
 4. Bundled teaching fixtures live in [`data/demo/`](../data/demo/) — not for clinical claims.  
-5. Optional: `index_time` + horizon via UI or CLI.  
+5. Optional: `index_time` + horizon via UI or CLI. Tiny `data/demo/ehr_data.csv` has no `index_time` — use `custom` / `last_event`, or `data/raw/paper_synthetic_cohort.csv` for diabetes / horizon / readmission tasks.  
 6. [`docs/data_sources_and_schema.md`](data_sources_and_schema.md) · MIMIC: [`mimic_access_and_outreach.md`](mimic_access_and_outreach.md).  
 
 ## Next
 
+- Research workflow: [`RESEARCH_WORKFLOW.md`](RESEARCH_WORKFLOW.md) · gap list: [`GAP_CLOSURES.md`](GAP_CLOSURES.md)  
 - Architecture: [`ARCHITECTURE.md`](../ARCHITECTURE.md)  
 - Verification matrix (local academic package): `make -C research-paper paper-quick`  
 - MIMIC lock: [`mimic_lock_checklist.md`](mimic_lock_checklist.md)  
 - Cite: [`CITATION.cff`](../CITATION.cff)
+- Thresholds / operating points: `GET /v1/reports/thresholds` (optional on-disk `reports/threshold_operating_points.json`)
+- Trust pack: per-run `reports/runs/<id>/trust_pack.json` (not a `/v1/reports/trust-pack` endpoint)

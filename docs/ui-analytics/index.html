@@ -42,8 +42,11 @@
         <li>Hold-out metrics</li>
         <li>Feature importance</li>
         <li>Model comparison</li>
+        <li><strong>ROC curve</strong> · <strong>Precision–Recall</strong> · <strong>Calibration (reliability)</strong> — from <code>evaluation_report.json</code> after retrain (<code>GET /v1/reports/curves</code>)</li>
+        <li>If ROC/PR are empty, Analytics shows an explicit empty-state (retrain / larger cohort). Tiny demo hold-outs are often single-class.</li>
+        <li>Header <strong>Take tour</strong> opens a short page tour (spotlight + docs).</li>
       </ul>
-      <p>Toggle individual cards from preferences; canvases stay mounted so redraws stay reliable.</p>
+      <p>Toggle individual cards from preferences; canvases stay mounted so redraws stay reliable. Bootstrap AUC CIs appear as a quality note when the hold-out supports them.</p>
       <p><strong>Export:</strong> per-chart PNG buttons and <em>Export all charts (PNG)</em>; <em>Print / PDF report</em> opens the browser print dialog for methods appendix figures (research use only).</p>
     </section>
     <section class="section">
@@ -61,7 +64,7 @@
     </section>
 
   </main>
-  <footer class="site-footer"><div class="inner"><p class="fine">Research / education only · Md Rana Hossain · <a href="mailto:support@larucare.com">support@larucare.com</a></p></div></footer>
+  <footer class="site-footer"><div class="inner"><p class="fine">For research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future. · Md Rana Hossain · <a href="mailto:support@larucare.com">support@larucare.com</a></p></div></footer>
   <script src="../assets/site.js"></script>
 </body>
 </html>

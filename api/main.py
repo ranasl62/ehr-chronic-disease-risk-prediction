@@ -190,8 +190,9 @@ def api_meta():
         "model_file_present": Path(MODEL_PATH).exists(),
         "clinical_use": "prohibited_without_validation",
         "description": (
-            "For research and education only. Not FDA-cleared; outputs are not clinical "
-            "recommendations and are not intended for patient care. Institutional policy "
+            "For research and education only. Outputs are not clinical recommendations "
+            "and are not intended for patient care. We are working toward broader "
+            "general-purpose use in the future. Not FDA-cleared. Institutional policy "
             "and IRB govern access to real PHI."
         ),
         "documentation": {

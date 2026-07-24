@@ -25,6 +25,7 @@ import pandas as pd
 
 from feature_engineering.cohort_integrity import (
     audit_temporal_integrity,
+    coerce_index_params,
     resolve_index_times,
     truncate_events_to_index,
 )
@@ -95,15 +96,18 @@ def _temporal_block(
     feature_inclusive: bool,
     label_col: str,
 ) -> dict:
-    strategy = index_strategy
-    if horizon_days is not None and strategy == "last_event" and index_time_col is None:
-        strategy = "before_last"
+    strategy, index_time_col = coerce_index_params(
+        df,
+        index_strategy=index_strategy,
+        index_time_col=index_time_col,
+        horizon_days=horizon_days,
+    )
     index_times = resolve_index_times(
         df,
         patient_col="patient_id",
         time_col="timestamp",
         index_time_col=index_time_col,
-        index_strategy=strategy if index_time_col is None else "column",
+        index_strategy=strategy,
     )
     feat_df = truncate_events_to_index(
         df,

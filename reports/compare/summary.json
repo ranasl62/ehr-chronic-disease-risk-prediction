@@ -17,7 +17,9 @@
         "accuracy": 0.5,
         "precision": 0.0,
         "recall": 0.0,
-        "f1": 0.0
+        "f1": 0.0,
+        "n_holdout": 2,
+        "single_class_holdout": true
       },
       "roc_auc": NaN,
       "pr_auc": NaN,
@@ -29,5 +31,5 @@
     }
   ],
   "selected_model": "logreg",
-  "disclaimer": "For research and education only. Outputs are not clinical recommendations."
+  "disclaimer": "For research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future."
 }

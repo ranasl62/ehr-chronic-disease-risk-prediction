@@ -97,6 +97,50 @@ def test_train_job_missing_path_returns_clear_not_found(client):
     assert r.json()["detail"] == "data not found: data/uploads/does-not-exist.csv"
 
 
+def test_train_rejects_column_strategy_without_index_time(client):
+    r = client.post(
+        "/v1/jobs/train",
+        json={
+            "data_path": "data/demo/ehr_data.csv",
+            "data_format": "longitudinal",
+            "model_kind": "logreg",
+            "index_strategy": "column",
+            "index_time_col": "index_time",
+            "force": True,
+        },
+    )
+    assert r.status_code == 400
+    detail = r.json()["detail"]
+    assert "index_time" in str(detail).lower()
+
+
+def test_train_clears_stale_index_time_col_on_demo(client, wait_jobs_idle):
+    """Stale index_time_col from paper_synthetic must not fail tiny demo trains."""
+    wait_jobs_idle()
+    r = client.post(
+        "/v1/jobs/train",
+        json={
+            "data_path": "data/demo/ehr_data.csv",
+            "data_format": "longitudinal",
+            "model_kind": "logreg",
+            "index_strategy": "last_event",
+            "index_time_col": "index_time",
+            "force": True,
+            "windows_days": [7, 30, 180],
+        },
+    )
+    assert r.status_code == 200, r.text
+    job_id = r.json()["id"]
+    status = "queued"
+    for _ in range(60):
+        jr = client.get(f"/v1/jobs/{job_id}")
+        status = jr.json()["status"]
+        if status in ("succeeded", "failed"):
+            break
+        time.sleep(0.5)
+    assert status == "succeeded", client.get(f"/v1/jobs/{job_id}").json()
+
+
 def test_upload_rejects_non_csv(client):
     r = client.post(
         "/v1/datasets/upload",

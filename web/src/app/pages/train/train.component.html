@@ -1,12 +1,12 @@
 <section class="panel">
-  <h1>Train &amp; audit</h1>
+  <h1 data-tour="train-title">Train &amp; audit</h1>
   <p class="lede">Pick a task preset or configure manually. Compare runs logreg / RF / XGBoost (+ LightGBM if installed). LSTM is not available.</p>
 
   @if (demoBanner()) {
     <div class="demo-banner" role="status">
       <strong>Demo preset loaded</strong> — bundled
       <code>data/demo/ehr_data.csv</code> with the <code>custom</code> task (logreg).
-      Research and education only — not for patient care.
+      Research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future.
     </div>
   }
 
@@ -71,8 +71,8 @@
     <label>Horizon days (optional)
       <input type="number" [(ngModel)]="horizonDays" name="horizonDays" />
     </label>
-    <label>Index strategy
-      <select [(ngModel)]="indexStrategy" name="indexStrategy">
+    <label data-tour="train-index">Index strategy
+      <select [(ngModel)]="indexStrategy" name="indexStrategy" (ngModelChange)="onIndexStrategyChange($event)">
         <option value="last_event">last_event</option>
         <option value="before_last">before_last</option>
         <option value="column">column</option>
@@ -84,6 +84,21 @@
     <label>Label column
       <input [(ngModel)]="labelCol" name="labelCol" placeholder="label / chronic_disease" />
     </label>
+    <label>Bootstrap samples (ROC/PR CI)
+      <input
+        type="number"
+        min="0"
+        max="2000"
+        step="50"
+        [(ngModel)]="bootstrapSamples"
+        name="bootstrapSamples"
+        placeholder="0 = off"
+      />
+    </label>
+    <p class="muted boot-hint">
+      Optional. When &gt; 0, train writes percentile bootstrap CIs for hold-out ROC/PR-AUC into the evaluation
+      report (shown on Analytics as a quality note). Research estimate only.
+    </p>
 
     <details class="hpo-box">
       <summary>Light HPO (optional, research-scoped)</summary>
@@ -118,7 +133,7 @@
     </div>
   }
 
-  <div class="history">
+  <div class="history" data-tour="train-jobs">
     <div class="job-head">
       <h2>Recent jobs</h2>
       <button type="button" class="btn" (click)="refreshJobs()">Refresh</button>

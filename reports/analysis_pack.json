@@ -1,15 +1,14 @@
 {
   "kind": "analysis_pack",
-  "path": "/app/data/raw/paper_synthetic_cohort.csv",
-  "n_rows": 16577,
-  "n_patients": 3000,
-  "n_columns": 13,
+  "path": "/app/data/demo/ehr_data.csv",
+  "n_rows": 20,
+  "n_patients": 10,
+  "n_columns": 10,
   "label_column": "label",
-  "label_prevalence": 0.301,
+  "label_prevalence": 0.4,
   "missingness": {
     "patient_id": 0.0,
     "timestamp": 0.0,
-    "index_time": 0.0,
     "icd_code": 0.0,
     "lab_value": 0.0,
     "vital_signs": 0.0,
@@ -17,16 +16,14 @@
     "blood_pressure": 0.0,
     "cholesterol": 0.0,
     "age": 0.0,
-    "sex": 0.0,
-    "age_band": 0.0,
     "label": 0.0
   },
-  "time_span": "2019-02-01 00:00:00 \u2192 2022-06-04 00:00:00",
+  "time_span": "2023-01-05 00:00:00 \u2192 2023-09-01 00:00:00",
   "subgroup_counts": {
     "age_band": {
-      "41-60": 6604,
-      "61-80": 6380,
-      "<=40": 3593,
+      "41-60": 14,
+      "61-80": 5,
+      "<=40": 1,
       "81+": 0
     }
   },

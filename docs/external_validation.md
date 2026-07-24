@@ -35,7 +35,16 @@ curl -X POST http://127.0.0.1:8000/v1/jobs/external-validate \
   -d '{"data_path":"data/demo/ehr_data.csv","data_format":"longitudinal","run_id":"<optional_run_id>"}'
 ```
 
-Workbench: Results → open a run → **External validation** form → poll job → `reports/external_validation_report.json` (also copied into the run trust pack).
+## 3. External validation job (same feature contract)
+
+```bash
+curl -s -X POST localhost:8000/v1/jobs/external-validate -H 'Content-Type: application/json' \
+  -d '{"data_path":"data/demo/ehr_data.csv","data_format":"longitudinal","run_id":"<optional_run_id>"}'
+```
+
+Workbench: **Research wizard** (`/research`) or Results → open a run → **External validation** form → poll job → `reports/external_validation_report.json` (also copied into the run trust pack).
+
+Paper curves after retrain: Analytics plots ROC/PR/calibration from `evaluation_report.json`; API `GET /v1/reports/curves`. Full study loop: [`RESEARCH_WORKFLOW.md`](RESEARCH_WORKFLOW.md).
 
 Still required on your side:
 
@@ -46,5 +55,6 @@ Still required on your side:
 ## 4. API / UI visibility
 
 - **`GET /v1/model/metrics`** — reads `reports/evaluation_report.json` and reports whether **`data_sha256` matches** the loaded `model.pkl` manifest.
+- **`GET /v1/reports/curves`** — ROC / PR / calibration points (+ bootstrap CIs when present).
 - **`GET /v1/reports/methods.md?run_id=`** and **`GET /v1/reports/download.zip?run_id=`** — run-scoped methods note and ZIP including the trust pack.
 - Angular **Results** trust checklist + **Home** workspace status surface leakage/SHAP when present.

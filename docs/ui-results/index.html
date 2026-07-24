@@ -38,9 +38,12 @@
         <li><strong>Operating points</strong> — precision/recall at several probability thresholds (research only)</li>
         <li><strong>Light HPO</strong> — optional grid trials from Train, presented as a structured best-trial card and trial table; unavailable metrics render as <code>n/a</code>, not raw JSON</li>
         <li><strong>Feature importance</strong> — top drivers from the fitted model</li>
-        <li><strong>Leakage audit</strong> — findings from the audit job</li>
+        <li><strong>Leakage audit</strong> — findings from the audit job (bind <code>run_id</code>)</li>
+        <li><strong>External validation</strong> — score a held-out / site CSV against the run model</li>
+        <li><strong>Trust checklist</strong> — per-run trust pack completeness</li>
         <li><strong>Report files</strong> — JSON/CSV artifacts under <code>reports/</code></li>
-        <li><strong>Figures</strong> — calibration and other PNGs</li>
+        <li><strong>Figures</strong> — calibration and SHAP PNGs</li>
+        <li><strong>Paper curves</strong> — interactive ROC / PR / calibration live on <a href="/ui-analytics">Analytics</a> after retrain</li>
       </ul>
     </section>
     <figure class="shot">
@@ -60,7 +63,7 @@
     </section>
 
   </main>
-  <footer class="site-footer"><div class="inner"><p class="fine">Research / education only · Md Rana Hossain · <a href="mailto:support@larucare.com">support@larucare.com</a></p></div></footer>
+  <footer class="site-footer"><div class="inner"><p class="fine">For research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future. · Md Rana Hossain · <a href="mailto:support@larucare.com">support@larucare.com</a></p></div></footer>
   <script src="../assets/site.js"></script>
 </body>
 </html>

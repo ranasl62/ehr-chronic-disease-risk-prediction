@@ -25,7 +25,8 @@ jobs:
       - name: Leakage audit on artifact
         run: PYTHONPATH=. python scripts/leakage_audit.py --artifact model.pkl
       - name: Pytest
-        run: PYTHONPATH=. pytest tests/ -q --tb=short
+        # Exclude live e2e (needs running API/UI). Coverage gates come from pytest.ini (pytest-cov).
+        run: PYTHONPATH=. pytest tests/ -m "not e2e" -q --tb=short
       - name: Temporal train + leakage audit + group CV
         run: |
           PYTHONPATH=. python -m training.train --format longitudinal --data data/raw/ehr_data.csv --model logreg --temporal-split --out model_temporal.pkl

@@ -11,7 +11,7 @@ describe('App routes (UI pages)', () => {
 
   it('registers all workbench pages', () => {
     const paths = routes.map((r) => r.path);
-    for (const p of ['', 'datasets', 'train', 'results', 'analytics', 'config', 'predict', 'docs']) {
+    for (const p of ['', 'research', 'datasets', 'train', 'results', 'analytics', 'config', 'predict', 'docs']) {
       expect(paths).toContain(p);
     }
   });

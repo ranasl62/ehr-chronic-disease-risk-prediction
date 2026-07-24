@@ -64,6 +64,8 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('fairnessChart') fairnessChartRef?: ElementRef<HTMLCanvasElement>;
 
   summary = signal<ReportsSummary | null>(null);
+  /** True until first reports/summary response (success or error). Avoids empty-state flash. */
+  summaryLoading = signal(true);
   runs = signal<RunSummary[]>([]);
   selectedRun = signal<RunDetail | null>(null);
   fairness = signal<FairnessReport | null>(null);
@@ -74,6 +76,10 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
   busy = signal(false);
   /** Empty = show all PNGs, calibration/SHAP first when present. */
   figFilter = '';
+  /** Per-figure load failures (broken URL / corrupt PNG served as 404). */
+  figLoadError = signal<Record<string, boolean>>({});
+  /** Cache-bust token so Retry re-requests figure URLs. */
+  figCacheBust = signal(0);
   metricFilter = '';
   /** Client-side filter for Experiment runs table. */
   runFilter = '';
@@ -168,16 +174,22 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   reload(): void {
     this.error.set(null);
+    this.summaryLoading.set(true);
     this.api.reportsSummary().subscribe({
       next: (s) => {
         this.summary.set(s);
         this.lastSummary = s;
+        this.summaryLoading.set(false);
+        this.figLoadError.set({});
         this.buildTables(s);
         if (this.figFilter === 'calibration' && !this.hasCalibrationFigure()) this.figFilter = '';
         if (this.figFilter === 'shap' && !this.hasShapFigure()) this.figFilter = '';
         this.scheduleRedraw();
       },
-      error: (e) => this.error.set(this.fmtErr(e)),
+      error: (e) => {
+        this.summaryLoading.set(false);
+        this.error.set(this.fmtErr(e));
+      },
     });
     this.api.runs(40).subscribe({
       next: (r) => {
@@ -234,6 +246,24 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   setFigFilter(q: string): void {
     this.figFilter = q;
+  }
+
+  onFigError(name: string): void {
+    this.figLoadError.update((m) => ({ ...m, [name]: true }));
+  }
+
+  onFigLoad(name: string): void {
+    this.figLoadError.update((m) => {
+      if (!m[name]) return m;
+      const next = { ...m };
+      delete next[name];
+      return next;
+    });
+  }
+
+  retryFig(name: string): void {
+    this.onFigLoad(name);
+    this.figCacheBust.update((n) => n + 1);
   }
 
   methodsMdUrl(): string {
@@ -534,7 +564,9 @@ export class ResultsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   fileUrl(name: string): string {
-    return this.api.reportFileUrl(name);
+    const base = this.api.reportFileUrl(name);
+    const bust = this.figCacheBust();
+    return bust ? `${base}${base.includes('?') ? '&' : '?'}v=${bust}` : base;
   }
 
   onPageSize(n: number): void {

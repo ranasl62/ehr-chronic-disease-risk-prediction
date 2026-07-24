@@ -2,13 +2,14 @@
 
 Canonical docs site: **https://ehr.larucare.com/**  
 Live demo (workbench): **https://ehr-risk-framework.larucare.com/**  
+(Free demo server — may be slow; try with small data. Run locally or on your own server for larger workloads.)  
 Live API: **https://ehr-api.larucare.com/**  
 GitHub: https://github.com/ranasl62/ehr-chronic-disease-risk-prediction  
 
 Catchphrase (use as tagline / anchor text):  
 **An open-source framework for leakage-safe, calibrated, and explainable EHR risk prediction.**
 
-Research / education only — not a medical device. Do not invent clinical performance claims.
+For research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future. Do not invent clinical performance claims.
 
 ## Done in-repo (on-page)
 

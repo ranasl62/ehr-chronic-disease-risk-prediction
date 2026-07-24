@@ -1,0 +1,87 @@
+.tour-root {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  pointer-events: none;
+}
+.tour-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(26, 46, 40, 0.45);
+  pointer-events: auto;
+}
+.tour-hole {
+  position: absolute;
+  border-radius: 8px;
+  box-shadow: 0 0 0 9999px rgba(26, 46, 40, 0.55);
+  border: 2px solid var(--accent);
+  background: transparent;
+  pointer-events: none;
+  transition: top 0.15s ease, left 0.15s ease, width 0.15s ease, height 0.15s ease;
+}
+.tour-tip {
+  position: absolute;
+  width: min(360px, calc(100vw - 32px));
+  max-height: min(70vh, 420px);
+  overflow: auto;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  box-shadow: 0 8px 28px rgba(26, 46, 40, 0.18);
+  pointer-events: auto;
+  z-index: 1;
+}
+.tour-tip:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.tour-tip-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: baseline;
+  margin-bottom: 0.35rem;
+}
+.tour-tip-head strong {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+.tour-count {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.tour-body {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.tour-check {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 0.75rem;
+}
+.tour-actions {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.tour-actions .btn {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.85rem;
+}
+.tour-actions .btn.primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.tour-actions .btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

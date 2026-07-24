@@ -363,7 +363,16 @@ def test_jobs_remaining_unit_paths(tmp_path, monkeypatch, tiny_csv):
     monkeypatch.setattr("openhealth.trust_pack.resolve_active_run_id", lambda x=None: "run_shap2")
     monkeypatch.setattr("openhealth.runs.run_path", lambda rid: run_dir)
     monkeypatch.setattr("openhealth.runs.ensure_run", lambda rid: run_dir)
-    monkeypatch.setattr("explainability.shap_explainer.explain_model", lambda *a, **k: None)
+
+    def _fake_shap(*_a, **k):
+        from utils.report_images import minimal_png_bytes
+
+        plot_path = k.get("plot_path")
+        if plot_path:
+            Path(plot_path).parent.mkdir(parents=True, exist_ok=True)
+            Path(plot_path).write_bytes(minimal_png_bytes())
+
+    monkeypatch.setattr("explainability.shap_explainer.explain_model", _fake_shap)
     jobs_mod.run_shap_job(
         jobs_mod.JobRecord(id="sh2", kind="shap"),
         {"run_id": "run_shap2", "out": "reports/custom/out.png"},
@@ -400,10 +409,13 @@ def test_jobs_remaining_unit_paths(tmp_path, monkeypatch, tiny_csv):
     monkeypatch.setattr("openhealth.trust_pack.resolve_active_run_id", lambda x=None: None)
 
     def touch_plot(*a, **k):
+        from utils.report_images import minimal_png_bytes
+
         plot_path = k.get("plot_path")
         if plot_path:
+            plot_path = Path(plot_path)
             plot_path.parent.mkdir(parents=True, exist_ok=True)
-            plot_path.write_bytes(b"png")
+            plot_path.write_bytes(minimal_png_bytes())
 
     monkeypatch.setattr("explainability.shap_explainer.explain_model", touch_plot)
     shared = REPORTS_DIR / "shap_summary.png"
@@ -414,7 +426,7 @@ def test_jobs_remaining_unit_paths(tmp_path, monkeypatch, tiny_csv):
         {"out": str(custom.relative_to(PROJECT_ROOT))},
     )
     assert custom.is_file() or shared.is_file()
-
+    assert (custom if custom.is_file() else shared).stat().st_size >= 64
 
 def test_delete_symlink_target_deletable_race():
     from api.data_io import delete_dataset_file
@@ -667,7 +679,11 @@ def test_researcher_train_with_task_and_hpo_blockers(client, wait_jobs_idle):
         "task_id": "diabetes",
     }
     r = client.post("/v1/jobs/train", json=body)
-    assert r.status_code in (200, 409)
+    # Tiny demo lacks index_time — task-aware health gate blocks without force.
+    assert r.status_code == 400
+    detail = r.json()["detail"]
+    assert isinstance(detail, dict)
+    assert detail.get("blockers")
 
     nolabel = PROJECT_ROOT / "data" / "uploads" / "nolabel_hpo.csv"
     nolabel.write_text("patient_id,timestamp\n1,2020-01-01\n", encoding="utf-8")
@@ -939,7 +955,16 @@ def test_jobs_shap_with_run_id(tmp_path, monkeypatch):
     monkeypatch.setattr("openhealth.trust_pack.resolve_active_run_id", lambda x=None: "run_shap")
     monkeypatch.setattr("openhealth.runs.ensure_run", lambda rid: run_dir)
     monkeypatch.setattr("openhealth.runs.run_path", lambda rid: run_dir)
-    monkeypatch.setattr("explainability.shap_explainer.explain_model", lambda *a, **k: None)
+
+    def _fake_shap(*_a, **k):
+        from utils.report_images import minimal_png_bytes
+
+        plot_path = k.get("plot_path")
+        if plot_path:
+            Path(plot_path).parent.mkdir(parents=True, exist_ok=True)
+            Path(plot_path).write_bytes(minimal_png_bytes())
+
+    monkeypatch.setattr("explainability.shap_explainer.explain_model", _fake_shap)
     monkeypatch.setattr(
         "training.reproduce_split.split_train_test_from_artifact",
         lambda a: (art["X_train"], art["X_test"], art["y_train"], art["y_test"], None, None),
@@ -1127,6 +1152,7 @@ def test_researcher_train_compare_hpo_routes(client, wait_jobs_idle, monkeypatch
         "feature_inclusive": True,
         "label_col": "label",
         "task_id": "diabetes",
+        "force": True,
     }
     r = client.post("/v1/jobs/train", json=body)
     assert r.status_code in (200, 409)
@@ -1136,7 +1162,7 @@ def test_researcher_train_compare_hpo_routes(client, wait_jobs_idle, monkeypatch
         "/v1/jobs/compare",
         json={**body, "temporal_split": True, "promote_best": False},
     )
-    assert r3.status_code in (200, 409)
+    assert r3.status_code in (200, 400, 409)
 
     nolabel = PROJECT_ROOT / "data" / "uploads" / "nolabel_compare.csv"
     nolabel.write_text("patient_id,timestamp\n1,2020-01-01\n", encoding="utf-8")
@@ -1153,7 +1179,7 @@ def test_researcher_train_compare_hpo_routes(client, wait_jobs_idle, monkeypatch
         "/v1/jobs/hpo",
         json={**body, "task_id": "diabetes", "max_trials": 1},
     )
-    assert r6.status_code in (200, 409)
+    assert r6.status_code in (200, 400, 409)
 
     nolabel2 = PROJECT_ROOT / "data" / "uploads" / "nolabel_hpo2.csv"
     nolabel2.write_text("patient_id,timestamp\n1,2020-01-01\n", encoding="utf-8")
@@ -1253,7 +1279,7 @@ def test_final_twenty_line_gaps(tmp_path, monkeypatch, client, wait_jobs_idle):
         "task_id": "diabetes",
     }
     r = client.post("/v1/jobs/train", json=train_body)
-    assert r.status_code in (200, 409, 422)
+    assert r.status_code in (200, 400, 409, 422)
 
     wait_jobs_idle()
     r2 = client.post(
@@ -1265,7 +1291,7 @@ def test_final_twenty_line_gaps(tmp_path, monkeypatch, client, wait_jobs_idle):
             "temporal_split": True,
         },
     )
-    assert r2.status_code in (200, 409, 422)
+    assert r2.status_code in (200, 400, 409, 422)
 
     r3 = client.post(
         "/v1/jobs/compare",
@@ -1376,10 +1402,16 @@ def test_coverage_last_mile(client, wait_jobs_idle, monkeypatch, tmp_path):
     monkeypatch.setattr("openhealth.events.emit", lambda *a, **k: None)
 
     start_train(
-        TrainJobBody(data_path="data/raw/ehr_data.csv", task_id="diabetes", label_col=None),
+        TrainJobBody(
+            data_path="data/raw/ehr_data.csv",
+            task_id="diabetes",
+            label_col=None,
+            force=True,
+        ),
         True,
     )
-    start_train(TrainJobBody(data_path="data/raw/ehr_data.csv"), True)
+    # Workspace config may still suggest diabetes — force past tiny-demo blockers.
+    start_train(TrainJobBody(data_path="data/raw/ehr_data.csv", force=True), True)
 
     start_compare(
         CompareJobBody(
@@ -1438,9 +1470,10 @@ def test_coverage_last_mile(client, wait_jobs_idle, monkeypatch, tmp_path):
 
     monkeypatch.setattr(HpoJobBody, "model_dump", _hpo_dump_without_model_kind)
     monkeypatch.setattr("openhealth.task_spec.load_task", _load_task_hide_model_kind_in_items)
+    # HPO has no force flag — use paper_synthetic so task-aware health passes.
     start_hpo(
         HpoJobBody(
-            data_path="data/raw/ehr_data.csv",
+            data_path="data/raw/paper_synthetic_cohort.csv",
             task_id="diabetes",
             max_trials=1,
             label_col=None,

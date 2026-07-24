@@ -8,9 +8,11 @@ import { DocsComponent } from './pages/docs/docs.component';
 
 import { AnalyticsComponent } from './pages/analytics/analytics.component';
 import { ConfigComponent } from './pages/config/config.component';
+import { ResearchWizardComponent } from './pages/research-wizard/research-wizard.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
+  { path: 'research', component: ResearchWizardComponent },
   { path: 'datasets', component: DatasetsComponent },
   { path: 'train', component: TrainComponent },
   { path: 'results', component: ResultsComponent },

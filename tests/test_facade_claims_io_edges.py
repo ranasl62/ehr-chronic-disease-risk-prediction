@@ -48,7 +48,7 @@ def test_zip_contains_limitations_and_manifest():
     assert "README_PACK.json" in names
     assert "reports/methods.md" in names
     methods = zf.read("reports/methods.md").decode("utf-8")
-    assert "Research and education" in methods
+    assert "research and education" in methods.lower()
     assert "Methods note" in methods
 
 

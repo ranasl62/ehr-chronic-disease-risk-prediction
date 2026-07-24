@@ -41,6 +41,7 @@ from utils.config import (
 )
 from utils.eval_report import load_evaluation_report_safe
 from utils.json_safe import json_safe
+from utils.report_images import is_valid_report_png
 
 router = APIRouter(prefix="/v1", tags=["researcher"])
 AuthDep = Depends(require_api_key_if_configured)
@@ -100,6 +101,73 @@ _REPORT_ALLOWLIST = {
     "external_validation_report.json",
     "analysis_pack.json",
 }
+
+
+def _csv_header_columns(data_path: Path) -> set[str] | None:
+    try:
+        import pandas as pd
+
+        header = pd.read_csv(data_path, nrows=0)
+        return set(header.columns.astype(str))
+    except Exception:
+        return None
+
+
+def _reconcile_merged_column_strategy(
+    params: dict[str, Any],
+    data_path: Path,
+    *,
+    explicit_column: bool,
+) -> None:
+    """
+    Task presets often set index_strategy=column + index_time.
+
+    When that merge lands on a CSV without the column (tiny demo / tabular) and the
+    caller did not explicitly request column strategy, fall back to last_event
+    instead of failing. Explicit column requests still hard-fail in validation.
+    """
+    if explicit_column:
+        return
+    strategy = params.get("index_strategy") or "last_event"
+    if strategy != "column":
+        return
+    need = params.get("index_time_col") or "index_time"
+    cols = _csv_header_columns(data_path)
+    if cols is None:
+        return
+    if need not in cols:
+        params["index_strategy"] = "last_event"
+        params["index_time_col"] = None
+
+
+def _validate_index_column_or_clear(params: dict[str, Any], data_path: Path) -> None:
+    """
+    Fail fast when strategy is explicitly ``column`` but the CSV lacks the column.
+    Otherwise clear a stale ``index_time_col`` so background jobs do not crash.
+    """
+    strategy = params.get("index_strategy") or "last_event"
+    col = params.get("index_time_col")
+    if strategy != "column" and not col:
+        return
+    cols = _csv_header_columns(data_path)
+    if cols is None:
+        return
+    need = col or "index_time"
+    if strategy == "column":
+        if need not in cols:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    f"index_strategy='column' requires column {need!r} in the dataset. "
+                    "Use last_event/before_last for demos without index_time, "
+                    "or switch to paper_synthetic / a cohort that includes index_time."
+                ),
+            )
+        params["index_time_col"] = need
+        return
+    if col and col not in cols:
+        # Stale suggestion from another dataset — train path will ignore it too.
+        params["index_time_col"] = None
 
 
 class TrainJobBody(BaseModel):
@@ -218,6 +286,8 @@ def workspace_status(_: bool = AuthDep):
     leakage = REPORTS_DIR / "leakage_audit.json"
     shap = REPORTS_DIR / "shap_summary.png"
     cal = REPORTS_DIR / "calibration_holdout.png"
+    shap_ok = is_valid_report_png(shap)
+    cal_ok = is_valid_report_png(cal)
     manifest: dict = {}
     if TRAINING_MANIFEST_PATH.is_file():
         try:
@@ -233,8 +303,8 @@ def workspace_status(_: bool = AuthDep):
             "evaluation_present": bool(ev),
             "metrics": (ev or {}).get("metrics"),
             "leakage_audit_present": leakage.is_file(),
-            "shap_present": shap.is_file(),
-            "calibration_present": cal.is_file(),
+            "shap_present": shap_ok,
+            "calibration_present": cal_ok,
             "demo_datasets_available": datasets_ok,
             "training_manifest": {
                 k: manifest.get(k)
@@ -253,7 +323,7 @@ def workspace_status(_: bool = AuthDep):
                 "model_trained": model_present,
                 "metrics_available": bool(ev),
                 "leakage_audited": leakage.is_file(),
-                "shap_available": shap.is_file(),
+                "shap_available": shap_ok,
             },
             "import_formats": ["csv", "tsv", "json", "xlsx", "xls", "form", "sql"],
             "download": {"results_zip": "/v1/reports/download.zip"},
@@ -285,8 +355,8 @@ def list_datasets(
                 )
     UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
     for p in sorted(UPLOADS_DIR.glob("*.csv")):
-        exists = p.is_file()
         try:
+            exists = p.is_file()
             nbytes = p.stat().st_size if exists else 0
         except OSError:
             exists = False
@@ -459,9 +529,9 @@ def start_train(body: TrainJobBody, _: bool = AuthDep):
     path = _resolve_under_project(str(resolve_training_data_path(params["data_path"])))
     if not path.is_file():
         raise HTTPException(status_code=404, detail=f"data not found: {params['data_path']}")
-    # Health gate
+    # Health gate (task-aware so index_time / required columns match the job)
     try:
-        health = dataset_health_report(path).get("health") or {}
+        health = dataset_health_report(path, task_id=params.get("task_id")).get("health") or {}
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"health check failed: {e}") from e
     if not health.get("ready_for_training"):
@@ -479,11 +549,19 @@ def start_train(body: TrainJobBody, _: bool = AuthDep):
                     "message": "dataset not ready for training",
                     "blockers": health.get("blockers"),
                     "warnings": health.get("warnings"),
+                    "hint": (
+                        "Use paper_synthetic (or another cohort with index_time) for horizon "
+                        "tasks, or switch to the custom / last_event task for the tiny demo."
+                    ),
                 },
             )
     params["data_path"] = str(path)
     if params.get("temporal_split"):
         params["split_by_patient"] = False
+    _reconcile_merged_column_strategy(
+        params, path, explicit_column=body.index_strategy == "column"
+    )
+    _validate_index_column_or_clear(params, path)
     try:
         rec = submit_job("train", lambda r: run_train_job(r, params))
         emit("train_queued", f"Train job {rec.id}", job_id=rec.id)
@@ -529,7 +607,7 @@ def start_compare(body: CompareJobBody, _: bool = AuthDep):
     if not path.is_file():
         raise HTTPException(status_code=404, detail=f"data not found: {params['data_path']}")
     try:
-        health = dataset_health_report(path).get("health") or {}
+        health = dataset_health_report(path, task_id=params.get("task_id")).get("health") or {}
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"health check failed: {e}") from e
     if not health.get("ready_for_training"):
@@ -539,11 +617,18 @@ def start_compare(body: CompareJobBody, _: bool = AuthDep):
                 "message": "dataset not ready for compare",
                 "blockers": health.get("blockers"),
                 "warnings": health.get("warnings"),
+                "hint": (
+                    "Use paper_synthetic for index_time tasks, or custom/last_event for the tiny demo."
+                ),
             },
         )
     params["data_path"] = str(path)
     if params.get("temporal_split"):
         params["split_by_patient"] = False
+    _reconcile_merged_column_strategy(
+        params, path, explicit_column=body.index_strategy == "column"
+    )
+    _validate_index_column_or_clear(params, path)
     try:
         rec = submit_job("compare", lambda r: run_compare_job(r, params))
     except RuntimeError as e:
@@ -637,7 +722,7 @@ def start_hpo(body: HpoJobBody, _: bool = AuthDep):
     if not path.is_file():
         raise HTTPException(status_code=404, detail=f"data not found: {params['data_path']}")
     try:
-        health = dataset_health_report(path).get("health") or {}
+        health = dataset_health_report(path, task_id=params.get("task_id")).get("health") or {}
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"health check failed: {e}") from e
     if not health.get("ready_for_training"):
@@ -647,11 +732,18 @@ def start_hpo(body: HpoJobBody, _: bool = AuthDep):
                 "message": "dataset not ready for HPO",
                 "blockers": health.get("blockers"),
                 "warnings": health.get("warnings"),
+                "hint": (
+                    "Use paper_synthetic for index_time tasks, or custom/last_event for the tiny demo."
+                ),
             },
         )
     params["data_path"] = str(path)
     if params.get("temporal_split"):
         params["split_by_patient"] = False
+    _reconcile_merged_column_strategy(
+        params, path, explicit_column=body.index_strategy == "column"
+    )
+    _validate_index_column_or_clear(params, path)
     try:
         rec = submit_job("hpo", lambda r: run_hpo_job(r, params))
     except RuntimeError as e:
@@ -717,18 +809,28 @@ def reports_summary(_: bool = AuthDep):
             thresholds = json.loads(tp.read_text(encoding="utf-8"))
         except Exception:
             thresholds = None
+    curves = (ev or {}).get("curves")
+    bootstrap_cis = (ev or {}).get("bootstrap_cis")
+    quality_note = (ev or {}).get("quality_note")
     files = []
     for name in sorted(_REPORT_ALLOWLIST):
         p = REPORTS_DIR / name
-        if p.is_file():
-            files.append(
-                {"name": name, "bytes": p.stat().st_size, "url": f"/v1/reports/file/{name}"}
-            )
+        if not p.is_file():
+            continue
+        # Do not advertise corrupt / magic-only PNG stubs as figures.
+        if name.endswith(".png") and not is_valid_report_png(p):
+            continue
+        files.append(
+            {"name": name, "bytes": p.stat().st_size, "url": f"/v1/reports/file/{name}"}
+        )
     return json_safe(
         {
             "metrics": (ev or {}).get("metrics"),
             "evaluation_generated_at_utc": (ev or {}).get("generated_at_utc"),
             "threshold": (ev or {}).get("threshold"),
+            "curves": curves,
+            "bootstrap_cis": bootstrap_cis,
+            "quality_note": quality_note,
             "leakage_audit": leakage,
             "feature_importance": feature_importance,
             "model_comparison": comparison,
@@ -737,6 +839,46 @@ def reports_summary(_: bool = AuthDep):
             "thresholds": thresholds,
             "files": files,
             "download_zip": "/v1/reports/download.zip",
+        }
+    )
+
+
+@router.get("/reports/curves")
+def reports_curves(run_id: str | None = None, _: bool = AuthDep):
+    """ROC / PR / calibration curve points for Chart.js (research plots)."""
+    root = REPORTS_DIR
+    if run_id:
+        from openhealth.runs import run_path
+
+        try:
+            root = run_path(run_id)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+        if not root.is_dir():
+            raise HTTPException(status_code=404, detail=f"run not found: {run_id}")
+    ep = root / "evaluation_report.json"
+    if not ep.is_file():
+        raise HTTPException(
+            status_code=404,
+            detail="evaluation_report.json missing — train a model first",
+        )
+    try:
+        ev = json.loads(ep.read_text(encoding="utf-8"))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"invalid evaluation report: {e}") from e
+    curves = ev.get("curves")
+    if not curves:
+        raise HTTPException(
+            status_code=404,
+            detail="curves not in evaluation report — retrain to regenerate paper plots",
+        )
+    return json_safe(
+        {
+            "run_id": run_id,
+            "curves": curves,
+            "bootstrap_cis": ev.get("bootstrap_cis"),
+            "quality_note": ev.get("quality_note"),
+            "metrics": ev.get("metrics"),
         }
     )
 
@@ -778,5 +920,10 @@ def reports_file(name: str, _: bool = AuthDep):
     path = REPORTS_DIR / name
     if not path.is_file():
         raise HTTPException(status_code=404, detail="file missing")
+    if name.endswith(".png") and not is_valid_report_png(path):
+        raise HTTPException(
+            status_code=404,
+            detail="figure corrupt or incomplete — regenerate SHAP / calibration",
+        )
     media = "application/json" if name.endswith(".json") else "image/png"
     return FileResponse(path, media_type=media, filename=name)

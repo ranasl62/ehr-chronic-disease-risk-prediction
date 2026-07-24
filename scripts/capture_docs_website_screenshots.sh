@@ -29,6 +29,7 @@ shot "http://127.0.0.1:8080/predict" "$MEDIA/06_predict_banner.png"
 shot "http://127.0.0.1:8000/docs" "$MEDIA/07_api_docs.png"
 shot "http://127.0.0.1:8080/analytics" "$MEDIA/08_analytics_dashboard.png"
 shot "http://127.0.0.1:8080/docs" "$MEDIA/09_ui_docs.png"
+shot "http://127.0.0.1:8080/research" "$MEDIA/10_research_wizard.png"
 
 # Legacy fallback removed — re-run capture if 07_api_docs.png is empty
 if [[ "$(wc -c < "$MEDIA/07_api_docs.png")" -lt 30000 ]]; then

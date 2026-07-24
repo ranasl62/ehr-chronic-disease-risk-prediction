@@ -346,4 +346,14 @@ describe('ApiService (UI → backend contract)', () => {
     expect(sqlReq.request.body.connection_url).toBeUndefined();
     sqlReq.flush({ path: 'data/uploads/s.csv' });
   });
+
+  it('loads evaluation curves with optional run_id', () => {
+    api.evaluationCurves('run_a').subscribe((r) => expect(r.curves.roc?.fpr?.length).toBe(2));
+    const req = http.expectOne((r) => r.url === '/v1/reports/curves');
+    expect(req.request.params.get('run_id')).toBe('run_a');
+    req.flush({
+      run_id: 'run_a',
+      curves: { roc: { fpr: [0, 1], tpr: [0, 1] }, pr: {}, calibration: {}, notes: [] },
+    });
+  });
 });

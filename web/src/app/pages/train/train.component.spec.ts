@@ -181,6 +181,22 @@ describe('TrainComponent', () => {
     expect(cmp.busy()).toBeFalse();
   }));
 
+  it('includes bootstrap_samples when bootstrapSamples > 0', () => {
+    cmp.dataPath = 'data/demo/ehr_data.csv';
+    cmp.bootstrapSamples = 200;
+    cmp.startTrain();
+    const payload = api.train.calls.mostRecent().args[0] as { bootstrap_samples?: number | null };
+    expect(payload.bootstrap_samples).toBe(200);
+  });
+
+  it('omits bootstrap_samples (null) when bootstrapSamples is 0', () => {
+    cmp.dataPath = 'data/demo/ehr_data.csv';
+    cmp.bootstrapSamples = 0;
+    cmp.startTrain();
+    const payload = api.train.calls.mostRecent().args[0] as { bootstrap_samples?: number | null };
+    expect(payload.bootstrap_samples).toBeNull();
+  });
+
   it('starts compare job', () => {
     cmp.dataPath = 'data/demo/ehr_data.csv';
     cmp.startCompare();

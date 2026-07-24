@@ -64,6 +64,18 @@ describe('AnalyticsComponent', () => {
     api.reportsSummary.and.returnValue(
       of({
         files: [],
+        quality_note: 'ROC-AUC bootstrap note',
+        curves: {
+          roc: { fpr: [0, 0.5, 1], tpr: [0, 0.7, 1], thresholds: [1, 0.5, 0] },
+          pr: { precision: [1, 0.6, 0.4], recall: [0, 0.5, 1], thresholds: [1, 0.5] },
+          calibration: {
+            bin_mid: [0.25, 0.75],
+            frac_positive: [0.2, 0.7],
+            mean_predicted: [0.3, 0.8],
+            counts: [3, 4],
+          },
+          notes: [],
+        },
         feature_importance: { w7d_glucose: 0.4, w7d_age: 0.2 },
         model_comparison: {
           selected_model: 'logreg',
@@ -287,6 +299,7 @@ describe('AnalyticsComponent', () => {
       renderImportance(r: object): void;
       renderCompare(r: object): void;
       renderMetrics(s: object): void;
+      renderEvalCurves(r: object): void;
     };
     ui.patch({ show_importance_chart: false, show_compare_chart: false, show_metric_chart: false });
     priv.renderImportance({});
@@ -300,5 +313,52 @@ describe('AnalyticsComponent', () => {
     ui.patch({ show_compare_chart: true, show_metric_chart: true });
     priv.renderCompare({ model_comparison: { comparison: [] } });
     priv.renderMetrics({ metrics: {} });
+    priv.renderEvalCurves({});
+    priv.renderEvalCurves({ curves: { roc: {}, pr: {}, calibration: {} } });
+    for (const name of ['roc', 'pr', 'cal']) {
+      const c = document.createElement('canvas');
+      c.setAttribute('data-chart', name);
+      fixture.nativeElement.appendChild(c);
+    }
+    priv.renderEvalCurves({
+      curves: {
+        roc: { fpr: [0, 1], tpr: [0, 1] },
+        pr: { precision: [1, 0.5], recall: [0, 1] },
+        calibration: { bin_mid: [0.5], frac_positive: [0.4], mean_predicted: undefined, counts: [2] },
+      },
+    });
+    tick(20);
+    expect(cmp.formatPct(undefined)).toBe('—');
+  }));
+
+  it('shows empty-state copy when ROC/PR points are unavailable', fakeAsync(() => {
+    api.reportsSummary.and.returnValue(
+      of({
+        files: [],
+        quality_note: 'Hold-out has a single class — ROC/PR-AUC and curve plots are n/a',
+        curves: {
+          roc: { fpr: [], tpr: [], thresholds: [] },
+          pr: { precision: [], recall: [], thresholds: [] },
+          calibration: { bin_mid: [0.5], frac_positive: [0], mean_predicted: [0.4], counts: [1] },
+          notes: ['single_class_holdout_curves_unavailable'],
+        },
+      })
+    );
+    fixture.detectChanges();
+    tick(20);
+    expect(cmp.hasRocCurve()).toBeFalse();
+    expect(cmp.hasPrCurve()).toBeFalse();
+    expect(cmp.hasCalCurve()).toBeTrue();
+    expect(cmp.curveEmpty().roc || '').toMatch(/single.class|paper_synthetic|larger/i);
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toMatch(/single class|larger cohort|n\/a/i);
+  }));
+
+  it('prompts retrain when curves key is absent', fakeAsync(() => {
+    api.reportsSummary.and.returnValue(of({ files: [], metrics: { brier: 0.2 } }));
+    fixture.detectChanges();
+    tick(20);
+    expect(cmp.hasRocCurve()).toBeFalse();
+    expect(cmp.curveEmpty().roc || '').toMatch(/retrain/i);
   }));
 });

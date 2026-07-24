@@ -1,7 +1,7 @@
 <section class="panel analytics-panel" id="analytics-print-root">
   <header class="analytics-header no-print">
     <div>
-      <h1>Analytics dashboard</h1>
+      <h1 data-tour="analytics-title">Analytics dashboard</h1>
       <p class="lede">Cohort exploration, hold-out metrics, and model charts for research reporting. Not clinical decision support.</p>
     </div>
     <div class="header-actions">
@@ -60,6 +60,15 @@
         {{ ap.time_span || 'no time span' }}
       </p>
     </div>
+  }
+  @if (qualityNote(); as qn) {
+    <p class="quality" data-tour="analytics-quality">{{ qn }}</p>
+  }
+  @if (reports() && (!hasRocCurve() || !hasPrCurve())) {
+    <p class="quality curve-hint" data-tour="analytics-curve-hint" role="status">
+      ROC/PR empty? Retrain on <code>paper_synthetic</code> (Research wizard or Train) so the hold-out has both classes.
+      Research / education only — not for care.
+    </p>
   }
 
   <details class="filters no-print">
@@ -176,6 +185,42 @@
             <button type="button" class="btn tiny" (click)="exportChartPng('compare', 'model_comparison')">PNG</button>
           </div>
           <div class="chart-body"><canvas #compareChart data-chart="compare"></canvas></div>
+        </div>
+        <div class="card chart-card" data-tour="analytics-roc">
+          <div class="chart-head no-print">
+            <span>ROC curve</span>
+            <button type="button" class="btn tiny" (click)="exportChartPng('roc', 'roc_curve')" [disabled]="!hasRocCurve()">PNG</button>
+          </div>
+          <div class="chart-body">
+            @if (curveEmpty().roc; as msg) {
+              <p class="curve-empty" role="status">{{ msg }}</p>
+            }
+            <canvas #rocChart data-chart="roc" [class.visually-hidden]="!!curveEmpty().roc"></canvas>
+          </div>
+        </div>
+        <div class="card chart-card" data-tour="analytics-pr">
+          <div class="chart-head no-print">
+            <span>PR curve</span>
+            <button type="button" class="btn tiny" (click)="exportChartPng('pr', 'pr_curve')" [disabled]="!hasPrCurve()">PNG</button>
+          </div>
+          <div class="chart-body">
+            @if (curveEmpty().pr; as msg) {
+              <p class="curve-empty" role="status">{{ msg }}</p>
+            }
+            <canvas #prChart data-chart="pr" [class.visually-hidden]="!!curveEmpty().pr"></canvas>
+          </div>
+        </div>
+        <div class="card chart-card wide" data-tour="analytics-cal">
+          <div class="chart-head no-print">
+            <span>Calibration</span>
+            <button type="button" class="btn tiny" (click)="exportChartPng('cal', 'calibration_curve')" [disabled]="!hasCalCurve()">PNG</button>
+          </div>
+          <div class="chart-body">
+            @if (curveEmpty().cal; as msg) {
+              <p class="curve-empty" role="status">{{ msg }}</p>
+            }
+            <canvas #calChart data-chart="cal" [class.visually-hidden]="!!curveEmpty().cal"></canvas>
+          </div>
         </div>
       </div>
     }

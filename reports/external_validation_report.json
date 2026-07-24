@@ -1,6 +1,6 @@
 {
   "kind": "external_validation",
-  "artifact": "/app/reports/runs/20260723T122625Z_logreg/model.pkl",
+  "artifact": "/app/reports/runs/20260724T021145Z_logreg/model.pkl",
   "data_path": "/app/data/demo/ehr_data.csv",
   "data_format": "longitudinal",
   "n_samples": 10,
@@ -15,8 +15,10 @@
     "accuracy": 0.9,
     "precision": 0.8,
     "recall": 1.0,
-    "f1": 0.8888888888888888
+    "f1": 0.8888888888888888,
+    "n_holdout": 10,
+    "single_class_holdout": false
   },
   "disclaimer": "Research hold-out on a second CSV \u2014 not multi-site clinical validation.",
-  "run_id": "20260723T122625Z_logreg"
+  "run_id": "20260724T021145Z_logreg"
 }

@@ -32,6 +32,11 @@
       description:
         "Tour the Angular researcher workbench for EHR risk prediction: datasets, train, results, predict, config, and OpenAPI.",
     },
+    "/research-workflow": {
+      title: "Research Workflow — Methods-Style EHR Risk Study Loop",
+      description:
+        "End-to-end research workflow: health gate, train, trust pack, leakage audit, external validation, curves, and ZIP export.",
+    },
     "/guide": {
       title: "How it Works A–Z — EHR Risk Workbench Guide with Screenshots",
       description:
@@ -285,7 +290,7 @@
           url: SITE_ORIGIN + "/",
           downloadUrl: GITHUB,
           license: "https://opensource.org/licenses/MIT",
-          description: CATCHPHRASE + ". Research and education only — not a medical device.",
+          description: CATCHPHRASE + ". For research and education only. Outputs are not clinical recommendations and are not intended for patient care. We are working toward broader general-purpose use in the future.",
           author: {
             "@type": "Person",
             name: "Md Rana Hossain",

@@ -98,7 +98,10 @@ def explain_model(
         raise TypeError(f"Unsupported model for SHAP helper: {type(tree_m)}")
 
     if plot_path:
-        Path(plot_path).parent.mkdir(parents=True, exist_ok=True)
+        from utils.report_images import remove_invalid_report_png, require_valid_report_png
+
+        out = Path(plot_path)
+        out.parent.mkdir(parents=True, exist_ok=True)
         plt.figure()
         if isinstance(tree_m, Pipeline):
             shap.summary_plot(
@@ -109,8 +112,15 @@ def explain_model(
         else:
             shap.summary_plot(shap_values, X_ex, show=False)
         plt.tight_layout()
-        plt.savefig(plot_path, dpi=150, bbox_inches="tight")
-        plt.close()
+        try:
+            plt.savefig(out, dpi=150, bbox_inches="tight")
+        finally:
+            plt.close()
+        try:
+            require_valid_report_png(out, label="SHAP summary PNG")
+        except ValueError:
+            remove_invalid_report_png(out)
+            raise
 
     return shap_values, X_ex
 

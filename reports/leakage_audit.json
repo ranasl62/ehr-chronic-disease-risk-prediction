@@ -1,5 +1,5 @@
 {
-  "artifact": "/app/reports/runs/20260723T122625Z_logreg/model.pkl",
+  "artifact": "/app/reports/runs/20260724T021145Z_logreg/model.pkl",
   "split_method": "patient_group",
   "n_rows": 10,
   "n_patients": 10,
