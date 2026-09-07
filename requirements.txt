@@ -9,7 +9,7 @@ shap
 matplotlib
 seaborn
 joblib
-pydantic>=2.13.4
+pydantic>=2.13.5
 requests
 pytest
 pytest-cov
